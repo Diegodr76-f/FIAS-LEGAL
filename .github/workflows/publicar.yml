@@ -1,0 +1,69 @@
+name: Publicar Quórum
+
+# El robot lee el Excel de OneDrive, lo cifra y lo despliega DIRECTO a GitHub
+# Pages, sin hacer commit: lo publicado nunca entra al historial de git. Así,
+# cambiar una frase de acceso deja de abrir lo que esté en línea desde ese
+# momento, en vez de dejar años de versiones viejas abiertas con la anterior.
+
+on:
+  push:
+    branches: [main]
+  schedule:
+    # 11:15 UTC = 6:15 Ecuador, todos los días (publica aunque no haya cambios:
+    # así la página sabe si el robot está vivo).
+    - cron: '15 11 * * *'
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  publicar:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.desplegar.outputs.page_url }}
+    steps:
+      - name: Descargar el repositorio
+        uses: actions/checkout@v4
+
+      - name: Preparar Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Instalar dependencias
+        run: pip install openpyxl requests cryptography msoffcrypto-tool
+
+      - name: Armar el sitio
+        run: |
+          mkdir -p _site/demo
+          cp index.html _site/
+          cp demo/datos-demo.json _site/demo/
+          for f in logo.svg logo.png; do [ -f "$f" ] && cp "$f" _site/ || true; done
+
+      # El registro de este paso es PÚBLICO: el robot solo imprime conteos,
+      # hojas y números de fila, nunca el contenido de una celda.
+      - name: Leer el Excel y cifrarlo
+        env:
+          EXCEL_URL: ${{ secrets.EXCEL_URL }}
+          EXCEL_CLAVE: ${{ secrets.EXCEL_CLAVE }}
+          CLAVES: ${{ secrets.CLAVES }}
+        run: python scripts/publicar.py --salida _site/datos --si-falta-config
+
+      - uses: actions/configure-pages@v5
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+          retention-days: 1
+
+      - name: Desplegar
+        id: desplegar
+        uses: actions/deploy-pages@v4

@@ -1,0 +1,189 @@
+/*
+ * Comprobaciones de la página (index.html).
+ *
+ * Carga Quórum en un DOM de mentira y lo maneja desde fuera, como probar_clm.js
+ * con el CLM. Los datos no son de mentira del todo: los cifra el robot de
+ * verdad (scripts/probar_robot.py --sitio), en dos grupos de acceso, así que
+ * esto prueba también que lo que cifra Python lo abre WebCrypto.
+ *
+ * Uso (las dependencias no se guardan en el repositorio):
+ *     npm install jsdom
+ *     pip install openpyxl cryptography msoffcrypto-tool
+ *     node scripts/probar_app.js
+ *
+ * El estado de la página se declara con `let` y no cuelga de window: se llega
+ * con w.eval(). Sale con código 1 si algo falla.
+ */
+const fs=require('fs'), path=require('path'), os=require('os'), {execFileSync}=require('child_process');
+let JSDOM;
+try{ JSDOM=require('jsdom').JSDOM; }
+catch(e){ console.error('Falta la dependencia de la prueba. Instálala con:\n    npm install jsdom\n'); process.exit(2); }
+
+const RAIZ=path.dirname(__dirname);
+const HTML=fs.readFileSync(path.join(RAIZ,'index.html'),'utf8');
+const SITIO=fs.mkdtempSync(path.join(os.tmpdir(),'quorum-'));
+const FRASES=JSON.parse(execFileSync('python3',[path.join(__dirname,'probar_robot.py'),'--sitio',path.join(SITIO,'datos')]).toString().trim().split('\n').pop());
+fs.mkdirSync(path.join(SITIO,'demo'));
+fs.copyFileSync(path.join(RAIZ,'demo','datos-demo.json'),path.join(SITIO,'demo','datos-demo.json'));
+
+let fallos=0, pruebas=0;
+function ok(cond,msg,extra){ pruebas++; if(cond){ console.log('  ✓ '+msg); } else { fallos++; console.log('  ✗ '+msg+(extra!==undefined?('  → '+JSON.stringify(extra)):'')); } }
+function seccion(t){ console.log('\n'+t); }
+const espera=ms=>new Promise(r=>setTimeout(r,ms));
+async function hasta(fn,ms){ const t0=Date.now(); while(Date.now()-t0<(ms||20000)){ try{ if(fn())return true; }catch(e){} await espera(40); } return false; }
+
+function nuevoDom(op){
+  op=op||{};
+  const dom=new JSDOM(HTML,{url:'http://localhost/quorum/index.html'+(op.hash||''),runScripts:'dangerously',pretendToBeVisual:true,
+    beforeParse(w){
+      Object.defineProperty(w,'crypto',{value:require('crypto').webcrypto});
+      w.TextEncoder=TextEncoder; w.TextDecoder=TextDecoder;
+      w.scrollTo=()=>{}; w.confirm=()=>true;
+      if(op.ls)for(const [k,v] of Object.entries(op.ls))w.localStorage.setItem(k,v);
+      w.fetch=async url=>{
+        const rel=String(url).replace(/^.*\/quorum\//,'').replace(/^\.?\//,'');
+        const f=path.join(SITIO,rel);
+        if(op.sinRed||!fs.existsSync(f))return {ok:false,status:404,json:async()=>{throw new Error('404');}};
+        const txt=fs.readFileSync(f,'utf8');
+        return {ok:true,status:200,json:async()=>JSON.parse(txt)};
+      };
+    }});
+  return dom.window;
+}
+async function cargado(w){ return hasta(()=>w.document.querySelector('#lf')||w.document.querySelector('#ldemo')); }
+async function entrar(w,frase){
+  const err=w.document.querySelector('#lerr');if(err)err.innerHTML='';
+  w.document.querySelector('#lp').value=frase;
+  w.document.querySelector('#lf').dispatchEvent(new w.Event('submit',{cancelable:true}));
+  return hasta(()=>w.document.querySelector('.shell')||w.document.querySelector('#lerr .errbox'));
+}
+const ev=(w,s)=>w.eval(s);
+const texto=w=>w.document.body.textContent;
+
+(async()=>{
+  seccion('1. La entrada: nada se descifra sin la frase');
+  let w=nuevoDom();
+  await cargado(w);
+  ok(w.document.querySelector('#lp')&&w.document.querySelector('#lp').type==='password','pide la frase, en un campo de contraseña');
+  ok(ev(w,'Object.keys(SOBRES).sort().join()')==='directorio,legal','bajó los dos sobres cifrados');
+  ok(!/Manual|Reglamento|Junta Administrativa del FAP ·/.test(texto(w).replace(/la Junta Administrativa del FAP y/,'')),'y no muestra nada de lo que hay dentro');
+  await entrar(w,'una-frase-que-no-es');
+  ok(w.document.querySelector('#lerr .errbox')&&!w.document.querySelector('.shell'),'una frase equivocada no abre nada y lo dice');
+
+  seccion('2. Cada frase abre su grupo, y solo el suyo');
+  await entrar(w,FRASES.legal);
+  ok(w.document.querySelector('.shell'),'la frase de legal entra');
+  ok(ev(w,'ABIERTOS.join()')==='legal','abre solo legal');
+  ok(ev(w,'ACTAS().every(a=>a.cuerpo!=="DIR-FIAS")'),'sin actas del Directorio del FIAS');
+  ok(/1 grupo más, cerrado/.test(texto(w)),'y dice que hay otro grupo cerrado');
+  const nLegal=ev(w,'RESOL().length');
+  ok(await ev(w,`probarFrase(${JSON.stringify(FRASES.legal)})`).then(a=>a.length===0),'la misma frase otra vez no abre nada nuevo');
+  const ab=await ev(w,`probarFrase(${JSON.stringify(FRASES.directorio)})`);
+  ok(ab.join()==='directorio'&&ev(w,'RESOL().length')>nLegal,'con la segunda frase se suma el directorio',ab);
+  ev(w,'render()');
+  ok(ev(w,'NORMAS().length')===10&&ev(w,'RESOL().length')===56,'juntos, está todo: 10 normas y 56 resoluciones',[ev(w,'NORMAS().length'),ev(w,'RESOL().length')]);
+  ok(ev(w,'CAMBIOS().length')===13,'un cambio que toca dos grupos no se duplica',ev(w,'CAMBIOS().length'));
+
+  seccion('3. La vigencia se deduce de los cambios, a la fecha que se pregunte');
+  const est=(id,f,t)=>ev(w,`estado${t||'Norma'}(DB.${t?'res':'normas'}[${JSON.stringify(id)}],${JSON.stringify(f)}).key`);
+  ok(est('politica-de-inversiones-del-fias','2026-10-12')==='baja','derogada hoy');
+  ok(est('politica-de-inversiones-del-fias','2020-01-01')==='vigente','pero vigente en 2020');
+  ok(est('politica-de-inversiones-del-fias','2016-01-01')==='nada','y antes de aprobarse, no existía');
+  ok(est('lineamientos-de-teletrabajo','2026-09-01')==='vigente','una derogación futura no se anuncia antes de la sesión que la decidió');
+  ok(est('reglamento-de-adquisiciones-del-fias','2026-10-12')==='reformada','con reformas sigue vigente');
+  ok(est('lineamientos-de-teletrabajo','2026-10-12')==='vence','derogación que aún no rige: vigente, y avisa la fecha');
+  ok(est('lineamientos-de-teletrabajo','2027-01-01')==='baja','el día que rige, derogada');
+  ok(est('ja-fap_2024-06-13_p4','2026-10-12','Res')==='baja'&&ev(w,'estadoRes(DB.res["ja-fap_2024-06-13_p4"],"2026-10-12").label')==='Sin efecto','resolución dejada sin efecto por otra acta');
+  ok(est('dir-fias_2025-03-20_p3','2026-10-12','Res')==='reformada','resolución reformada');
+  const ver=(id,f)=>ev(w,`versionA(DB.normas[${JSON.stringify(id)}],${JSON.stringify(f)}).ultima.tipo`);
+  ok(ver('reglamento-de-adquisiciones-del-fias','2018-06-01')==='Texto original','2018: rige el texto original');
+  ok(ver('reglamento-de-adquisiciones-del-fias','2020-06-01')==='Reforma parcial · arts. 12 y 15','2020: rige la reforma parcial');
+  ok(ver('reglamento-de-adquisiciones-del-fias','2026-10-12')==='Codificación','hoy: la codificación');
+  ok(ver('manual-de-operaciones-del-feig','2025-06-30')==='Texto original'&&ver('manual-de-operaciones-del-feig','2025-07-01').startsWith('Reforma parcial'),'una reforma con «Rige desde» cambia el texto ese día, no el de la sesión');
+  ev(w,'ST.aFecha="2019-01-01"');
+  ok(ev(w,'normasFiltradas().length')===5,'«Vigencia al» 1/1/2019: solo las normas que ya existían',ev(w,'normasFiltradas().map(x=>x.n.nombre)'));
+  ev(w,'ST.aFecha=null');
+
+  seccion('4. Pantallas y enlaces');
+  ev(w,'go("norma","reglamento-de-adquisiciones-del-fias")');
+  ok(w.location.hash==='#/norma/reglamento-de-adquisiciones-del-fias','el enlace lleva el id de la norma, no su posición');
+  ok(/Vigente con reformas/.test(texto(w))&&/Codificación/.test(texto(w))&&w.document.querySelectorAll('.tl li').length===3,'la ficha trae estado, versiones y línea de tiempo');
+  const qd=w.document.querySelector('#qd');qd.value='2020-06-01';w.document.querySelector('#qdb').click();
+  ok(/Reforma parcial/.test(w.document.querySelector('#qdr').textContent),'«¿Qué regía en una fecha?» responde con la versión de ese día');
+  ev(w,'go("acta","ja-fap_2026-08-08")');
+  ok(w.document.querySelectorAll('.rowitem').length===3&&/Reforma: Manual Operativo/.test(texto(w)),'el acta muestra sus puntos y lo que cambió');
+  ev(w,'go("resoluciones")');
+  ok(/56 de 56 resoluciones/.test(texto(w)),'el listado de resoluciones');
+  const q=w.document.querySelector('#rq');q.value='convocatoria donaciones';q.dispatchEvent(new w.Event('input'));
+  ok(/2 de 56/.test(w.document.querySelector('#cnt').textContent),'busca cada palabra en cualquier parte',w.document.querySelector('#cnt').textContent);
+  ev(w,'ST.rf.q=""');
+  ok(ev(w,'buscarTodo("teletrabajo").some(h=>h.t==="norma")'),'el buscador de arriba encuentra normas');
+  ok(ev(w,'buscarTodo("08/08/2026").some(h=>h.t==="acta"&&h.id==="ja-fap_2026-08-08")'),'y sesiones por la fecha como se escribe');
+  ok(ev(w,'buscarTodo("junta agosto 2026").length>0')&&ev(w,'buscarTodo("codificacion").length>0'),'sin tildes y en cualquier orden');
+  ev(w,'go("panel")');
+  ok(w.document.querySelectorAll('.kpi').length===6&&/Próximo: derogación/.test(texto(w)),'el panel: indicadores y lo que viene');
+  ev(w,'go("revision")');
+  ok(/renglón 57/.test(texto(w)),'«Revisión de la matriz» trae el aviso del robot con su renglón');
+
+  seccion('5. Un enlace a algo de otro grupo o que ya no está');
+  let w2=nuevoDom({hash:'#/norma/reglamento-de-adquisiciones-del-fias'});
+  await cargado(w2);await entrar(w2,FRASES.legal);
+  ok(ev(w2,'ST.view')==='normativa'&&/otro grupo de acceso/.test(texto(w2)),'con la frase de legal, la norma del directorio no se abre: lleva al listado y lo dice');
+  let w3=nuevoDom({hash:'#/acta/ja-fap_2026-08-08'});
+  await cargado(w3);await entrar(w3,FRASES.legal);
+  ok(ev(w3,'ST.view')==='acta'&&/8 de agosto de 2026/.test(texto(w3)),'un enlace que llega antes de la frase se abre al entrar');
+
+  seccion('6. Notas: cifradas, y solo en este navegador');
+  ev(w,'go("resolucion","ja-fap_2026-08-08_p3")');
+  w.document.querySelector('#ntx').value='Nota confidencial de prueba';
+  w.document.querySelector('#nok').click();
+  ok(await hasta(()=>w.localStorage.getItem('quorum_notas_legal')),'la nota se guarda');
+  const todo=JSON.stringify(Object.assign({},w.localStorage))+JSON.stringify(Object.assign({},w.sessionStorage));
+  ok(!/confidencial/.test(todo),'cifrada: el texto no está en el almacenamiento');
+  ok(!todo.includes(FRASES.legal)&&!todo.includes(FRASES.directorio),'y ninguna frase quedó guardada');
+  ok(Object.keys(w.localStorage).every(k=>k.startsWith('quorum_notas_')),'lo único que se guarda son las notas',Object.keys(w.localStorage));
+  const ls={};for(const k of Object.keys(w.localStorage))ls[k]=w.localStorage.getItem(k);
+  let w4=nuevoDom({ls,hash:'#/resolucion/ja-fap_2026-08-08_p3'});
+  await cargado(w4);await entrar(w4,FRASES.legal);
+  ok(/Nota confidencial de prueba/.test(texto(w4)),'al volver a entrar con la frase, la nota está');
+
+  seccion('7. Cerrar es olvidar');
+  ev(w,'cerrarSesion("x")');
+  ok(w.document.querySelector('#lf')&&ev(w,'ABIERTOS.length')===0&&ev(w,'RESOL().length')===0,'cerrar borra lo descifrado y vuelve a pedir la frase');
+  ok(ev(w,'Object.keys(LLAVES).length')===0&&!w.location.hash,'también las llaves de las notas y el enlace de la barra');
+  await entrar(w,FRASES.legal);
+  ev(w,'BLOQUEO_MIN=0.002;tocar()');
+  ok(await hasta(()=>w.document.querySelector('#lf'),3000)&&/inactividad/.test(texto(w)),'se cierra sola sin uso');
+  ev(w,'BLOQUEO_MIN=20');
+
+  seccion('8. Lo que viene del Excel nunca se interpreta como código');
+  ev(w,`DEMO=true;fusionar({grupo:"x",cuerpos:[{sigla:"JA-FAP",nombre:"Junta <b>x</b>"}],actas:[{id:"ja-fap_2030-01-01",cuerpo:"JA-FAP",fecha:"2030-01-01"}],
+    resoluciones:[{id:"ja-fap_2030-01-01_p1",acta:"ja-fap_2030-01-01",cuerpo:"JA-FAP",fecha:"2030-01-01",punto:"1",texto:"<img src=x onerror=window.PWNED=1>",enlace:"javascript:window.PWNED=2"}],normas:[],cambios:[],avisos:[]});render();go("resolucion","ja-fap_2030-01-01_p1")`);
+  ok(!w.document.querySelector('#view img')&&!w.PWNED,'el texto con etiquetas se muestra como texto');
+  ok(![...w.document.querySelectorAll('a')].some(a=>/^javascript:/i.test(a.getAttribute('href')||'')),'y un «javascript:» no llega a un enlace');
+  ev(w,'cerrarSesion()');
+
+  seccion('9. La demostración');
+  w.document.querySelector('#ldemo').click();
+  ok(await hasta(()=>w.document.querySelector('.shell')),'entra sin frase');
+  ok(ev(w,'DEMO')&&/datos ficticios/.test(w.document.querySelector('.srcpill').textContent),'y dice siempre que los datos son ficticios');
+  ev(w,'go("norma","codigo-de-etica-y-conducta-del-fias")');
+  w.document.querySelector('#ntx').value='nota de demo';w.document.querySelector('#nok').click();await espera(50);
+  ok(!w.localStorage.getItem('quorum_notas_demo'),'sus notas no se guardan');
+
+  seccion('10. Sin red, o sin publicar todavía');
+  let w5=nuevoDom({sinRed:true});
+  await cargado(w5);
+  ok(!w5.document.querySelector('#lf')&&/No se pudieron bajar/.test(texto(w5))&&w5.document.querySelector('#ldemo'),'lo dice, y ofrece la demostración');
+
+  seccion('11. Las frases que genera');
+  const n=ev(w,'LISTA_PALABRAS.length'),f=ev(w,'fraseNueva()').split('-');
+  ok(n>=450,`${n} palabras: seis al azar son más de 52 bits`,n);
+  ok(f.length===6&&f.every(p=>ev(w,`LISTA_PALABRAS.includes(${JSON.stringify(p)})`)),'seis palabras de la lista');
+  ok(ev(w,'LISTA_PALABRAS.every(p=>/^[a-z]+$/.test(p))'),'sin tildes, eñes ni mayúsculas: se dictan sin dudas');
+  ok(ev(w,'new Set(Array.from({length:50},()=>fraseNueva())).size')===50,'y no se repiten');
+
+  console.log(`\n${pruebas-fallos} de ${pruebas} comprobaciones bien`+(fallos?` · ${fallos} FALLAN`:''));
+  fs.rmSync(SITIO,{recursive:true,force:true});
+  process.exit(fallos?1:0);
+})().catch(e=>{console.error(e);process.exit(1);});

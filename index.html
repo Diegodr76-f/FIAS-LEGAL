@@ -1,0 +1,1158 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Quórum · Actas, resoluciones y normativa · FIAS</title>
+<meta name="description" content="Repositorio de las actas y resoluciones de los cuerpos colegiados del FIAS y de su normativa interna, con su vigencia al día.">
+<!-- Nada de esto debe salir de aquí: ni a un buscador, ni en el Referer de un enlace,
+     ni por un script inyectado que quiera mandar lo descifrado a otro sitio
+     (connect-src 'self'). -->
+<meta name="robots" content="noindex, nofollow">
+<meta name="referrer" content="no-referrer">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self'; form-action 'none'; base-uri 'none'; object-src 'none'">
+<link rel="icon" href="data:,">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<!-- La misma letra del CLM, pedida sin bloquear la primera pantalla. -->
+<link href="https://fonts.googleapis.com/css2?family=Titillium+Web:wght@300;400;600;700&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+<style>
+  :root{
+    --navy:#00249C; --navy2:#2547C9; --ink:#0B153F; --bg:#F4F6FB; --card:#fff;
+    --line:#E3E6F0; --line2:#EAEDF5; --muted:#6B7180; --muted2:#9AA0B2;
+    --green:#1E9E5A; --greenbg:#E7F6EE; --amber:#C98A08; --amberbg:#FCF3DD;
+    --red:#D23A3A; --redbg:#FBE7E7; --tint:#EEF1FB; --violet:#6A44C9; --teal:#0E9AA7;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0;height:100%}
+  body{font-family:'Titillium Web',system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--ink);-webkit-font-smoothing:antialiased;font-size:14px}
+  a{color:var(--navy);text-decoration:none}
+  button{font-family:inherit}
+  input,select,textarea{font-family:inherit;font-size:14px}
+  ::placeholder{color:var(--muted2)}
+  @keyframes up{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+  .up{animation:up .25s ease}
+
+  /* ===== shell (el del CLM) ===== */
+  .shell{display:flex;min-height:100vh}
+  aside.side{width:230px;flex:0 0 230px;background:#fff;border-right:1px solid var(--line);display:flex;flex-direction:column;position:sticky;top:0;height:100vh;overflow-y:auto}
+  .side-brand{display:flex;align-items:center;gap:11px;padding:16px 16px 14px;border-bottom:1px solid var(--line2)}
+  .logo{width:40px;height:40px;border-radius:10px;background:var(--navy);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;flex:0 0 auto;overflow:hidden}
+  .logo img{width:100%;height:100%;object-fit:contain;background:#fff}
+  .side-brand .t{font-weight:700;font-size:14px;line-height:1.15}
+  .side-brand .s{font-size:11px;color:var(--muted)}
+  .navgrp{font-size:10.5px;font-weight:700;letter-spacing:.7px;color:var(--muted2);text-transform:uppercase;padding:16px 18px 6px}
+  .navitem{all:unset;box-sizing:border-box;cursor:pointer;display:flex;align-items:center;gap:11px;padding:9px 14px;margin:1px 8px;border-radius:9px;font-size:13.5px;font-weight:600;color:var(--muted);width:calc(100% - 16px)}
+  .navitem:hover{background:var(--tint);color:var(--navy)}
+  .navitem.on{background:var(--navy);color:#fff}
+  .navitem .nbadge{margin-left:auto;font-size:11px;font-weight:700;background:var(--amberbg);color:var(--amber);padding:1px 8px;border-radius:99px}
+  .navitem.on .nbadge{background:rgba(255,255,255,.22);color:#fff}
+  .side-foot{margin-top:auto;border-top:1px solid var(--line2);padding:12px 14px;display:flex;align-items:center;gap:10px}
+  .avatar{width:34px;height:34px;border-radius:50%;background:var(--tint);color:var(--navy);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:15px;flex:0 0 auto}
+  .side-foot .n{font-size:12.5px;font-weight:700;line-height:1.15;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .side-foot .r{font-size:11px;color:var(--muted)}
+  .iconbtn{all:unset;cursor:pointer;color:var(--muted);padding:6px;border-radius:8px;display:flex}
+  .iconbtn:hover{background:var(--tint);color:var(--navy)}
+
+  main.main{flex:1;min-width:0;display:flex;flex-direction:column}
+  .topbar{display:flex;align-items:center;gap:14px;background:#fff;border-bottom:1px solid var(--line);padding:0 22px;height:58px;position:sticky;top:0;z-index:15}
+  .topbar h1{font-size:16.5px;font-weight:700;margin:0;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .gsearch{margin-left:auto;position:relative;width:min(340px,38vw)}
+  .gsearch input{width:100%;padding:9px 12px 9px 34px;border:1.5px solid var(--line);border-radius:10px;background:var(--bg)}
+  .gsearch input:focus{outline:none;border-color:var(--navy);background:#fff}
+  .gsearch svg{position:absolute;left:10px;top:50%;transform:translateY(-50%)}
+  .gresults{position:absolute;top:44px;left:0;right:0;background:#fff;border:1px solid var(--line);border-radius:12px;box-shadow:0 18px 44px rgba(11,21,63,.14);max-height:360px;overflow:auto;z-index:40}
+  .gres{display:block;padding:10px 13px;border-bottom:1px solid var(--line2);cursor:pointer}
+  .gres:hover,.gres.sel{background:var(--tint)}
+  .gres .a{font-size:13px;font-weight:700;color:var(--ink)}
+  .gres .b{font-size:11.5px;color:var(--muted)}
+  .content{padding:22px 24px 70px;max-width:1220px;width:100%;margin:0 auto}
+
+  .srcpill{display:inline-flex;align-items:center;gap:7px;font-size:11px;font-weight:700;color:var(--muted);background:var(--bg);border:1px solid var(--line2);padding:5px 10px;border-radius:99px;white-space:nowrap}
+  .srcdot{width:8px;height:8px;border-radius:50%;background:var(--green)}
+  .srcdot.off{background:var(--amber)} .srcdot.old{background:var(--red)}
+  .srcpill.old,.srcpill.demo{color:#8A5E06;background:var(--amberbg);border-color:#F0DCA6}
+
+  @media(max-width:860px){
+    .shell{flex-direction:column}
+    aside.side{width:100%;flex:0 0 auto;height:auto;position:sticky;top:0;z-index:20;flex-direction:row;flex-wrap:nowrap;align-items:center;overflow-x:auto;overflow-y:hidden;border-right:0;border-bottom:1px solid var(--line);scrollbar-width:none;-webkit-overflow-scrolling:touch}
+    aside.side::-webkit-scrollbar{display:none}
+    .side-brand{border:0;padding:8px 6px 8px 10px;flex:0 0 auto}
+    .side-brand .logo{width:34px;height:34px;font-size:11px}
+    .side-brand>div:last-child{display:none}
+    .navgrp{display:none}
+    .navitem{width:auto;flex:0 0 auto;padding:8px 11px;margin:6px 2px;white-space:nowrap}
+    .side-foot{margin-left:0;border:0;padding:6px 10px;flex:0 0 auto}
+    .side-foot .n,.side-foot .r,.side-foot .avatar{display:none}
+    .topbar{position:static;height:auto;flex-wrap:wrap;padding:10px 14px;gap:8px}
+    .topbar h1{font-size:15.5px;flex:1}
+    .gsearch{order:3;width:100%;margin-left:0}
+    .content{padding:14px 12px 60px}
+  }
+  @media(max-width:560px){
+    .modal{padding:20px 18px 18px}
+    .overlay{padding:14px 10px}
+    .alert-row{flex-wrap:wrap}
+    .alert-row>div:nth-child(2){flex:1 1 200px}
+    .alert-row .go{margin-left:48px}
+    .srcpill{max-width:100%;overflow:hidden;text-overflow:ellipsis}
+  }
+
+  /* ===== átomos ===== */
+  .btn{all:unset;box-sizing:border-box;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:8px;background:var(--navy);color:#fff;font-weight:700;font-size:13.5px;padding:11px 17px;border-radius:10px;transition:filter .15s}
+  .btn:hover{filter:brightness(1.1)}
+  .btn.line{background:#fff;border:1.5px solid var(--line);color:var(--ink)}
+  .btn.line:hover{background:var(--bg);filter:none}
+  .btn.sm{padding:8px 13px;font-size:12.5px}
+  .btn.block{width:100%}
+  .btn:disabled{opacity:.45;cursor:not-allowed;filter:none}
+  .panel{background:#fff;border:1px solid var(--line2);border-radius:15px;padding:20px 22px}
+  .panel+.panel{margin-top:14px}
+  .charts>.panel+.panel{margin-top:0}
+  .ptitle{font-size:14.5px;font-weight:700;margin:0 0 3px}
+  .psub{font-size:12px;color:var(--muted);margin:0 0 14px;line-height:1.45}
+  .badge{font-size:11px;font-weight:700;padding:3px 9px;border-radius:99px;white-space:nowrap;display:inline-block}
+  .b-g{background:var(--greenbg);color:var(--green)} .b-a{background:var(--amberbg);color:var(--amber)}
+  .b-r{background:var(--redbg);color:var(--red)} .b-d{background:#EEF0F5;color:var(--muted)}
+  .b-n{background:var(--tint);color:var(--navy)} .b-v{background:#EFE6FA;color:var(--violet)}
+  .chip{all:unset;cursor:pointer;font-size:12.5px;font-weight:600;color:var(--muted);padding:8px 13px;border:1.5px solid var(--line);border-radius:99px;background:#fff;white-space:nowrap}
+  .chip.on{background:var(--ink);color:#fff;border-color:var(--ink)}
+  .chips{display:flex;gap:8px;flex-wrap:wrap}
+  .catchip{display:inline-block;font-size:10.5px;font-weight:700;padding:3px 9px;border-radius:20px;white-space:nowrap;background:#ECEEF4;color:#4A5068}
+  .kpis{display:grid;grid-template-columns:repeat(6,1fr);gap:12px;margin-bottom:18px}
+  @media(max-width:1000px){.kpis{grid-template-columns:repeat(3,1fr)}}
+  @media(max-width:560px){.kpis{grid-template-columns:repeat(2,1fr)}}
+  .kpi{background:#fff;border:1px solid var(--line2);border-radius:13px;padding:14px 16px;cursor:pointer;transition:box-shadow .15s}
+  .kpi:hover{box-shadow:0 10px 26px rgba(11,21,63,.08)}
+  .kpi-n{font-size:24px;font-weight:700;line-height:1}
+  .kpi-l{font-size:11.5px;color:var(--muted);margin-top:6px;font-weight:600}
+  .toolbar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:0 0 12px}
+  .search{flex:1;min-width:200px;position:relative}
+  .search input{width:100%;padding:10px 12px 10px 36px;border:1.5px solid var(--line);border-radius:10px;background:#fff}
+  .search input:focus{outline:none;border-color:var(--navy)}
+  .search svg{position:absolute;left:11px;top:50%;transform:translateY(-50%)}
+  .toolbar select,.toolbar input[type=date]{padding:9px 10px;border:1.5px solid var(--line);border-radius:10px;background:#fff;color:var(--ink);max-width:100%}
+  .viewtog{display:flex;border:1.5px solid var(--line);border-radius:10px;overflow:hidden}
+  .viewtog button{all:unset;cursor:pointer;padding:8px 12px;font-size:12.5px;font-weight:600;color:var(--muted)}
+  .viewtog button.on{background:var(--navy);color:#fff}
+  .countlbl{font-size:12px;color:var(--muted);font-weight:600;margin:0 0 10px}
+  .afecha{display:flex;align-items:center;gap:10px;flex-wrap:wrap;background:var(--amberbg);border:1px solid #F0DCA6;color:#8A5E06;border-radius:11px;padding:9px 13px;margin:0 0 12px;font-size:12.5px;font-weight:600}
+  .afecha .linkbtn{color:#8A5E06}
+  .flbl{display:flex;align-items:center;gap:7px;font-size:12px;font-weight:700;color:var(--muted)}
+
+  /* tablas */
+  .tablewrap{background:#fff;border:1px solid var(--line2);border-radius:14px;overflow-x:auto}
+  table.list{width:100%;border-collapse:collapse;min-width:720px}
+  table.list th{font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.4px;color:var(--muted2);text-align:left;padding:12px 10px;border-bottom:1.5px solid var(--line2);background:#FAFBFE;white-space:nowrap}
+  table.list td{font-size:13px;padding:11px 10px;border-bottom:1px solid var(--line2);vertical-align:middle}
+  table.list tbody tr{cursor:pointer}
+  table.list tbody tr:hover{background:var(--tint)}
+  .td-nro{font-weight:700;color:var(--navy);white-space:nowrap}
+  .td-obj{font-weight:600;min-width:240px;max-width:460px;line-height:1.35}
+  .td-obj .oc{margin-top:5px;font-weight:400}
+  .td-sub{font-size:11.5px;color:var(--muted);font-weight:600;margin-top:3px}
+  table.list .td-sig{position:sticky;right:0;background:#fff;box-shadow:-8px 0 8px -8px rgba(11,21,63,.22);white-space:nowrap;width:1%}
+  table.list th.td-sig{background:#FAFBFE}
+  table.list tbody tr:hover .td-sig{background:var(--tint)}
+  @media(max-width:1280px){table.list .td-org{display:none}.td-obj .oa{display:block}}
+  .td-obj .oa{display:none;margin-top:4px;font-size:12px;font-weight:600;color:var(--muted)}
+  .dot{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:6px;vertical-align:middle}
+
+  /* tarjetas */
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:14px}
+  .cc{background:#fff;border:1px solid var(--line2);border-radius:14px;padding:16px;cursor:pointer;transition:box-shadow .15s,transform .15s;border-left:5px solid var(--line)}
+  .cc:hover{box-shadow:0 12px 30px rgba(11,21,63,.09);transform:translateY(-2px)}
+  .cc.g{border-left-color:var(--green)}.cc.a{border-left-color:var(--amber)}.cc.r{border-left-color:var(--red)}.cc.n{border-left-color:var(--navy2)}.cc.d{border-left-color:var(--muted2)}
+  .cc-nro{font-size:11.5px;font-weight:700;color:var(--navy)}
+  .cc-title{font-size:14px;font-weight:700;margin:7px 0 4px;line-height:1.3}
+  .cc-meta{display:flex;gap:10px;flex-wrap:wrap;align-items:center;font-size:12px;color:var(--muted);margin-top:8px}
+
+  /* detalle */
+  .back{all:unset;cursor:pointer;display:inline-flex;align-items:center;gap:7px;font-size:13px;font-weight:600;color:var(--navy);margin-bottom:14px}
+  .back:hover{text-decoration:underline}
+  .detail{display:grid;grid-template-columns:1.6fr 1fr;gap:18px;align-items:start}
+  .detail>*{min-width:0}
+  @media(max-width:920px){.detail{grid-template-columns:1fr}}
+  .dhead{display:flex;align-items:flex-start;gap:12px;justify-content:space-between}
+  @media(max-width:560px){.dhead{flex-direction:column;gap:8px}.dhead>.badge{order:-1}}
+  .h-title{font-size:19px;font-weight:700;margin:0 0 2px;line-height:1.3}
+  .h-sub{font-size:12.5px;color:var(--muted);font-weight:600}
+  .dl{display:grid;grid-template-columns:1fr 1fr;gap:13px 20px;margin-top:14px}
+  .dl>div{min-width:0}
+  .dl .k{font-size:10.5px;font-weight:700;color:var(--muted2);text-transform:uppercase;letter-spacing:.4px;margin-bottom:2px}
+  .dl .v{font-size:14px;font-weight:600;overflow-wrap:anywhere}
+  .dl .full{grid-column:1/-1}
+  .linkbar{display:flex;align-items:center;gap:10px;background:var(--tint);border:1px solid #D7DEF6;border-radius:11px;padding:11px 13px;margin:14px 0 4px}
+  .linkbar.off{background:var(--bg);border-color:var(--line2)}
+  .linkbar .lt{font-size:12.5px;font-weight:700}
+  .linkbar .ls{font-size:11.5px;color:var(--muted)}
+  .expbox{border:1px solid var(--line);border-radius:11px;padding:11px 13px;margin:10px 0 4px}
+  .expbox .expt{font-size:10.5px;font-weight:700;color:var(--muted2);text-transform:uppercase;letter-spacing:.4px;margin-bottom:7px}
+  .expbox .exprow{display:flex;align-items:baseline;gap:10px;padding:3px 0;font-size:13.5px}
+  .expbox .exprow .k{flex:0 0 140px;color:var(--muted);font-weight:600}
+  .expbox .exprow .v{font-weight:700;color:var(--ink);min-width:0;overflow-wrap:anywhere}
+  .expbox .exprow .v.none{font-weight:600;color:var(--muted2)}
+  .note{font-size:12px;color:var(--muted);line-height:1.5;background:var(--bg);border:1px solid var(--line2);border-radius:10px;padding:11px 13px}
+  .tl{list-style:none;margin:6px 0 0;padding:0}
+  .tl li{position:relative;padding:0 0 14px 22px;border-left:2px solid var(--line2);margin-left:7px}
+  .tl li:last-child{padding-bottom:2px}
+  .tl li::before{content:"";position:absolute;left:-6px;top:3px;width:10px;height:10px;border-radius:50%;background:var(--navy2);border:2px solid #fff}
+  .tl li.fin::before{background:var(--red)} .tl li.ok::before{background:var(--green)} .tl li.fut::before{background:#fff;border:2px dashed var(--amber);width:8px;height:8px}
+  .tl li.fut .t{color:var(--amber)}
+  .tl .t{font-size:12.5px;font-weight:700}
+  .tl .s{font-size:11.5px;color:var(--muted);line-height:1.45}
+  .tl .lk{all:unset;cursor:pointer;color:var(--navy);font-weight:700}
+  .tl .lk:hover{text-decoration:underline}
+  .linkbtn{all:unset;cursor:pointer;font-size:12px;font-weight:700;color:var(--navy);text-decoration:underline}
+  .rowlist{display:flex;flex-direction:column;gap:8px}
+  .rowitem{all:unset;box-sizing:border-box;cursor:pointer;display:flex;gap:12px;align-items:flex-start;border:1px solid var(--line2);border-radius:11px;padding:11px 13px;background:#fff;width:100%}
+  .rowitem:hover{background:var(--tint);border-color:#C9D3F2}
+  .rowitem .pn{flex:0 0 auto;min-width:30px;height:30px;padding:0 6px;border-radius:8px;background:var(--tint);color:var(--navy);font-weight:700;font-size:12.5px;display:flex;align-items:center;justify-content:center}
+  .rowitem .rt{font-size:13px;font-weight:600;line-height:1.4}
+  .rowitem .rs{font-size:11.5px;color:var(--muted);margin-top:3px;display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+  .vers{display:flex;flex-direction:column;gap:7px}
+  .ver{display:flex;align-items:center;gap:10px;font-size:12.5px;border:1px solid var(--line2);border-radius:10px;padding:9px 11px}
+  .ver.on{border-color:var(--green);background:var(--greenbg)}
+  .ver .vd{flex:1;min-width:0}
+  .ver .vd b{display:block;font-size:12.5px}
+  .ver .vd span{color:var(--muted);font-size:11.5px}
+  .quedia{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+  .quedia input{padding:9px 10px;border:1.5px solid var(--line);border-radius:10px}
+  .resq{margin-top:12px;border-radius:11px;padding:11px 13px;font-size:13px;line-height:1.5;border:1px solid var(--line2);background:var(--bg)}
+
+  /* notas */
+  .nota{border:1px solid var(--line2);border-radius:10px;padding:9px 11px;margin-top:8px;font-size:13px;line-height:1.45;display:flex;gap:8px}
+  .nota .nt{flex:1;white-space:pre-wrap;overflow-wrap:anywhere}
+  .nota .nm{font-size:11px;color:var(--muted);margin-top:4px}
+  textarea.notatx{width:100%;min-height:62px;padding:9px 11px;border:1.5px solid var(--line);border-radius:10px;resize:vertical}
+  textarea.notatx:focus{outline:none;border-color:var(--navy)}
+
+  /* modales */
+  .overlay{position:fixed;inset:0;background:rgba(11,21,63,.44);display:flex;align-items:flex-start;justify-content:center;padding:36px 18px;overflow:auto;z-index:60}
+  .modal{background:#fff;border-radius:16px;max-width:520px;width:100%;padding:24px 26px 22px;box-shadow:0 30px 80px rgba(11,21,63,.3);animation:up .2s ease}
+  .modal h2{font-size:19px;font-weight:700;margin:0 0 3px}
+  .modal .sub{font-size:13px;color:var(--muted);margin:0 0 16px;line-height:1.5}
+  .modal-foot{display:flex;gap:10px;justify-content:flex-end;margin-top:18px;flex-wrap:wrap}
+  .frase{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:17px;font-weight:700;background:var(--tint);color:var(--navy);border-radius:11px;padding:14px;text-align:center;word-break:break-word;user-select:all}
+  .toast{position:fixed;bottom:22px;left:50%;transform:translateX(-50%);background:var(--ink);color:#fff;font-size:13px;font-weight:600;padding:12px 19px;border-radius:11px;width:max-content;max-width:calc(100vw - 30px);line-height:1.45;box-shadow:0 14px 40px rgba(11,21,63,.3);z-index:90;animation:up .22s ease}
+  .empty{text-align:center;padding:44px 20px;color:var(--muted);line-height:1.6}
+
+  /* gráficos */
+  .charts{display:grid;grid-template-columns:1.35fr 1fr;gap:14px;margin-bottom:14px}
+  @media(max-width:980px){.charts{grid-template-columns:1fr}}
+  .chart-svg{width:100%;height:auto;display:block}
+  .bar{cursor:default}
+  .bar:hover{filter:brightness(1.18)}
+  .axlbl{font-size:10px;fill:var(--muted2);font-family:'Titillium Web',sans-serif}
+  .vallbl{font-size:10.5px;font-weight:700;fill:var(--muted);font-family:'Titillium Web',sans-serif}
+  .stackbar{display:flex;height:34px;border-radius:9px;overflow:hidden;gap:2px;background:var(--bg)}
+  .stackbar>div{display:flex;align-items:center;justify-content:center;font-size:11.5px;font-weight:700;color:#fff;min-width:0;overflow:hidden;white-space:nowrap}
+  .legend{display:flex;gap:14px;flex-wrap:wrap;margin-top:10px}
+  .legend .li{display:flex;align-items:center;gap:6px;font-size:12px;font-weight:600;color:var(--muted)}
+  .legend .sw{width:11px;height:11px;border-radius:3px}
+  #tip{position:fixed;pointer-events:none;background:var(--ink);color:#fff;font-size:12px;font-weight:600;padding:7px 11px;border-radius:8px;z-index:95;display:none;box-shadow:0 10px 26px rgba(11,21,63,.3);max-width:260px;line-height:1.4}
+  .cuerpos{display:flex;flex-direction:column;gap:8px}
+  .cuerpo{all:unset;box-sizing:border-box;cursor:pointer;display:flex;align-items:center;gap:12px;border:1px solid var(--line2);border-radius:11px;padding:11px 13px;width:100%}
+  .cuerpo:hover{background:var(--tint)}
+  .cuerpo .cs{flex:0 0 auto;font-size:11px;font-weight:700;color:var(--navy);background:var(--tint);padding:4px 8px;border-radius:7px}
+  .cuerpo .cn{flex:1;min-width:0;font-size:13px;font-weight:700}
+  .cuerpo .cn small{display:block;font-weight:600;color:var(--muted);font-size:11.5px}
+
+  /* alertas */
+  .alert-row{display:flex;align-items:center;gap:12px;background:#fff;border:1px solid var(--line2);border-radius:12px;padding:12px 15px;margin-bottom:9px}
+  .alert-row .aic{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;flex:0 0 auto}
+  .alert-row .at{font-size:13px;font-weight:700}
+  .alert-row .ad{font-size:11.5px;color:var(--muted);line-height:1.4}
+  .alert-row .go{margin-left:auto;flex:0 0 auto}
+
+  /* entrada */
+  .login-shell{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:30px 16px;background:linear-gradient(160deg,#F4F6FB 0%,#E8EDFB 100%)}
+  .login-card{background:#fff;border:1px solid var(--line);border-radius:18px;padding:32px 32px 26px;max-width:470px;width:100%;box-shadow:0 18px 50px rgba(11,21,63,.09)}
+  @media(max-width:560px){.login-card{padding:24px 20px 20px}}
+  .login-top{display:flex;align-items:center;gap:12px;margin-bottom:14px}
+  .eyebrow{display:inline-block;font-size:11px;font-weight:700;letter-spacing:.6px;color:var(--navy);background:var(--tint);padding:5px 11px;border-radius:99px;text-transform:uppercase}
+  .login-card h1{font-size:24px;font-weight:700;margin:0 0 6px;letter-spacing:-.3px;line-height:1.2}
+  .lead{font-size:14px;color:var(--muted);margin:0 0 18px;line-height:1.55}
+  input.big{width:100%;padding:12px 14px;border:1.5px solid var(--line);border-radius:11px;background:#fff;font-size:15px}
+  input.big:focus{outline:none;border-color:var(--navy)}
+  .errbox{background:var(--redbg);color:#A32020;border-radius:10px;padding:9px 12px;font-size:13px;margin-bottom:12px;line-height:1.45}
+  .login-links{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-top:14px}
+  .bootmsg{min-height:100vh;display:flex;align-items:center;justify-content:center;gap:14px;padding:24px;color:var(--muted);font-size:14px}
+
+  .navitem:focus-visible,.btn:focus-visible,.chip:focus-visible,.iconbtn:focus-visible,.back:focus-visible,
+  .viewtog button:focus-visible,.linkbtn:focus-visible,.rowitem:focus-visible,.cuerpo:focus-visible,.tl .lk:focus-visible{outline:2.5px solid var(--navy2);outline-offset:2px}
+</style>
+</head>
+<body>
+<div id="app"><div class="bootmsg"><b>Quórum</b> · cargando…</div></div>
+<div id="tip"></div>
+<script>
+/* =====================================================================
+   Quórum · actas, resoluciones y normativa de los cuerpos colegiados del FIAS
+   La misma dinámica del CLM: un Excel que se mantiene a mano, un robot que
+   lo publica CIFRADO y esta página que lo descifra en el navegador. Las
+   diferencias, todas por confidencialidad, están explicadas donde viven:
+   un archivo por grupo de acceso, nada guardado en el navegador salvo las
+   notas (cifradas), y la sesión se cierra sola.
+   ===================================================================== */
+
+/* ================= CONFIGURACIÓN ================= */
+// La marca en un solo lugar. Cuando llegue el logo del FIAS: guardar el
+// archivo junto a este (logo.svg o logo.png) y poner su nombre en `logo`.
+var MARCA = { nombre: "Quórum", sigla: "FIAS", logo: "" };
+var DATOS_URL = "datos/";              // indice.json y un g-<grupo>.json por grupo
+var DEMO_URL = "demo/datos-demo.json"; // datos ficticios, sin cifrar
+var BLOQUEO_MIN = 20;                  // se cierra sola tras estos minutos sin uso
+var PROVISIONAL_DIAS = 60;             // acta provisional sin definitiva: avisar
+var NOTAS_LS = "quorum_notas_";        // + grupo. Cifradas con la frase del grupo.
+
+// Que no se pueda abrir dentro de otra página: la frase se escribe aquí.
+if (window.top !== window.self) {
+  document.getElementById("app").innerHTML = '<div class="bootmsg">Quórum solo se abre en su propia pestaña.</div>';
+  throw new Error("enmarcado");
+}
+
+/* ================= AYUDAS (las del CLM) ================= */
+const $=(s,el=document)=>el.querySelector(s);
+const esc=s=>(s==null?"":String(s)).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+function plano(s){return String(s==null?"":s).normalize("NFD").replace(/[̀-ͯ]/g,"").toLowerCase();}
+/* Búsqueda que perdona: sin tildes, cada palabra en cualquier parte. La usan el
+   buscador de arriba y el de cada listado: una sola regla. */
+function coincide(texto,q){const t=plano(texto);return plano(q).split(/\s+/).filter(Boolean).every(p=>t.includes(p));}
+const MESES=["enero","febrero","marzo","abril","mayo","junio","julio","agosto","septiembre","octubre","noviembre","diciembre"];
+function fdate(iso){if(!iso)return "—";const [y,m,d]=String(iso).split("-");return `${+d} ${MESES[+m-1].slice(0,3)} ${y}`;}
+function longDate(iso){if(!iso)return "—";const [y,m,d]=String(iso).split("-");return `${+d} de ${MESES[+m-1]} de ${y}`;}
+function dmy(iso){if(!iso)return "";const [y,m,d]=String(iso).split("-");return `${d}/${m}/${y}`;}
+function todayISO(){const t=new Date();const p=n=>String(n).padStart(2,"0");return t.getFullYear()+"-"+p(t.getMonth()+1)+"-"+p(t.getDate());}
+function diasEntre(a,b){return Math.round((new Date(b+"T00:00:00")-new Date(a+"T00:00:00"))/86400000);}
+function trunc(s,n){s=String(s==null?"":s);return s.length>n?s.slice(0,n-1).trimEnd()+"…":s;}
+// Solo http(s): el robot ya lo filtra, y aquí se vuelve a mirar antes de un href.
+function seguro(u){return /^https?:\/\//i.test(String(u||""))?String(u):"";}
+function toast(msg,ms){const t=document.createElement("div");t.className="toast";t.textContent=msg;document.body.appendChild(t);setTimeout(()=>t.remove(),ms||3200);}
+async function mientras(btn,txt,fn){const ant=btn.innerHTML;btn.disabled=true;btn.textContent=txt;let ok=false;try{ok=await fn();}finally{if(!ok&&document.body.contains(btn)){btn.disabled=false;btn.innerHTML=ant;}}return ok;}
+/* Cuándo corrió el robot. Revisa el Excel todos los días aunque no haya cambios:
+   si lo publicado tiene dos días o más, algo falló y hay que decirlo. */
+function edadBase(iso){
+  if(!iso)return null;const f=new Date(iso);if(isNaN(f))return null;
+  const dia=d=>new Date(d.getFullYear(),d.getMonth(),d.getDate());
+  const dias=Math.round((dia(new Date())-dia(f))/86400000);
+  const hora=f.toLocaleTimeString("es-EC",{hour:"2-digit",minute:"2-digit"});
+  return {dias,vieja:dias>=2,txt:dias<=0?`hoy, ${hora}`:dias===1?"ayer":`hace ${dias} días`,
+    fecha:f.getFullYear()+"-"+String(f.getMonth()+1).padStart(2,"0")+"-"+String(f.getDate()).padStart(2,"0")};
+}
+
+/* ================= CIFRADO (WebCrypto) =================
+   Lo mismo que el CLM —AES-256-GCM, clave de PBKDF2-SHA256— con dos cambios:
+   600.000 iteraciones, y la frase NO se guarda: vive en memoria hasta que se
+   cierra la pestaña o la sesión. El sitio comparte origen con las demás
+   herramientas publicadas desde la misma cuenta de GitHub, y lo que va a
+   localStorage lo podría leer cualquiera de ellas. */
+const b64=s=>Uint8Array.from(atob(s),c=>c.charCodeAt(0));
+const a64=u=>{let s="";new Uint8Array(u).forEach(c=>s+=String.fromCharCode(c));return btoa(s);};
+async function claveDe(frase,salt,iter,usos){
+  const base=await crypto.subtle.importKey("raw",new TextEncoder().encode(frase),"PBKDF2",false,["deriveKey"]);
+  return crypto.subtle.deriveKey({name:"PBKDF2",salt,iterations:iter,hash:"SHA-256"},base,{name:"AES-GCM",length:256},false,usos);
+}
+async function descifrar(env,frase){
+  const k=await claveDe(frase,b64(env.salt),env.iter||600000,["decrypt"]);
+  const pt=await crypto.subtle.decrypt({name:"AES-GCM",iv:b64(env.iv)},k,b64(env.ct));
+  return JSON.parse(new TextDecoder().decode(pt));
+}
+
+/* ================= ESTADO ================= */
+let INDICE=null;          // {generado, grupos:[{id,archivo}]}
+let SOBRES={};            // grupo -> sobre cifrado, tal como llegó
+let ABIERTOS=[];          // grupos descifrados en esta sesión
+let DEMO=false;
+let DB=vacia();
+let FALLA_CARGA="";
+function vacia(){return {cuerpos:{},actas:{},res:{},normas:{},cambios:{},avisos:[],generado:null};}
+let ST={view:"panel",id:null,from:null,fromY:0,aFecha:null,
+  viewMode:(window.innerWidth&&window.innerWidth<700)?"cards":"table",
+  nf:{q:"",estado:"all",organo:"all",tipo:"all"},
+  af:{q:"",cuerpo:"all",estado:"all",anio:"all"},
+  rf:{q:"",cuerpo:"all",estado:"all",materia:"all",anio:"all"}};
+
+/* Junta lo que abrió cada frase. Un cambio que toca dos grupos llega en los
+   dos archivos: se une por su id. Cada cosa recuerda de qué grupo vino, que es
+   con cuya frase se cifran sus notas. */
+function fusionar(p){
+  const g=p.grupo;
+  (p.cuerpos||[]).forEach(c=>{DB.cuerpos[c.sigla]=c;});
+  (p.actas||[]).forEach(a=>{const ya=DB.actas[a.id];if(!ya||ya.stub)DB.actas[a.id]=Object.assign({},a,{_g:g});});
+  (p.resoluciones||[]).forEach(r=>{DB.res[r.id]=Object.assign({},r,{_g:g});});
+  (p.normas||[]).forEach(n=>{DB.normas[n.id]=Object.assign({},n,{_g:g});});
+  (p.cambios||[]).forEach(c=>{DB.cambios[c.id]=c;});
+  const vistos=new Set(DB.avisos.map(a=>a.hoja+"|"+a.fila+"|"+a.texto));
+  (p.avisos||[]).forEach(a=>{const k=a.hoja+"|"+a.fila+"|"+a.texto;if(!vistos.has(k)){vistos.add(k);DB.avisos.push(a);}});
+  DB.generado=p.generado||DB.generado;
+  if(!ABIERTOS.includes(g))ABIERTOS.push(g);
+}
+const NORMAS=()=>Object.values(DB.normas);
+const ACTAS=()=>Object.values(DB.actas);
+const RESOL=()=>Object.values(DB.res);
+const CAMBIOS=()=>Object.values(DB.cambios);
+
+/* ================= VIGENCIA =================
+   No hay columna «vigente» en el Excel: se deduce de los cambios, a la fecha
+   que se pregunte. Un solo lugar decide, y de aquí cuelgan la insignia, los
+   filtros, la línea de tiempo, el panel y «¿qué estaba vigente el…?». */
+const TERMINAN=["Derogación","Deja sin efecto"];
+const NUEVA_VERSION=["Reforma","Reforma parcial","Codificación"];
+const ICONO={"Reforma":"✏️","Reforma parcial":"✏️","Codificación":"📚","Derogación":"⛔","Deja sin efecto":"⛔","Aclaración":"💬"};
+function hoyRef(){return ST.aFecha||todayISO();}
+function cambiosA(id){return CAMBIOS().filter(c=>c.a&&c.a.id===id).sort((x,y)=>x.fecha.localeCompare(y.fecha)||x.id.localeCompare(y.id,undefined,{numeric:true}));}
+function cambiosPor(rid){return CAMBIOS().filter(c=>c.por&&c.por.id===rid).sort((x,y)=>x.fecha.localeCompare(y.fecha));}
+function estado(obj,esNorma,ref){
+  ref=ref||hoyRef();
+  if(obj.fecha>ref)return {key:"nada",label:"Aún no existía",b:"b-d",cc:"d"};
+  const todos=cambiosA(obj.id), hasta=todos.filter(c=>c.fecha<=ref);
+  const fin=hasta.find(c=>TERMINAN.includes(c.tipo));
+  if(fin)return {key:"baja",label:esNorma?(fin.tipo==="Derogación"?"Derogada":"Sin efecto"):(fin.tipo==="Derogación"?"Derogada":"Sin efecto"),b:"b-r",cc:"r",cambio:fin};
+  // «Se deroga el…» solo si a esa fecha ya se había resuelto: en 2020 no se
+  // puede anunciar una derogación que el directorio decidió en 2023.
+  const prox=todos.find(c=>c.fecha>ref&&TERMINAN.includes(c.tipo)&&c.por&&c.por.fecha<=ref);
+  const reformas=hasta.filter(c=>NUEVA_VERSION.includes(c.tipo));
+  if(prox)return {key:"vence",label:`Vigente · ${prox.tipo==="Derogación"?"se deroga":"pierde efecto"} el ${fdate(prox.fecha)}`,b:"b-a",cc:"a",cambio:prox,reformas};
+  if(reformas.length)return {key:"reformada",label:esNorma?"Vigente con reformas":"Reformada",b:esNorma?"b-g":"b-n",cc:esNorma?"g":"n",reformas};
+  return {key:"vigente",label:"Vigente",b:"b-g",cc:"g"};
+}
+const estadoNorma=(n,ref)=>estado(n,true,ref);
+const estadoRes=(r,ref)=>estado(r,false,ref);
+function vigenteGrupo(e){return e.key==="vigente"||e.key==="reformada"||e.key==="vence";}
+/* Las versiones del texto de una norma: la original y cada reforma o
+   codificación que trajo texto nuevo. La vigente a una fecha es la última que
+   ya regía; si la última reforma no trajo enlace, se dice. */
+function versiones(n){
+  const v=[{desde:n.fecha,enlace:seguro(n.enlace),tipo:"Texto original",cambio:null}];
+  cambiosA(n.id).filter(c=>NUEVA_VERSION.includes(c.tipo)).forEach(c=>v.push({desde:c.fecha,enlace:seguro(c.enlace),tipo:c.tipo+(c.articulos?" · "+c.articulos:""),cambio:c}));
+  return v;
+}
+function versionA(n,ref){
+  ref=ref||hoyRef();
+  const vs=versiones(n).filter(x=>x.desde<=ref);
+  if(!vs.length)return null;
+  const ultima=vs[vs.length-1];
+  const conTexto=[...vs].reverse().find(x=>x.enlace)||null;
+  return {ultima,conTexto,sinTextoUltima:!ultima.enlace};
+}
+function estadoActa(a){
+  if(a.stub)return {key:"stub",label:"Sin registrar",b:"b-d",cc:"d"};
+  if(a.definitiva||a.aprobacion)return {key:"def",label:"Definitiva",b:"b-g",cc:"g"};
+  const d=diasEntre(a.fecha,todayISO());
+  return {key:"prov",label:"Provisional",b:d>PROVISIONAL_DIAS?"b-a":"b-n",cc:d>PROVISIONAL_DIAS?"a":"n",dias:d};
+}
+
+/* ================= NOMBRES ================= */
+function cuerpo(s){return DB.cuerpos[s]||{sigla:s,nombre:s};}
+function resRef(r){return `${cuerpo(r.cuerpo).nombre} · ${fdate(r.fecha)} · punto ${r.punto}`;}
+function resCorta(r){return `${r.cuerpo} · ${fdate(r.fecha)} · p. ${r.punto}`;}
+function actaRef(a){return `${cuerpo(a.cuerpo).nombre} · ${a.tipo?("sesión "+a.tipo.toLowerCase()+" del "):"sesión del "}${longDate(a.fecha)}`;}
+function resDeActa(aid){return RESOL().filter(r=>r.acta===aid).sort((x,y)=>String(x.punto).localeCompare(String(y.punto),undefined,{numeric:true}));}
+function normasDeRes(rid){return NORMAS().filter(n=>n.res===rid);}
+function anio(iso){return String(iso||"").slice(0,4);}
+/* Todo lo que identifica a cada cosa, también la fecha escrita de las formas en
+   que se dice: «8 de agosto de 2026», «08/08/2026», «agosto 2026». */
+function fechasPaja(iso){return iso?[iso,dmy(iso),longDate(iso),fdate(iso),MESES[+iso.slice(5,7)-1]+" "+iso.slice(0,4)].join(" "):"";}
+function pajaNorma(n){return [n.nombre,n.tipo,n.entidad,n.organo,cuerpo(n.organo).nombre,n.obs,fechasPaja(n.fecha)].filter(Boolean).join(" ");}
+function pajaRes(r){return [r.texto,r.materia,r.obs,r.cuerpo,cuerpo(r.cuerpo).nombre,"punto "+r.punto,fechasPaja(r.fecha)].filter(Boolean).join(" ");}
+function pajaActa(a){return [a.cuerpo,cuerpo(a.cuerpo).nombre,a.tipo,a.numero?"sesion "+a.numero:"",a.obs,fechasPaja(a.fecha)].filter(Boolean).join(" ");}
+
+/* ================= NOTAS (cifradas) =================
+   Como la bitácora del CLM, pero las actas no admiten notas en claro en el
+   navegador: cada nota se cifra con la frase del grupo de lo que se anota, y
+   se guarda en ESTE navegador (no se comparte). En la demostración no se
+   guardan. */
+let NOTAS={};       // grupo -> [{id,ref:{t,id},txt,ts}]
+let LLAVES={};      // grupo -> {key, salt}
+const lsGet=k=>{try{return localStorage.getItem(k);}catch(e){return null;}};
+function lsSet(k,v){try{localStorage.setItem(k,v);return true;}catch(e){toast("No se pudo guardar la nota en este navegador (¿modo privado o sin espacio?).",5000);return false;}}
+async function abrirNotas(grupo,frase){
+  const raw=lsGet(NOTAS_LS+grupo);
+  let env=null;try{env=raw?JSON.parse(raw):null;}catch(e){}
+  const salt=env&&env.salt?b64(env.salt):crypto.getRandomValues(new Uint8Array(16));
+  const key=await claveDe(frase,salt,600000,["encrypt","decrypt"]);
+  LLAVES[grupo]={key,salt};
+  NOTAS[grupo]=[];
+  if(!env)return;
+  try{
+    const pt=await crypto.subtle.decrypt({name:"AES-GCM",iv:b64(env.iv)},key,b64(env.ct));
+    NOTAS[grupo]=JSON.parse(new TextDecoder().decode(pt))||[];
+  }catch(e){
+    // Se cambió la frase del grupo: las notas viejas no se pueden leer, pero
+    // no se botan. Se apartan, por si vuelve la frase anterior.
+    lsSet(NOTAS_LS+grupo+"_anterior",raw);
+    try{localStorage.removeItem(NOTAS_LS+grupo);}catch(e2){}
+    const s=crypto.getRandomValues(new Uint8Array(16));
+    LLAVES[grupo]={key:await claveDe(frase,s,600000,["encrypt","decrypt"]),salt:s};
+    setTimeout(()=>toast("Hay notas guardadas con una frase anterior del grupo «"+grupo+"»: no se pueden leer con la actual.",6000),400);
+  }
+}
+async function guardarNotas(grupo){
+  if(DEMO)return true;
+  const L=LLAVES[grupo];if(!L)return false;
+  const iv=crypto.getRandomValues(new Uint8Array(12));
+  const ct=await crypto.subtle.encrypt({name:"AES-GCM",iv},L.key,new TextEncoder().encode(JSON.stringify(NOTAS[grupo]||[])));
+  return lsSet(NOTAS_LS+grupo,JSON.stringify({v:1,salt:a64(L.salt),iv:a64(iv),ct:a64(ct)}));
+}
+function notasDe(t,id){return Object.values(NOTAS).flat().filter(n=>n.ref.t===t&&n.ref.id===id).sort((a,b)=>b.ts.localeCompare(a.ts));}
+function todasNotas(){return Object.entries(NOTAS).flatMap(([g,l])=>l.map(n=>Object.assign({_g:g},n))).sort((a,b)=>b.ts.localeCompare(a.ts));}
+
+/* ================= SESIÓN ================= */
+let relojBloqueo=null, MSG_LOGIN="";
+function tocar(){if(!ABIERTOS.length)return;clearTimeout(relojBloqueo);relojBloqueo=setTimeout(()=>cerrarSesion("Se cerró por inactividad. Vuelve a escribir la frase."),BLOQUEO_MIN*60000);}
+["click","keydown","mousemove","touchstart","scroll"].forEach(ev=>window.addEventListener(ev,tocar,{passive:true}));
+/* Cerrar es olvidar: los datos descifrados, las llaves de las notas y la vista. */
+function cerrarSesion(msg){
+  clearTimeout(relojBloqueo);
+  DB=vacia();ABIERTOS=[];NOTAS={};LLAVES={};DEMO=false;
+  ST.view="panel";ST.id=null;ST.aFecha=null;
+  document.querySelectorAll(".overlay").forEach(o=>o.remove());
+  MSG_LOGIN=msg||"";
+  if(location.hash)history.replaceState(null,"",location.pathname+location.search);
+  render();
+}
+/* Prueba la frase contra cada grupo que todavía está cerrado. Una misma frase
+   puede abrir varios (si así se configuró); las que no abre, no dicen nada. */
+async function probarFrase(frase){
+  const cerrados=(INDICE&&INDICE.grupos||[]).filter(g=>!ABIERTOS.includes(g.id)&&SOBRES[g.id]);
+  const abiertos=[];
+  await Promise.all(cerrados.map(async g=>{
+    try{const p=await descifrar(SOBRES[g.id],frase);p.grupo=p.grupo||g.id;await abrirNotas(p.grupo,frase);fusionar(p);abiertos.push(g.id);}catch(e){}
+  }));
+  return abiertos;
+}
+async function entrarDemo(){
+  const r=await fetch(DEMO_URL,{cache:"no-store"});
+  if(!r.ok)throw new Error("HTTP "+r.status);
+  const p=await r.json();
+  DEMO=true;p.grupo="demo";NOTAS={demo:[]};fusionar(p);
+}
+
+/* ================= RUTAS =================
+   Los enlaces llevan el id de la cosa (norma, acta, resolución), nunca su
+   posición en una lista: la lista cambia cada vez que se publica. */
+const VIEWS={panel:"Panel",normativa:"Normativa interna",norma:"Norma",actas:"Actas de sesión",acta:"Acta",resoluciones:"Resoluciones",resolucion:"Resolución",notas:"Mis notas",revision:"Revisión de la matriz"};
+const DETALLE={norma:"normativa",acta:"actas",resolucion:"resoluciones"};
+function hashDe(){return "#/"+ST.view+(DETALLE[ST.view]&&ST.id?"/"+encodeURIComponent(ST.id):"");}
+function leerHash(){
+  const m=location.hash.match(/^#\/([a-z]+)(?:\/(.+))?$/);
+  if(!m||!VIEWS[m[1]])return null;
+  let id=null;if(m[2]!=null){try{id=decodeURIComponent(m[2]);}catch(e){id=m[2];}}
+  return {view:m[1],id};
+}
+function existe(view,id){return view==="norma"?!!DB.normas[id]:view==="acta"?!!DB.actas[id]:view==="resolucion"?!!DB.res[id]:true;}
+function go(view,id){
+  if(DETALLE[view]&&!DETALLE[ST.view]){ST.from=ST.view;ST.fromY=window.scrollY||0;}
+  if(!DETALLE[view])ST.from=null;
+  ST.view=view;ST.id=id===undefined?null:id;
+  const h=hashDe();if(location.hash!==h)history.pushState(null,"",h);
+  render();window.scrollTo(0,0);
+}
+function aplicarHash(){
+  const h=leerHash();if(!h)return;
+  if(DETALLE[h.view]&&!existe(h.view,h.id)){
+    toast(h.id?"Eso no está entre lo que abriste: puede ser de otro grupo de acceso, o ya no estar en la matriz.":"Enlace incompleto.",5000);
+    ST.view=DETALLE[h.view];ST.id=null;history.replaceState(null,"","#/"+ST.view);return;
+  }
+  ST.view=h.view;ST.id=h.id;
+}
+window.addEventListener("popstate",()=>{if(!ABIERTOS.length)return;aplicarHash();render();});
+window.addEventListener("hashchange",()=>{if(!ABIERTOS.length)return;const h=leerHash();if(h&&(h.view!==ST.view||h.id!==ST.id)){aplicarHash();render();}});
+
+/* ================= PINTAR ================= */
+const I={
+  panel:'<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg>',
+  libro:'<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20V3H6.5A2.5 2.5 0 0 0 4 5.5z"/><path d="M4 19.5A2.5 2.5 0 0 0 6.5 22H20v-5"/></svg>',
+  acta:'<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M8 13h8M8 17h5"/></svg>',
+  mazo:'<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m14 13-7.5 7.5a2.1 2.1 0 0 1-3-3L11 10"/><path d="m16 16 6-6M8 8l6-6M9 7l8 8M21 11l-8-8"/></svg>',
+  nota:'<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>',
+  check:'<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>',
+  candado:'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>',
+  llave:'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="7.5" cy="15.5" r="4.5"/><path d="m10.7 12.3 9.8-9.8M17 6l3 3M14.5 8.5l2 2"/></svg>',
+  enlace:'<svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 0 0 7 0l3-3a5 5 0 0 0-7-7l-1 1"/><path d="M14 11a5 5 0 0 0-7 0l-3 3a5 5 0 0 0 7 7l1-1"/></svg>',
+  lupa:'<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#9AA0B2" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>'
+};
+function logoHTML(){return MARCA.logo?`<div class="logo"><img src="${esc(MARCA.logo)}" alt="${esc(MARCA.sigla)}"></div>`:`<div class="logo">${esc(MARCA.sigla)}</div>`;}
+
+function render(){
+  if(!ABIERTOS.length){renderLogin();return;}
+  tocar();
+  const app=$("#app");
+  const activo=id=>ST.view===id||DETALLE[ST.view]===id;
+  const nav=(id,label,icon,badge)=>`<button class="navitem ${activo(id)?"on":""}" data-go="${id}">${icon}<span>${label}</span>${badge?`<span class="nbadge">${badge}</span>`:""}</button>`;
+  const pend=revisionLista().length;
+  const cerrados=(INDICE&&INDICE.grupos||[]).filter(g=>!ABIERTOS.includes(g.id)).length;
+  app.innerHTML=`
+  <div class="shell">
+    <aside class="side">
+      <div class="side-brand">${logoHTML()}<div><div class="t">${esc(MARCA.nombre)}</div><div class="s">Actas · resoluciones · normativa</div></div></div>
+      <div class="navgrp">Consulta</div>
+      ${nav("panel","Panel",I.panel)}
+      ${nav("normativa","Normativa",I.libro)}
+      ${nav("actas","Actas",I.acta)}
+      ${nav("resoluciones","Resoluciones",I.mazo)}
+      <div class="navgrp">Seguimiento</div>
+      ${nav("notas","Mis notas",I.nota,todasNotas().length||"")}
+      ${nav("revision","Revisión de la matriz",I.check,pend||"")}
+      <div class="side-foot">
+        <div class="avatar">🔓</div>
+        <div style="min-width:0;flex:1"><div class="n">${DEMO?"Demostración":"Acceso: "+esc(ABIERTOS.join(", "))}</div><div class="r">${DEMO?"datos ficticios":cerrados?`${cerrados} grupo${cerrados===1?"":"s"} más, cerrado${cerrados===1?"":"s"}`:"todo lo publicado"}</div></div>
+        ${cerrados&&!DEMO?`<button class="iconbtn" id="masgrupos" title="Abrir otro grupo con otra frase">${I.llave}</button>`:""}
+        <button class="iconbtn" id="logout" title="Cerrar (olvida lo descifrado)">${I.candado}</button>
+      </div>
+    </aside>
+    <main class="main">
+      <div class="topbar">
+        <h1>${esc(VIEWS[ST.view]||"")}</h1>
+        ${srcPillHTML()}
+        <div class="gsearch">${I.lupa}
+          <input id="gq" placeholder="Buscar norma, resolución, sesión…" autocomplete="off">
+          <div class="gresults" id="gres" style="display:none"></div>
+        </div>
+      </div>
+      <div class="content" id="view"></div>
+    </main>
+  </div>`;
+  app.querySelectorAll("[data-go]").forEach(b=>b.onclick=()=>go(b.dataset.go));
+  $("#logout").onclick=()=>cerrarSesion("Sesión cerrada. Lo descifrado se olvidó en este navegador.");
+  if($("#masgrupos"))$("#masgrupos").onclick=modalOtraFrase;
+  const side=$("aside.side",app),on=$(".navitem.on",app);
+  if(side&&on&&side.scrollWidth>side.clientWidth)side.scrollLeft=Math.max(0,on.offsetLeft-70);
+  bindGlobalSearch();
+  const V={panel:vPanel,normativa:vNormativa,norma:vNorma,actas:vActas,acta:vActa,resoluciones:vResoluciones,resolucion:vResolucion,notas:vNotas,revision:vRevision};
+  (V[ST.view]||vPanel)();
+}
+function srcPillHTML(){
+  if(DEMO)return `<span class="srcpill demo" title="Datos inventados para conocer la herramienta. Nada de esto es real."><span class="srcdot off"></span>Demostración · datos ficticios</span>`;
+  const e=edadBase(INDICE&&INDICE.generado);
+  const vieja=!!(e&&e.vieja);
+  const tip=vieja?`No se publica desde el ${fdate(e.fecha)}: el robot diario pudo fallar. Revisa la pestaña Actions del repositorio.`:"Publicado por el robot desde el Excel de la matriz";
+  return `<span class="srcpill${vieja?" old":""}" title="${esc(tip)}"><span class="srcdot ${vieja?"old":""}"></span>${e?esc(vieja?"Sin publicar desde el "+fdate(e.fecha):"Publicado "+e.txt):"Matriz"}</span>`;
+}
+
+/* ================= BUSCADOR GLOBAL ================= */
+function buscarTodo(q,max){
+  const out=[];
+  NORMAS().filter(n=>coincide(pajaNorma(n),q)).forEach(n=>out.push({t:"norma",id:n.id,a:"📘 "+n.nombre,b:`${n.tipo||"Norma"} · ${cuerpo(n.organo).nombre} · ${estadoNorma(n).label}`,o:0}));
+  RESOL().filter(r=>coincide(pajaRes(r),q)).sort((x,y)=>y.fecha.localeCompare(x.fecha)).forEach(r=>out.push({t:"resolucion",id:r.id,a:"📄 "+trunc(r.texto,80),b:`${resRef(r)} · ${estadoRes(r).label}`,o:1}));
+  ACTAS().filter(a=>coincide(pajaActa(a),q)).sort((x,y)=>y.fecha.localeCompare(x.fecha)).forEach(a=>out.push({t:"acta",id:a.id,a:"🗂️ "+actaRef(a),b:`${resDeActa(a.id).length} resoluciones · ${estadoActa(a).label}`,o:2}));
+  return out.slice(0,max||10);
+}
+function bindGlobalSearch(){
+  const inp=$("#gq"),box=$("#gres");let hits=[],sel=0;
+  const abrir=h=>{box.style.display="none";inp.value="";go(h.t,h.id);};
+  const pinta=()=>{box.innerHTML=hits.map((h,k)=>`<div class="gres${k===sel?" sel":""}" data-k="${k}"><div class="a">${esc(h.a)}</div><div class="b">${esc(h.b)}</div></div>`).join("");
+    box.querySelectorAll("[data-k]").forEach(el=>el.onmousedown=e=>{e.preventDefault();abrir(hits[+el.dataset.k]);});};
+  inp.oninput=()=>{const q=inp.value.trim();if(q.length<2){box.style.display="none";hits=[];return;}
+    hits=buscarTodo(q);sel=0;
+    if(!hits.length){box.innerHTML=`<div class="gres"><span class="b">Sin resultados. Prueba con menos palabras.</span></div>`;box.style.display="";return;}
+    pinta();box.style.display="";};
+  inp.onkeydown=e=>{if(e.key==="Escape"){box.style.display="none";inp.blur();return;}if(!hits.length)return;
+    if(e.key==="ArrowDown"||e.key==="ArrowUp"){e.preventDefault();sel=(sel+(e.key==="ArrowDown"?1:hits.length-1))%hits.length;pinta();}
+    else if(e.key==="Enter"){e.preventDefault();abrir(hits[sel]);}};
+  inp.onblur=()=>setTimeout(()=>{box.style.display="none";},200);
+}
+
+/* ================= PANEL ================= */
+function alertList(){
+  const out=[], hoy=todayISO();
+  ACTAS().forEach(a=>{const e=estadoActa(a);if(e.key==="prov"&&e.dias>PROVISIONAL_DIAS)
+    out.push({sev:1,icon:"🗂️",bg:"var(--amberbg)",t:`Acta provisional hace ${e.dias} días`,d:`${actaRef(a)} · aún sin acta definitiva`,act:"Abrir",go:["acta",a.id]});});
+  CAMBIOS().filter(c=>c.fecha>hoy).sort((x,y)=>x.fecha.localeCompare(y.fecha)).forEach(c=>{
+    const nom=c.a.t==="norma"?(DB.normas[c.a.id]?DB.normas[c.a.id].nombre:c.a.nombre):(DB.res[c.a.id]?"Resolución "+resCorta(DB.res[c.a.id]):"una resolución");
+    out.push({sev:2,icon:ICONO[c.tipo]||"📅",bg:"var(--tint)",t:`Próximo: ${c.tipo.toLowerCase()} el ${fdate(c.fecha)}`,d:nom,act:"Ver",go:[c.a.t==="norma"?"norma":"resolucion",c.a.id]});});
+  const r=revisionLista().length;
+  if(r)out.push({sev:3,icon:"🧾",bg:"var(--bg)",t:`${r} cosa${r===1?"":"s"} por completar en la matriz`,d:"Renglones con algo que no cuadra o sin enlace al documento",act:"Revisar",go:["revision"]});
+  return out.sort((a,b)=>a.sev-b.sev);
+}
+function alertRowHTML(a,k){return `<div class="alert-row"><div class="aic" style="background:${a.bg}">${a.icon}</div><div style="min-width:0"><div class="at">${esc(a.t)}</div><div class="ad">${esc(a.d)}</div></div><button class="btn sm line go" data-al="${k}">${esc(a.act)}</button></div>`;}
+function movimientos(){
+  const hoy=todayISO(),ev=[];
+  ACTAS().filter(a=>!a.stub&&a.fecha<=hoy).forEach(a=>ev.push({d:a.fecha,t:"🗂️ Sesión de "+cuerpo(a.cuerpo).nombre,s:`${longDate(a.fecha)} · ${resDeActa(a.id).length} resoluciones`,go:["acta",a.id]}));
+  CAMBIOS().filter(c=>c.fecha<=hoy).forEach(c=>{const n=c.a.t==="norma"?(DB.normas[c.a.id]||c.a).nombre:"Resolución "+resCorta(DB.res[c.a.id]||c.a);
+    ev.push({d:c.fecha,t:`${ICONO[c.tipo]||"•"} ${c.tipo}: ${n}`,s:longDate(c.fecha)+(c.por?" · "+resCorta(c.por):""),go:[c.a.t==="norma"?"norma":"resolucion",c.a.id],fin:TERMINAN.includes(c.tipo)});});
+  return ev.sort((a,b)=>b.d.localeCompare(a.d));
+}
+function vPanel(){
+  const ns=NORMAS(),rs=RESOL(),as=ACTAS().filter(a=>!a.stub);
+  const en=ns.map(n=>estadoNorma(n,todayISO()));
+  const er=rs.map(r=>estadoRes(r,todayISO()));
+  const nVig=en.filter(vigenteGrupo).length,nRef=en.filter(e=>e.key==="reformada").length,nDer=en.filter(e=>e.key==="baja").length;
+  const prov=as.filter(a=>estadoActa(a).key==="prov").length;
+  const rVig=er.filter(vigenteGrupo).length;
+  const alerts=alertList();
+  const anios={};as.forEach(a=>{const y=anio(a.fecha);(anios[y]=anios[y]||{n:0,por:{}}).n++;anios[y].por[a.cuerpo]=(anios[y].por[a.cuerpo]||0)+1;});
+  const ys=Object.keys(anios).sort();const serie=[];
+  if(ys.length)for(let y=+ys[0];y<=+ys[ys.length-1];y++){const o=anios[y]||{n:0,por:{}};serie.push({label:String(y),n:o.n,tip:`<b>${y}</b><br>`+(Object.entries(o.por).map(([c,k])=>`${esc(c)}: ${k}`).join("<br>")||"sin sesiones")});}
+  const mov=movimientos().slice(0,7);
+  const cs=Object.values(DB.cuerpos);
+  $("#view").innerHTML=`<div class="up">
+    <div class="kpis">
+      <div class="kpi" data-k="nvig"><div class="kpi-n" style="color:var(--green)">${nVig}</div><div class="kpi-l">Normas vigentes</div></div>
+      <div class="kpi" data-k="nref"><div class="kpi-n" style="color:var(--navy)">${nRef}</div><div class="kpi-l">Vigentes con reformas</div></div>
+      <div class="kpi" data-k="nder"><div class="kpi-n" style="color:var(--red)">${nDer}</div><div class="kpi-l">Derogadas</div></div>
+      <div class="kpi" data-k="actas"><div class="kpi-n">${as.length}</div><div class="kpi-l">Actas de sesión</div></div>
+      <div class="kpi" data-k="prov"><div class="kpi-n" style="color:var(--amber)">${prov}</div><div class="kpi-l">Actas provisionales</div></div>
+      <div class="kpi" data-k="rvig"><div class="kpi-n" style="color:var(--violet)">${rVig}</div><div class="kpi-l">Resoluciones vigentes</div></div>
+    </div>
+    <div class="charts">
+      <div class="panel">
+        <p class="ptitle">Requiere atención</p>
+        <p class="psub">Actas sin su versión definitiva, cambios que todavía no rigen y lo que falta completar en la matriz.</p>
+        ${alerts.length?alerts.slice(0,7).map(alertRowHTML).join(""):`<div class="empty">Nada pendiente ✅</div>`}
+      </div>
+      <div class="panel">
+        <p class="ptitle">Últimos movimientos</p>
+        <p class="psub">Sesiones y cambios a la normativa y a las resoluciones</p>
+        ${mov.length?`<ul class="tl">${mov.map((e,k)=>`<li class="${e.fin?"fin":""}"><div class="t"><button class="lk" data-mv="${k}">${esc(e.t)}</button></div><div class="s">${esc(e.s)}</div></li>`).join("")}</ul>`:`<div class="empty">Aún no hay movimientos.</div>`}
+      </div>
+    </div>
+    <div class="charts">
+      <div class="panel">
+        <p class="ptitle">Sesiones por año</p>
+        <p class="psub">Actas registradas de todos los cuerpos colegiados</p>
+        ${barras(serie)}
+      </div>
+      <div class="panel">
+        <p class="ptitle">Cuerpos colegiados</p>
+        <p class="psub">Lo que tienes abierto de cada uno</p>
+        <div class="cuerpos">${cs.map(c=>{const na=as.filter(a=>a.cuerpo===c.sigla).length,nr=rs.filter(r=>r.cuerpo===c.sigla).length,nn=ns.filter(n=>n.organo===c.sigla).length;
+          return `<button class="cuerpo" data-c="${esc(c.sigla)}"><span class="cs">${esc(c.sigla)}</span><span class="cn">${esc(c.nombre)}<small>${na} actas · ${nr} resoluciones · ${nn} normas</small></span></button>`;}).join("")||`<div class="empty">Sin cuerpos.</div>`}</div>
+      </div>
+    </div>
+    <div class="panel">
+      <p class="ptitle">Estado de las resoluciones</p>
+      <p class="psub">Hoy, según los cambios registrados</p>
+      ${stack([{label:"Vigentes",n:er.filter(e=>e.key==="vigente"||e.key==="vence").length,col:"var(--green)"},{label:"Reformadas",n:er.filter(e=>e.key==="reformada").length,col:"var(--navy2)"},{label:"Derogadas o sin efecto",n:er.filter(e=>e.key==="baja").length,col:"var(--red)"}])}
+    </div>
+  </div>`;
+  const V=$("#view");
+  V.querySelectorAll("[data-al]").forEach(b=>b.onclick=()=>{const a=alerts[+b.dataset.al];go(...a.go);});
+  V.querySelectorAll("[data-mv]").forEach(b=>b.onclick=()=>{const e=mov[+b.dataset.mv];go(...e.go);});
+  V.querySelectorAll("[data-c]").forEach(b=>b.onclick=()=>{ST.af=Object.assign({},ST.af,{cuerpo:b.dataset.c,estado:"all",q:"",anio:"all"});go("actas");});
+  V.querySelectorAll("[data-k]").forEach(k=>k.onclick=()=>{const t=k.dataset.k;ST.aFecha=null;
+    if(t==="nvig"||t==="nref"||t==="nder"){ST.nf=Object.assign({},ST.nf,{estado:{nvig:"vig",nref:"reformada",nder:"baja"}[t],q:""});go("normativa");}
+    else if(t==="rvig"){ST.rf=Object.assign({},ST.rf,{estado:"vig",q:""});go("resoluciones");}
+    else{ST.af=Object.assign({},ST.af,{estado:t==="prov"?"prov":"all",cuerpo:"all",q:""});go("actas");}});
+}
+function barras(d){
+  if(!d.length)return `<div class="empty">Sin sesiones registradas.</div>`;
+  const W=640,H=200,pb=24,pt=18,max=Math.max(1,...d.map(x=>x.n)),bw=W/d.length;
+  return `<svg class="chart-svg" viewBox="0 0 ${W} ${H}" role="img" aria-label="Sesiones por año">${d.map((x,k)=>{
+    const h=Math.round((H-pb-pt)*x.n/max),X=k*bw+bw*.18,Y=H-pb-h;
+    return `<rect class="bar" data-tip="${esc(x.tip)}" x="${X.toFixed(1)}" y="${Y}" width="${(bw*.64).toFixed(1)}" height="${Math.max(h,x.n?2:0)}" rx="4" fill="var(--navy)"/>`+
+      (x.n?`<text class="vallbl" x="${(X+bw*.32).toFixed(1)}" y="${Y-5}" text-anchor="middle">${x.n}</text>`:"")+
+      `<text class="axlbl" x="${(X+bw*.32).toFixed(1)}" y="${H-7}" text-anchor="middle">${d.length>12?"’"+x.label.slice(2):x.label}</text>`;}).join("")}</svg>`;
+}
+function stack(segs){
+  const tot=segs.reduce((s,x)=>s+x.n,0)||1;
+  return `<div class="stackbar">${segs.filter(s=>s.n).map(s=>`<div style="flex:${s.n};background:${s.col}" data-tip="${esc(s.label)}: ${s.n}">${s.n/tot>.07?s.n:""}</div>`).join("")}</div>
+  <div class="legend">${segs.map(s=>`<span class="li"><span class="sw" style="background:${s.col}"></span>${esc(s.label)} · ${s.n}</span>`).join("")}</div>`;
+}
+
+/* ================= VIGENCIA A UNA FECHA ================= */
+function aFechaBarra(){
+  return ST.aFecha?`<div class="afecha">🕰️ Viendo la vigencia al ${longDate(ST.aFecha)}: lo aprobado después no aparece y los estados son los de ese día. <button class="linkbtn" id="ahoy">Volver a hoy</button></div>`:"";
+}
+function aFechaInput(){return `<label class="flbl">Vigencia al <input type="date" id="afi" value="${esc(ST.aFecha||"")}" max="2100-12-31"></label>`;}
+function bindAFecha(re){
+  const i=$("#afi");if(i)i.onchange=()=>{ST.aFecha=i.value&&i.value!==todayISO()?i.value:null;re();};
+  const h=$("#ahoy");if(h)h.onclick=()=>{ST.aFecha=null;re();};
+}
+function opciones(lista,sel,todos){return `<option value="all">${esc(todos)}</option>`+lista.map(([v,l])=>`<option value="${esc(v)}"${String(sel)===String(v)?" selected":""}>${esc(l)}</option>`).join("");}
+function toolbarBusqueda(id,ph,val){return `<div class="search">${I.lupa}<input id="${id}" placeholder="${esc(ph)}" value="${esc(val)}" autocomplete="off"></div>`;}
+function viewTog(){return `<div class="viewtog"><button data-vm="table" class="${ST.viewMode==="table"?"on":""}">Tabla</button><button data-vm="cards" class="${ST.viewMode==="cards"?"on":""}">Tarjetas</button></div>`;}
+function bindLista(re,fkey,qid){
+  const q=$("#"+qid);if(q){q.oninput=()=>{ST[fkey].q=q.value;pintaFilas();};}
+  $("#view").querySelectorAll("[data-vm]").forEach(b=>b.onclick=()=>{ST.viewMode=b.dataset.vm;re();});
+  $("#view").querySelectorAll("[data-ch]").forEach(b=>b.onclick=()=>{ST[fkey].estado=b.dataset.ch;re();});
+  $("#view").querySelectorAll("select[data-f]").forEach(s=>s.onchange=()=>{ST[fkey][s.dataset.f]=s.value;re();});
+  bindAFecha(re);
+}
+let pintaFilas=()=>{};
+function chipsEstado(sel,opts){return `<div class="chips" style="margin:0 0 12px">${opts.map(([v,l])=>`<button class="chip ${sel===v?"on":""}" data-ch="${v}">${esc(l)}</button>`).join("")}</div>`;}
+function vacioHTML(hay){return `<div class="empty">${hay?"Nada coincide con la búsqueda o los filtros.<br>Prueba con menos palabras, o quita un filtro.":"Todavía no hay nada aquí.<br>Se llena desde el Excel de la matriz."}</div>`;}
+
+/* ================= NORMATIVA ================= */
+function normasFiltradas(){
+  const f=ST.nf,ref=hoyRef();
+  return NORMAS().filter(n=>n.fecha<=ref).map(n=>({n,e:estadoNorma(n,ref)}))
+    .filter(({n,e})=>(f.estado==="all"||(f.estado==="vig"?vigenteGrupo(e):e.key===f.estado))&&(f.organo==="all"||n.organo===f.organo)&&(f.tipo==="all"||n.tipo===f.tipo)&&(!f.q||coincide(pajaNorma(n),f.q)))
+    .sort((a,b)=>a.n.nombre.localeCompare(b.n.nombre,"es"));
+}
+function ultimoCambio(n,ref){const cs=cambiosA(n.id).filter(c=>c.fecha<=(ref||hoyRef()));return cs[cs.length-1]||null;}
+function vNormativa(){
+  const f=ST.nf;
+  const organos=[...new Set(NORMAS().map(n=>n.organo))].sort().map(s=>[s,cuerpo(s).nombre]);
+  const tipos=[...new Set(NORMAS().map(n=>n.tipo).filter(Boolean))].sort().map(t=>[t,t]);
+  $("#view").innerHTML=`<div class="up">
+    ${aFechaBarra()}
+    <div class="toolbar">${toolbarBusqueda("nq","Buscar por nombre, tipo, órgano…",f.q)}
+      <select data-f="organo" aria-label="Órgano">${opciones(organos,f.organo,"Todos los órganos")}</select>
+      <select data-f="tipo" aria-label="Tipo">${opciones(tipos,f.tipo,"Todos los tipos")}</select>
+      ${aFechaInput()}${viewTog()}</div>
+    ${chipsEstado(f.estado,[["all","Todas"],["vig","Vigentes"],["reformada","Con reformas"],["vence","Por derogarse"],["baja","Derogadas"]])}
+    <p class="countlbl" id="cnt"></p><div id="filas"></div></div>`;
+  pintaFilas=()=>{
+    const l=normasFiltradas(),hay=NORMAS().length;
+    $("#cnt").textContent=`${l.length} de ${hay} norma${hay===1?"":"s"}`;
+    if(!l.length){$("#filas").innerHTML=vacioHTML(hay);return;}
+    $("#filas").innerHTML=ST.viewMode==="cards"
+      ?`<div class="grid">${l.map(({n,e})=>{const u=ultimoCambio(n);return `<div class="cc ${e.cc}" data-n="${esc(n.id)}"><div class="cc-nro">${esc(n.tipo||"Norma")} · ${esc(n.entidad||n.organo)}</div><div class="cc-title">${esc(n.nombre)}</div><div class="td-sub">${esc(cuerpo(n.organo).nombre)}</div><div class="cc-meta"><span class="badge ${e.b}">${esc(e.label)}</span><span>Aprobada ${fdate(n.fecha)}</span>${u?`<span>· ${esc(u.tipo.toLowerCase())} ${fdate(u.fecha)}</span>`:""}</div></div>`;}).join("")}</div>`
+      :`<div class="tablewrap"><table class="list"><thead><tr><th>Norma</th><th class="td-org">Órgano</th><th>Aprobada</th><th>Último cambio</th><th>Estado</th><th class="td-sig"></th></tr></thead><tbody>${l.map(({n,e})=>{const u=ultimoCambio(n);
+        return `<tr data-n="${esc(n.id)}"><td class="td-obj">${esc(n.nombre)}<div class="oc"><span class="catchip">${esc(n.tipo||"Norma")}</span></div><div class="oa">${esc(cuerpo(n.organo).nombre)}</div></td><td class="td-org">${esc(cuerpo(n.organo).nombre)}</td><td style="white-space:nowrap">${fdate(n.fecha)}</td><td>${u?`${esc(u.tipo)}<div class="td-sub">${fdate(u.fecha)}</div>`:'<span style="color:var(--muted2)">—</span>'}</td><td><span class="badge ${e.b}">${esc(e.label)}</span></td><td class="td-sig"><button class="btn sm line">Abrir</button></td></tr>`;}).join("")}</tbody></table></div>`;
+    $("#filas").querySelectorAll("[data-n]").forEach(r=>r.onclick=()=>go("norma",r.dataset.n));
+  };
+  pintaFilas();bindLista(vNormativa,"nf","nq");
+}
+function lineaNorma(n){
+  const hoy=todayISO(),ev=[];
+  const r=n.res&&DB.res[n.res];
+  ev.push({d:n.fecha,cls:"ok",t:"✅ Aprobada",s:`${cuerpo(n.organo).nombre} · sesión del ${longDate(n.fecha)}${n.punto?" · punto "+n.punto:""}`,go:r?["resolucion",r.id]:(n.acta?["acta",n.acta]:null)});
+  cambiosA(n.id).forEach(c=>ev.push(eventoCambio(c,hoy)));
+  return ev;
+}
+function eventoCambio(c,hoy){
+  const fut=c.fecha>(hoy||todayISO());
+  const quien=c.por?`${cuerpo(c.por.cuerpo).nombre} · sesión del ${longDate(c.por.fecha)} · punto ${c.por.punto}`:(c.detalle||"Sin resolución registrada");
+  return {d:c.fecha,cls:fut?"fut":TERMINAN.includes(c.tipo)?"fin":"",t:`${ICONO[c.tipo]||"•"} ${c.tipo}${c.articulos?" · "+c.articulos:""}${fut?" (todavía no rige)":""}`,
+    s:quien+(c.rige?` · rige desde el ${longDate(c.rige)}`:"")+(c.detalle&&c.por?` · ${c.detalle}`:""),go:c.por&&c.por.id&&DB.res[c.por.id]?["resolucion",c.por.id]:null};
+}
+function timelineHTML(ev){return `<ul class="tl">${ev.map((e,k)=>`<li class="${e.cls||""}"><div class="t">${e.go?`<button class="lk" data-tl="${k}">${esc(e.t)}</button>`:esc(e.t)}</div><div class="s">${esc(e.s)}</div></li>`).join("")}</ul>`;}
+function bindTimeline(ev){$("#view").querySelectorAll("[data-tl]").forEach(b=>b.onclick=()=>go(...ev[+b.dataset.tl].go));}
+function volverHTML(def){const a={panel:"al panel",normativa:"a la normativa",actas:"a las actas",resoluciones:"a las resoluciones",notas:"a mis notas",revision:"a la revisión"};return `<button class="back" id="back">← Volver ${a[ST.from]||a[def]}</button>`;}
+function bindVolver(def){$("#back").onclick=()=>{const y=ST.fromY;go(ST.from||def);if(y)setTimeout(()=>window.scrollTo(0,y),0);};}
+function linkbarHTML(titulo,u,sub,offTxt){u=seguro(u);return `<div class="linkbar${u?"":" off"}"><span style="color:var(--navy)">${I.enlace}</span><div style="flex:1;min-width:0"><div class="lt">${esc(titulo)}</div><div class="ls">${esc(u?sub:offTxt)}</div></div>${u?`<a class="btn sm" href="${esc(u)}" target="_blank" rel="noopener noreferrer">Abrir</a>`:`<button class="btn sm line" disabled>Sin enlace</button>`}</div>`;}
+function vNorma(){
+  const n=DB.normas[ST.id];if(!n){go("normativa");return;}
+  const e=estadoNorma(n,todayISO()),v=versionA(n,todayISO()),r=n.res&&DB.res[n.res],a=n.acta&&DB.actas[n.acta];
+  const ev=lineaNorma(n),vs=versiones(n),cs=cambiosA(n.id);
+  const vigTxt=e.key==="baja"?"El último texto que rigió":v&&v.sinTextoUltima?`La última ${esc(v.ultima.tipo.toLowerCase())} no tiene enlace al texto: se abre la versión anterior`:"La versión que rige hoy";
+  $("#view").innerHTML=`<div class="up">${volverHTML("normativa")}
+    <div class="detail"><div>
+      <div class="panel">
+        <div class="dhead">
+          <div style="min-width:0"><div class="cc-nro" style="margin-bottom:3px">${esc(n.tipo||"Norma")} · ${esc(n.entidad||"")}</div>
+            <div class="h-title">${esc(n.nombre)}</div><div class="h-sub">${esc(cuerpo(n.organo).nombre)}</div></div>
+          <span class="badge ${e.b}">${esc(e.label)}</span>
+        </div>
+        ${linkbarHTML(e.key==="baja"?"Último texto":"Texto vigente",v&&v.conTexto&&v.conTexto.enlace,`${vigTxt} · ${v&&v.conTexto?v.conTexto.tipo+" desde el "+fdate(v.conTexto.desde):""}`,"No hay enlace al texto en la matriz")}
+        <div class="expbox"><div class="expt">Aprobación</div>
+          <div class="exprow"><span class="k">Órgano</span><span class="v">${esc(cuerpo(n.organo).nombre)}</span></div>
+          <div class="exprow"><span class="k">Sesión</span>${a&&!a.stub?`<span class="v"><button class="linkbtn" id="a-acta" style="font-size:inherit">${esc(longDate(n.fecha))}</button></span>`:`<span class="v">${esc(longDate(n.fecha))}</span>`}</div>
+          <div class="exprow"><span class="k">Resolución</span>${r?`<span class="v"><button class="linkbtn" id="a-res" style="font-size:inherit">Punto ${esc(r.punto)}</button></span>`:`<span class="v none">${n.punto?"punto "+esc(n.punto)+" (no está en Resoluciones)":"sin registrar"}</span>`}</div>
+        </div>
+        ${e.cambio&&e.key==="baja"?`<div class="note" style="margin-top:12px">⛔ ${esc(e.cambio.tipo)} el ${esc(longDate(e.cambio.fecha))}${e.cambio.por?` por ${esc(cuerpo(e.cambio.por.cuerpo).nombre)}, sesión del ${esc(longDate(e.cambio.por.fecha))}, punto ${esc(e.cambio.por.punto)}`:""}.</div>`:""}
+        ${e.key==="vence"?`<div class="note" style="margin-top:12px;background:var(--amberbg);border-color:#F0DCA6;color:#8A5E06">📅 Deja de regir el ${esc(longDate(e.cambio.fecha))}: ${esc(e.cambio.tipo.toLowerCase())} aprobada por ${esc(e.cambio.por?cuerpo(e.cambio.por.cuerpo).nombre+", sesión del "+longDate(e.cambio.por.fecha):"la matriz")}.</div>`:""}
+        <div class="dl">
+          <div><div class="k">Tipo</div><div class="v">${esc(n.tipo||"—")}</div></div>
+          <div><div class="k">Entidad</div><div class="v">${esc(n.entidad||"—")}</div></div>
+          <div><div class="k">Aprobada</div><div class="v">${fdate(n.fecha)}</div></div>
+          <div><div class="k">Cambios registrados</div><div class="v">${cs.length||"Ninguno"}</div></div>
+          ${n.obs?`<div class="full"><div class="k">Observaciones</div><div class="v" style="font-weight:400">${esc(n.obs)}</div></div>`:""}
+        </div>
+      </div>
+      <div class="panel"><p class="ptitle">Línea de tiempo</p><p class="psub">Aprobación y cada cambio, con la sesión que lo resolvió</p>${timelineHTML(ev)}</div>
+    </div><div>
+      <div class="panel"><p class="ptitle">¿Qué regía en una fecha?</p><p class="psub">Para saber qué texto aplicaba, por ejemplo, el día que se firmó algo.</p>
+        <div class="quedia"><input type="date" id="qd" value="${esc(ST.aFecha||todayISO())}"><button class="btn sm" id="qdb">Consultar</button></div><div id="qdr"></div></div>
+      <div class="panel"><p class="ptitle">Versiones del texto</p><p class="psub">${vs.length} versión${vs.length===1?"":"es"}</p>
+        <div class="vers">${vs.map(x=>{const on=!!(v&&v.conTexto&&v.conTexto.desde===x.desde&&v.conTexto.tipo===x.tipo)&&e.key!=="baja";return `<div class="ver ${on?"on":""}"><div class="vd"><b>${esc(x.tipo)}</b><span>desde el ${fdate(x.desde)}${on?" · la que rige":""}</span></div>${x.enlace?`<a class="btn sm line" href="${esc(x.enlace)}" target="_blank" rel="noopener noreferrer">Abrir</a>`:`<span class="badge b-d">sin enlace</span>`}</div>`;}).join("")}</div></div>
+      ${notasPanelHTML()}
+    </div></div></div>`;
+  bindVolver("normativa");bindTimeline(ev);bindNotas("norma",n.id,n._g,vNorma);
+  if($("#a-acta"))$("#a-acta").onclick=()=>go("acta",n.acta);
+  if($("#a-res"))$("#a-res").onclick=()=>go("resolucion",r.id);
+  const consulta=()=>{const d=$("#qd").value;if(!d)return;const out=$("#qdr");
+    if(d<n.fecha){out.innerHTML=`<div class="resq">El ${esc(longDate(d))} esta norma <b>todavía no existía</b>: se aprobó el ${esc(longDate(n.fecha))}.</div>`;return;}
+    const es=estadoNorma(n,d),vv=versionA(n,d);
+    out.innerHTML=`<div class="resq"><div style="margin-bottom:6px"><span class="badge ${es.b}">${esc(es.label)}</span></div>${es.key==="baja"?`El ${esc(longDate(d))} ya no regía: ${esc(es.cambio.tipo.toLowerCase())} el ${esc(longDate(es.cambio.fecha))}.`:`El ${esc(longDate(d))} regía <b>${esc(vv.ultima.tipo)}</b>, desde el ${esc(longDate(vv.ultima.desde))}.`}${vv&&vv.conTexto&&es.key!=="baja"?` <a href="${esc(vv.conTexto.enlace)}" target="_blank" rel="noopener noreferrer">Abrir ese texto</a>${vv.sinTextoUltima?" (la versión anterior: esa reforma no tiene enlace)":""}`:""}</div>`;};
+  $("#qdb").onclick=consulta;$("#qd").onkeydown=ev2=>{if(ev2.key==="Enter")consulta();};
+}
+
+/* ================= ACTAS ================= */
+function actasFiltradas(){
+  const f=ST.af;
+  return ACTAS().map(a=>({a,e:estadoActa(a)}))
+    .filter(({a,e})=>(f.cuerpo==="all"||a.cuerpo===f.cuerpo)&&(f.anio==="all"||anio(a.fecha)===f.anio)&&(f.estado==="all"||e.key===f.estado)&&(!f.q||coincide(pajaActa(a)+" "+resDeActa(a.id).map(pajaRes).join(" "),f.q)))
+    .sort((x,y)=>y.a.fecha.localeCompare(x.a.fecha));
+}
+function vActas(){
+  const f=ST.af;
+  const cs=Object.values(DB.cuerpos).map(c=>[c.sigla,c.nombre]);
+  const ys=[...new Set(ACTAS().map(a=>anio(a.fecha)))].sort().reverse().map(y=>[y,y]);
+  $("#view").innerHTML=`<div class="up">
+    <div class="toolbar">${toolbarBusqueda("aq","Buscar por cuerpo, fecha o lo resuelto…",f.q)}
+      <select data-f="cuerpo" aria-label="Cuerpo colegiado">${opciones(cs,f.cuerpo,"Todos los cuerpos")}</select>
+      <select data-f="anio" aria-label="Año">${opciones(ys,f.anio,"Todos los años")}</select>${viewTog()}</div>
+    ${chipsEstado(f.estado,[["all","Todas"],["def","Definitivas"],["prov","Provisionales"],["stub","Sin registrar"]])}
+    <p class="countlbl" id="cnt"></p><div id="filas"></div></div>`;
+  pintaFilas=()=>{
+    const l=actasFiltradas(),hay=ACTAS().length;
+    $("#cnt").textContent=`${l.length} de ${hay} acta${hay===1?"":"s"}`;
+    if(!l.length){$("#filas").innerHTML=vacioHTML(hay);return;}
+    $("#filas").innerHTML=ST.viewMode==="cards"
+      ?`<div class="grid">${l.map(({a,e})=>`<div class="cc ${e.cc}" data-a="${esc(a.id)}"><div class="cc-nro">${esc(a.cuerpo)}${a.tipo?" · "+esc(a.tipo):""}</div><div class="cc-title">${esc(longDate(a.fecha))}</div><div class="td-sub">${esc(cuerpo(a.cuerpo).nombre)}</div><div class="cc-meta"><span class="badge ${e.b}">${esc(e.label)}</span><span>${resDeActa(a.id).length} resoluciones</span></div></div>`).join("")}</div>`
+      :`<div class="tablewrap"><table class="list"><thead><tr><th>Sesión</th><th>Cuerpo colegiado</th><th>Resoluciones</th><th>Acta</th><th class="td-sig"></th></tr></thead><tbody>${l.map(({a,e})=>`<tr data-a="${esc(a.id)}"><td class="td-nro">${esc(fdate(a.fecha))}<div class="td-sub">${esc(a.tipo||"")}${a.numero?" · n.º "+esc(a.numero):""}</div></td><td class="td-obj">${esc(cuerpo(a.cuerpo).nombre)}</td><td>${resDeActa(a.id).length}</td><td><span class="badge ${e.b}">${esc(e.label)}</span>${e.key==="prov"?`<div class="td-sub">hace ${e.dias} días</div>`:""}</td><td class="td-sig"><button class="btn sm line">Abrir</button></td></tr>`).join("")}</tbody></table></div>`;
+    $("#filas").querySelectorAll("[data-a]").forEach(r=>r.onclick=()=>go("acta",r.dataset.a));
+  };
+  pintaFilas();bindLista(vActas,"af","aq");
+}
+function filaResHTML(r,ref){const e=estadoRes(r,ref);return `<button class="rowitem" data-r="${esc(r.id)}"><span class="pn">${esc(r.punto)}</span><span style="min-width:0;flex:1"><span class="rt">${esc(r.texto)}</span><span class="rs"><span class="badge ${e.b}">${esc(e.label)}</span>${r.materia?`<span class="catchip">${esc(r.materia)}</span>`:""}</span></span></button>`;}
+function vActa(){
+  const a=DB.actas[ST.id];if(!a){go("actas");return;}
+  const e=estadoActa(a),rs=resDeActa(a.id);
+  const efectos=rs.flatMap(r=>cambiosPor(r.id).map(c=>({r,c}))).concat(rs.flatMap(r=>normasDeRes(r.id).map(n=>({r,n}))));
+  $("#view").innerHTML=`<div class="up">${volverHTML("actas")}
+    <div class="detail"><div>
+      <div class="panel">
+        <div class="dhead">
+          <div style="min-width:0"><div class="cc-nro" style="margin-bottom:3px">${esc(a.cuerpo)}${a.tipo?" · sesión "+esc(a.tipo.toLowerCase()):""}${a.numero?" · n.º "+esc(a.numero):""}</div>
+            <div class="h-title">${esc(longDate(a.fecha))}</div><div class="h-sub">${esc(cuerpo(a.cuerpo).nombre)}</div></div>
+          <span class="badge ${e.b}">${esc(e.label)}</span>
+        </div>
+        ${a.stub?`<div class="note" style="margin-top:12px">Esta sesión no está en la hoja <b>Actas</b> del Excel: aparece porque tiene resoluciones registradas. Al añadir su renglón se completan el tipo de sesión y los enlaces.</div>`:""}
+        ${linkbarHTML("Acta definitiva",a.definitiva,a.aprobacion?`Aprobada el ${longDate(a.aprobacion)}`:"Documento firmado",a.aprobacion?`Aprobada el ${longDate(a.aprobacion)}, sin enlace en la matriz`:"Todavía no hay acta definitiva")}
+        ${a.provisional||!a.definitiva?linkbarHTML("Acta provisional",a.provisional,"Versión previa a la aprobación","Sin enlace en la matriz"):""}
+        ${a.obs?`<div class="note" style="margin-top:12px">${esc(a.obs)}</div>`:""}
+      </div>
+      <div class="panel"><p class="ptitle">Lo que se resolvió</p><p class="psub">${rs.length} punto${rs.length===1?"":"s"} con resolución · su estado es el de hoy</p>
+        ${rs.length?`<div class="rowlist">${rs.map(r=>filaResHTML(r,todayISO())).join("")}</div>`:`<div class="empty">No hay resoluciones de esta sesión en la matriz.</div>`}</div>
+    </div><div>
+      <div class="panel"><p class="ptitle">Efectos de esta sesión</p><p class="psub">Normas que aprobó y cambios que hizo</p>
+        ${efectos.length?`<ul class="tl">${efectos.map((x,k)=>x.n?`<li class="ok"><div class="t"><button class="lk" data-ef="${k}">✅ Aprobó: ${esc(x.n.nombre)}</button></div><div class="s">punto ${esc(x.r.punto)}</div></li>`:`<li class="${TERMINAN.includes(x.c.tipo)?"fin":""}"><div class="t"><button class="lk" data-ef="${k}">${ICONO[x.c.tipo]||"•"} ${esc(x.c.tipo)}: ${esc(x.c.a.t==="norma"?(DB.normas[x.c.a.id]||x.c.a).nombre:"resolución "+resCorta(DB.res[x.c.a.id]||x.c.a))}</button></div><div class="s">punto ${esc(x.r.punto)}${x.c.articulos?" · "+esc(x.c.articulos):""}${x.c.rige?" · rige desde el "+esc(longDate(x.c.rige)):""}</div></li>`).join("")}</ul>`:`<div class="empty" style="padding:22px 10px">Ninguno registrado.</div>`}
+      </div>
+      ${notasPanelHTML()}
+    </div></div></div>`;
+  bindVolver("actas");bindNotas("acta",a.id,a._g,vActa);
+  $("#view").querySelectorAll("[data-r]").forEach(b=>b.onclick=()=>go("resolucion",b.dataset.r));
+  $("#view").querySelectorAll("[data-ef]").forEach(b=>b.onclick=()=>{const x=efectos[+b.dataset.ef];if(x.n)go("norma",x.n.id);else if(x.c.a.t==="norma"?DB.normas[x.c.a.id]:DB.res[x.c.a.id])go(x.c.a.t==="norma"?"norma":"resolucion",x.c.a.id);else toast("Eso es de otro grupo de acceso.");});
+}
+
+/* ================= RESOLUCIONES ================= */
+function resFiltradas(){
+  const f=ST.rf,ref=hoyRef();
+  return RESOL().filter(r=>r.fecha<=ref).map(r=>({r,e:estadoRes(r,ref)}))
+    .filter(({r,e})=>(f.cuerpo==="all"||r.cuerpo===f.cuerpo)&&(f.materia==="all"||r.materia===f.materia)&&(f.anio==="all"||anio(r.fecha)===f.anio)&&(f.estado==="all"||(f.estado==="vig"?vigenteGrupo(e):e.key===f.estado))&&(!f.q||coincide(pajaRes(r),f.q)))
+    .sort((x,y)=>y.r.fecha.localeCompare(x.r.fecha)||String(x.r.punto).localeCompare(String(y.r.punto),undefined,{numeric:true}));
+}
+function vResoluciones(){
+  const f=ST.rf;
+  const cs=Object.values(DB.cuerpos).map(c=>[c.sigla,c.nombre]);
+  const ms=[...new Set(RESOL().map(r=>r.materia).filter(Boolean))].sort().map(m=>[m,m]);
+  const ys=[...new Set(RESOL().map(r=>anio(r.fecha)))].sort().reverse().map(y=>[y,y]);
+  $("#view").innerHTML=`<div class="up">
+    ${aFechaBarra()}
+    <div class="toolbar">${toolbarBusqueda("rq","Buscar en lo resuelto, materia, cuerpo, fecha…",f.q)}
+      <select data-f="cuerpo" aria-label="Cuerpo colegiado">${opciones(cs,f.cuerpo,"Todos los cuerpos")}</select>
+      <select data-f="materia" aria-label="Materia">${opciones(ms,f.materia,"Todas las materias")}</select>
+      <select data-f="anio" aria-label="Año">${opciones(ys,f.anio,"Todos los años")}</select>
+      ${aFechaInput()}${viewTog()}</div>
+    ${chipsEstado(f.estado,[["all","Todas"],["vig","Vigentes"],["reformada","Reformadas"],["baja","Sin efecto o derogadas"]])}
+    <p class="countlbl" id="cnt"></p><div id="filas"></div></div>`;
+  pintaFilas=()=>{
+    const l=resFiltradas(),hay=RESOL().length;
+    $("#cnt").textContent=`${l.length} de ${hay} resolucion${hay===1?"":"es"}`;
+    if(!l.length){$("#filas").innerHTML=vacioHTML(hay);return;}
+    $("#filas").innerHTML=ST.viewMode==="cards"
+      ?`<div class="grid">${l.map(({r,e})=>`<div class="cc ${e.cc}" data-r="${esc(r.id)}"><div class="cc-nro">${esc(resCorta(r))}</div><div class="cc-title">${esc(trunc(r.texto,140))}</div><div class="cc-meta"><span class="badge ${e.b}">${esc(e.label)}</span>${r.materia?`<span class="catchip">${esc(r.materia)}</span>`:""}</div></div>`).join("")}</div>`
+      :`<div class="tablewrap"><table class="list"><thead><tr><th>Sesión · punto</th><th>Lo que se resolvió</th><th>Estado</th><th class="td-sig"></th></tr></thead><tbody>${l.map(({r,e})=>`<tr data-r="${esc(r.id)}"><td class="td-nro">${esc(fdate(r.fecha))}<div class="td-sub">${esc(r.cuerpo)} · punto ${esc(r.punto)}</div></td><td class="td-obj">${esc(trunc(r.texto,180))}${r.materia?`<div class="oc"><span class="catchip">${esc(r.materia)}</span></div>`:""}</td><td><span class="badge ${e.b}">${esc(e.label)}</span></td><td class="td-sig"><button class="btn sm line">Abrir</button></td></tr>`).join("")}</tbody></table></div>`;
+    $("#filas").querySelectorAll("[data-r]").forEach(r=>r.onclick=()=>go("resolucion",r.dataset.r));
+  };
+  pintaFilas();bindLista(vResoluciones,"rf","rq");
+}
+function vResolucion(){
+  const r=DB.res[ST.id];if(!r){go("resoluciones");return;}
+  const e=estadoRes(r,todayISO()),a=DB.actas[r.acta];
+  const ev=[{d:r.fecha,cls:"ok",t:"✅ Adoptada",s:`${cuerpo(r.cuerpo).nombre} · sesión del ${longDate(r.fecha)} · punto ${r.punto}`,go:a?["acta",a.id]:null}].concat(cambiosA(r.id).map(c=>eventoCambio(c)));
+  const hizo=cambiosPor(r.id),aprobo=normasDeRes(r.id);
+  const efectos=aprobo.map(n=>({n})).concat(hizo.map(c=>({c})));
+  $("#view").innerHTML=`<div class="up">${volverHTML("resoluciones")}
+    <div class="detail"><div>
+      <div class="panel">
+        <div class="dhead">
+          <div style="min-width:0"><div class="cc-nro" style="margin-bottom:3px">Punto ${esc(r.punto)} · ${esc(cuerpo(r.cuerpo).nombre)} · ${esc(longDate(r.fecha))}</div>
+            <div class="h-title" style="font-size:17px;font-weight:600">${esc(r.texto)}</div></div>
+          <span class="badge ${e.b}">${esc(e.label)}</span>
+        </div>
+        ${e.key==="baja"?`<div class="note" style="margin-top:12px;background:var(--redbg);border-color:#F3C0C0;color:#A32020">⛔ ${esc(e.cambio.tipo)} el ${esc(longDate(e.cambio.fecha))}${e.cambio.por?` por ${esc(cuerpo(e.cambio.por.cuerpo).nombre)}, sesión del ${esc(longDate(e.cambio.por.fecha))}, punto ${esc(e.cambio.por.punto)}`:""}.</div>`:""}
+        ${e.key==="reformada"?`<div class="note" style="margin-top:12px">✏️ Se lee junto con su reforma: ${e.reformas.map(c=>esc(c.por?`${cuerpo(c.por.cuerpo).nombre}, sesión del ${longDate(c.por.fecha)}, punto ${c.por.punto}`:longDate(c.fecha))).join("; ")}.</div>`:""}
+        <div class="linkbar"><span style="color:var(--navy)">${I.acta}</span><div style="flex:1;min-width:0"><div class="lt">Acta de la sesión</div><div class="ls">${a?esc(estadoActa(a).label)+(a.stub?" · falta registrarla en la hoja Actas":""):"—"}</div></div>${a?`<button class="btn sm" id="a-acta">Ver acta</button>`:""}</div>
+        ${r.enlace?linkbarHTML("Documento de la resolución",r.enlace,"Certificación o extracto",""):""}
+        <div class="dl">
+          <div><div class="k">Cuerpo colegiado</div><div class="v">${esc(cuerpo(r.cuerpo).nombre)}</div></div>
+          <div><div class="k">Sesión</div><div class="v">${fdate(r.fecha)}${a&&a.tipo?" · "+esc(a.tipo.toLowerCase()):""}</div></div>
+          <div><div class="k">Punto</div><div class="v">${esc(r.punto)}</div></div>
+          <div><div class="k">Materia</div><div class="v">${esc(r.materia||"—")}</div></div>
+          ${r.obs?`<div class="full"><div class="k">Observaciones</div><div class="v" style="font-weight:400">${esc(r.obs)}</div></div>`:""}
+        </div>
+      </div>
+      <div class="panel"><p class="ptitle">Línea de tiempo</p><p class="psub">Desde que se adoptó, y lo que otras sesiones resolvieron sobre ella</p>${timelineHTML(ev)}</div>
+    </div><div>
+      <div class="panel"><p class="ptitle">Efectos de esta resolución</p><p class="psub">Lo que aprobó o cambió</p>
+        ${efectos.length?`<ul class="tl">${efectos.map((x,k)=>x.n?`<li class="ok"><div class="t"><button class="lk" data-ef="${k}">✅ Aprobó: ${esc(x.n.nombre)}</button></div><div class="s">${esc(x.n.tipo||"Norma")}</div></li>`
+          :`<li class="${TERMINAN.includes(x.c.tipo)?"fin":""}${x.c.fecha>todayISO()?" fut":""}"><div class="t"><button class="lk" data-ef="${k}">${ICONO[x.c.tipo]||"•"} ${esc(x.c.tipo)}: ${esc(x.c.a.t==="norma"?(DB.normas[x.c.a.id]||x.c.a).nombre:"resolución "+resCorta(DB.res[x.c.a.id]||x.c.a))}</button></div><div class="s">${x.c.articulos?esc(x.c.articulos)+" · ":""}${x.c.fecha>todayISO()?"rige desde el "+esc(longDate(x.c.fecha)):"desde el "+esc(longDate(x.c.fecha))}</div></li>`).join("")}</ul>`
+          :`<div class="empty" style="padding:22px 10px">No aprobó ni cambió normas u otras resoluciones.</div>`}
+      </div>
+      ${notasPanelHTML()}
+    </div></div></div>`;
+  bindVolver("resoluciones");bindTimeline(ev);bindNotas("res",r.id,r._g,vResolucion);
+  if($("#a-acta"))$("#a-acta").onclick=()=>go("acta",a.id);
+  $("#view").querySelectorAll("[data-ef]").forEach(b=>b.onclick=()=>{const x=efectos[+b.dataset.ef];if(x.n)go("norma",x.n.id);else if(x.c.a.t==="norma"?DB.normas[x.c.a.id]:DB.res[x.c.a.id])go(x.c.a.t==="norma"?"norma":"resolucion",x.c.a.id);else toast("Eso es de otro grupo de acceso.");});
+}
+
+/* ================= NOTAS ================= */
+function notasPanelHTML(){return `<div class="panel" id="notaspanel"></div>`;}
+function bindNotas(t,id,grupo,re){
+  const box=$("#notaspanel");if(!box)return;
+  const lista=notasDe(t,id);
+  box.innerHTML=`<p class="ptitle">Notas</p><p class="psub">${DEMO?"En la demostración las notas no se guardan.":"Solo en este navegador, cifradas con la frase. No se comparten."}</p>
+    <textarea class="notatx" id="ntx" placeholder="Ej.: confirmar con la Secretaría si el anexo 2 se aprobó en la misma sesión…"></textarea>
+    <div style="display:flex;justify-content:flex-end;margin-top:8px"><button class="btn sm" id="nok">Guardar nota</button></div>
+    ${lista.map(n=>`<div class="nota"><div class="nt">${esc(n.txt)}<div class="nm">${esc(new Date(n.ts).toLocaleString("es-EC",{day:"numeric",month:"short",year:"numeric",hour:"2-digit",minute:"2-digit"}))}</div></div><button class="iconbtn" data-del="${esc(n.id)}" title="Borrar nota">✕</button></div>`).join("")}`;
+  $("#nok").onclick=async()=>{const txt=$("#ntx").value.trim();if(!txt)return;
+    const g=grupo||ABIERTOS[0];(NOTAS[g]=NOTAS[g]||[]).push({id:Date.now().toString(36)+Math.random().toString(36).slice(2,6),ref:{t,id},txt,ts:new Date().toISOString()});
+    if(await guardarNotas(g))toast(DEMO?"Nota añadida (no se guarda en la demostración)":"Nota guardada, cifrada");re();};
+  box.querySelectorAll("[data-del]").forEach(b=>b.onclick=async()=>{if(!confirm("¿Borrar esta nota?"))return;
+    for(const g of Object.keys(NOTAS)){const k=NOTAS[g].findIndex(n=>n.id===b.dataset.del);if(k>=0){NOTAS[g].splice(k,1);await guardarNotas(g);}}re();});
+}
+function vNotas(){
+  const l=todasNotas();
+  const titulo=n=>n.ref.t==="norma"?(DB.normas[n.ref.id]?"📘 "+DB.normas[n.ref.id].nombre:null):n.ref.t==="acta"?(DB.actas[n.ref.id]?"🗂️ "+actaRef(DB.actas[n.ref.id]):null):(DB.res[n.ref.id]?"📄 "+resRef(DB.res[n.ref.id]):null);
+  $("#view").innerHTML=`<div class="up"><div class="panel"><p class="ptitle">Mis notas</p><p class="psub">Lo que anotaste en este navegador, de lo más nuevo a lo más viejo. Se guardan cifradas con la frase de cada grupo y no se comparten con nadie.</p>
+    ${l.length?`<ul class="tl">${l.map((n,k)=>{const t=titulo(n);return `<li><div class="t">${t?`<button class="lk" data-nt="${k}">${esc(t)}</button>`:"(ya no está en la matriz)"}</div><div class="s" style="white-space:pre-wrap;color:var(--ink);font-size:12.5px;margin:3px 0">${esc(n.txt)}</div><div class="s">${esc(new Date(n.ts).toLocaleString("es-EC",{day:"numeric",month:"short",year:"numeric",hour:"2-digit",minute:"2-digit"}))}</div></li>`;}).join("")}</ul>`
+      :`<div class="empty">Aún no hay notas.<br>Se añaden desde cualquier norma, acta o resolución.</div>`}</div></div>`;
+  $("#view").querySelectorAll("[data-nt]").forEach(b=>b.onclick=()=>{const n=l[+b.dataset.nt];go(n.ref.t==="res"?"resolucion":n.ref.t,n.ref.id);});
+}
+
+/* ================= REVISIÓN DE LA MATRIZ =================
+   Lo que el robot encontró al leer el Excel (con hoja y renglón), y lo que se
+   ve desde aquí: actas sin definitiva, normas sin texto, reformas sin el
+   texto que trajeron. Es la lista de trabajo de quien mantiene el Excel. */
+function revisionLista(){
+  const out=DB.avisos.map(a=>({hoja:a.hoja,fila:a.fila,texto:a.texto,origen:"robot"}));
+  NORMAS().forEach(n=>{if(!seguro(n.enlace))out.push({hoja:"Normativa",texto:`«${n.nombre}» no tiene enlace al texto original.`,go:["norma",n.id]});});
+  CAMBIOS().forEach(c=>{if(c.a.t==="norma"&&NUEVA_VERSION.includes(c.tipo)&&!seguro(c.enlace)&&DB.normas[c.a.id])out.push({hoja:"Cambios",texto:`${c.tipo} de «${DB.normas[c.a.id].nombre}» (${fdate(c.fecha)}) sin enlace al texto vigente después del cambio.`,go:["norma",c.a.id]});});
+  ACTAS().forEach(a=>{const e=estadoActa(a);if(e.key==="prov"&&e.dias>PROVISIONAL_DIAS)out.push({hoja:"Actas",texto:`${actaRef(a)}: provisional hace ${e.dias} días, sin acta definitiva ni fecha de aprobación.`,go:["acta",a.id]});});
+  return out;
+}
+function vRevision(){
+  const l=revisionLista();
+  $("#view").innerHTML=`<div class="up"><div class="panel"><p class="ptitle">Revisión de la matriz</p><p class="psub">Lo que conviene completar o corregir en el Excel. Lo marcado con 🤖 lo encontró el robot al leerlo, con la hoja y el renglón; el resto se ve desde aquí. Al corregir el Excel, desaparece en la siguiente publicación.</p>
+    ${l.length?l.map((x,k)=>`<div class="alert-row"><div class="aic" style="background:var(--bg)">${x.origen==="robot"?"🤖":"🧾"}</div><div style="min-width:0"><div class="at">${esc(x.hoja)}${x.fila?", renglón "+esc(x.fila):""}</div><div class="ad">${esc(x.texto)}</div></div>${x.go?`<button class="btn sm line go" data-rv="${k}">Ver</button>`:""}</div>`).join("")
+      :`<div class="empty">Todo en orden: la matriz no tiene nada pendiente ✅</div>`}</div></div>`;
+  $("#view").querySelectorAll("[data-rv]").forEach(b=>b.onclick=()=>go(...l[+b.dataset.rv].go));
+}
+
+/* ================= MODALES ================= */
+function openModal(html){
+  const o=document.createElement("div");o.className="overlay";o.innerHTML=`<div class="modal" role="dialog" aria-modal="true">${html}</div>`;
+  document.body.appendChild(o);
+  o.addEventListener("click",e=>{if(e.target===o)o.remove();});
+  o.addEventListener("keydown",e=>{if(e.key==="Escape")o.remove();});
+  const f=o.querySelector("input");if(f)setTimeout(()=>{try{f.focus();}catch(e){}},30);
+  return o;
+}
+function modalOtraFrase(){
+  const o=openModal(`<h2>Abrir otro grupo</h2><p class="sub">Si te dieron otra frase (por ejemplo, la del Directorio), escríbela aquí. Se suma a lo que ya tienes abierto.</p>
+    <form id="ff"><input class="big" type="password" id="ff2" autocomplete="off" placeholder="Frase de acceso"><div id="fferr"></div>
+    <div class="modal-foot"><button type="button" class="btn line" id="ffc">Cancelar</button><button class="btn" id="ffok">Abrir</button></div></form>`);
+  $("#ffc",o).onclick=()=>o.remove();
+  $("#ff",o).onsubmit=e=>{e.preventDefault();const fr=$("#ff2",o).value.trim();if(!fr)return;
+    mientras($("#ffok",o),"Abriendo…",async()=>{const ab=await probarFrase(fr);
+      if(!ab.length){$("#fferr",o).innerHTML=`<div class="errbox" style="margin-top:10px">Esa frase no abre ningún grupo que falte.</div>`;return false;}
+      o.remove();toast("Abierto: "+ab.join(", "));render();return true;});};
+}
+/* Frases de seis palabras al azar: fáciles de dictar, imposibles de adivinar
+   probando (son ~52 bits, y cada intento cuesta 600.000 vueltas de PBKDF2).
+   Sin tildes ni eñes, para que no haya dudas al escribirlas. */
+const PALABRAS=("abeja alce almeja alpaca anguila ardilla avestruz ballena bisonte burro caballo cabra camello canguro caracol castor cebra cerdo ciervo cisne cobra conejo coyote cuervo elefante foca gacela gallina ganso garza gato gorila grillo gusano hiena hormiga iguana jaguar jirafa koala lagarto langosta leopardo liebre lobo loro llama mapache medusa mirlo mono mosca nutria oca orca oso oveja pantera pato pavo perro puma pulpo rana sapo tigre topo toro tortuga trucha vaca venado zorro "+
+"arena arroyo bosque brisa cascada cerro cielo colina costa cumbre desierto duna escarcha estrella galaxia glaciar granizo hielo isla lago laguna lluvia luna marea meseta monte nieve niebla nube ola orilla pantano playa pradera rayo roca selva sierra sol tierra trueno valle viento bruma aurora cometa planeta polvo musgo hoja rama semilla tronco flor rosa lirio cactus helecho trigo avena cebada arroz frijol lenteja pepino tomate papa yuca mango banana cereza ciruela durazno fresa guayaba higo kiwi lima manzana mora naranja pera uva coco nuez almendra cacao canela vainilla menta albahaca perejil romero tomillo laurel ajo cebolla "+
+"anillo arco barco barril bote botella brocha cadena caja campana candado canasta carpeta carta casco cesta cinta clavo cofre collar copa corona cuaderno cuchara cuerda dado espejo farol flauta globo guitarra hacha jarra libro linterna llave maleta mapa martillo mesa mochila moneda pala paraguas peine pelota piano pincel pluma puerta reloj remo silla sombrero taza tambor tetera tijera trompeta vaso vela ventana yunque zapato bufanda abrigo camisa chaqueta falda gorra guante pijama sandalia bota cartera ladrillo tejado columna escalera patio pasillo muro torre castillo puente faro molino granero iglesia museo teatro mercado plaza parque calle avenida camino sendero "+
+"amarillo azul blanco celeste dorado gris morado negro plateado rojo rosado verde violeta alegre amable audaz brillante calmo claro curioso dulce enorme fiel firme fresco fuerte gentil grande honesto humilde ligero listo lento noble nuevo oscuro paciente puro sabio sereno sincero suave tenaz tranquilo valiente veloz vivo "+
+"alfarero arquero artista astronauta bombero carpintero cartero cocinero doctor granjero herrero jardinero juez marinero minero panadero pastor pescador piloto pintor poeta profesor sastre soldado vaquero viajero "+
+"arepa bizcocho caramelo empanada galleta helado jalea mermelada miel pan pastel queso sopa tamal torta yogur fideo acorde balada bolero coro cumbia ritmo tango vals salsa "+
+"alba atardecer aventura calma deseo destino eco enigma fortuna fuego gloria historia idea leyenda luz magia memoria mito nostalgia orgullo paz poema promesa refugio secreto silencio sombra talento tesoro triunfo verdad viaje victoria vuelo "+
+"ajedrez bicicleta canoa carrera esgrima golf karate patineta polo rugby tenis surf yoga boxeo brazo cabeza codo dedo espalda frente hombro mano mejilla nariz oreja pierna rodilla tobillo "+
+"enero febrero marzo abril mayo junio julio agosto octubre noviembre diciembre lunes martes jueves viernes domingo verano invierno primavera carreta cohete moto tren velero yate barca submarino trineo "+
+"acero bronce cobre cristal diamante esmeralda granito hierro jade oro perla plata seda zafiro madera lana cuero arcilla").split(" ");
+const LISTA_PALABRAS=[...new Set(PALABRAS.filter(Boolean))];
+function fraseNueva(n){
+  n=n||6;const out=[],r=new Uint32Array(n*4);crypto.getRandomValues(r);
+  const N=LISTA_PALABRAS.length,lim=Math.floor(4294967296/N)*N;let k=0;
+  while(out.length<n){if(k>=r.length){crypto.getRandomValues(r);k=0;}const x=r[k++];if(x<lim)out.push(LISTA_PALABRAS[x%N]);}
+  return out.join("-");
+}
+function modalGenerarFrase(){
+  const o=openModal(`<h2>Una frase nueva</h2><p class="sub">Para cada grupo de acceso (por ejemplo «legal»). Seis palabras al azar, generadas en este navegador: nadie más la ve.</p>
+    <div class="frase" id="fr"></div>
+    <div class="steps note" style="margin-top:12px;font-size:12.5px;line-height:1.6"><b>Qué hacer con ella</b><br>1. En GitHub: Settings → Secrets and variables → Actions → secreto <b>CLAVES</b>, una línea por grupo: <code>legal = la-frase</code>.<br>2. Publica (Actions → «Publicar Quórum» → Run workflow).<br>3. Entrégala <b>de palabra o en persona</b>. Por correo o WhatsApp queda escrita para siempre en otro lado.<br>Para quitarle el acceso a alguien: frase nueva y publicar. La anterior deja de abrir lo que se publique desde ese momento.</div>
+    <div class="modal-foot"><button class="btn line" id="frotra">Otra</button><button class="btn line" id="frcop">Copiar</button><button class="btn" id="frok">Listo</button></div>`);
+  const pon=()=>{$("#fr",o).textContent=fraseNueva();};pon();
+  $("#frotra",o).onclick=pon;$("#frok",o).onclick=()=>o.remove();
+  $("#frcop",o).onclick=async()=>{try{await navigator.clipboard.writeText($("#fr",o).textContent);toast("Copiada. Pégala en el secreto y luego borra el portapapeles copiando otra cosa.",5000);}catch(e){toast("No se pudo copiar: selecciónala y cópiala a mano.");}};
+}
+
+/* ================= ENTRADA ================= */
+function renderLogin(){
+  const e=INDICE&&edadBase(INDICE.generado),nG=INDICE&&INDICE.grupos?INDICE.grupos.length:0;
+  const sinDatos=!INDICE||!nG;
+  $("#app").innerHTML=`<div class="login-shell"><div class="login-card up">
+    <div class="login-top">${logoHTML()}<span class="eyebrow">${esc(MARCA.nombre)} · ${esc(MARCA.sigla)}</span></div>
+    <h1>Actas, resoluciones y normativa, con su vigencia al día</h1>
+    <p class="lead">Las sesiones del Directorio del FIAS, la Junta Administrativa del FAP y el Directorio del FEIG; lo que resolvieron, y qué norma rige hoy —o regía cualquier día— después de cada reforma.</p>
+    ${MSG_LOGIN?`<div class="errbox" style="background:var(--tint);color:var(--navy)">${esc(MSG_LOGIN)}</div>`:""}
+    <div id="lerr"></div>
+    ${sinDatos?`<div class="note" style="margin-bottom:14px">${FALLA_CARGA?esc(FALLA_CARGA):INDICE&&INDICE.pendiente?"Todavía no hay datos publicados: falta configurar el robot (ver el README del repositorio). Mientras tanto, puedes recorrer la demostración.":"No se pudieron cargar los datos. Revisa la conexión y vuelve a abrir la página."}</div>`
+      :`<form id="lf"><label for="lp" style="display:block;font-size:12px;font-weight:700;margin-bottom:5px">Frase de acceso</label>
+        <input class="big" type="password" id="lp" autocomplete="off" autocapitalize="none" spellcheck="false" placeholder="palabra-palabra-palabra…">
+        <button class="btn block" id="lok" style="margin-top:12px">Entrar</button></form>`}
+    <div class="note" style="margin-top:14px">🔒 Se descifra en este navegador; nada se guarda en él. Se cierra sola tras ${BLOQUEO_MIN} minutos sin uso.${e?` Última publicación: ${esc(e.txt)}${e.vieja?" — <b style='color:var(--amber)'>revisa el robot</b>":""}`:""}</div>
+    <div class="login-links"><button class="linkbtn" id="ldemo">Ver con datos de ejemplo</button><button class="linkbtn" id="lgen" style="color:var(--muted)">Generar una frase nueva</button></div>
+  </div></div>`;
+  $("#lgen").onclick=modalGenerarFrase;
+  $("#ldemo").onclick=()=>mientras($("#ldemo"),"Cargando…",async()=>{try{await entrarDemo();}catch(err){toast("No se pudo cargar la demostración.");return false;}MSG_LOGIN="";aplicarHash();render();return true;});
+  const f=$("#lf");if(!f)return;
+  const inp=$("#lp");try{inp.focus();}catch(e2){}
+  f.onsubmit=ev=>{ev.preventDefault();const fr=inp.value.trim();if(!fr)return;
+    mientras($("#lok"),"Abriendo…",async()=>{
+      const ab=await probarFrase(fr);
+      if(!ab.length){$("#lerr").innerHTML=`<div class="errbox">Esa frase no abre nada. Revísala (van las palabras con guiones, en minúsculas) o pide la tuya a quien administra ${esc(MARCA.nombre)}.</div>`;inp.select();return false;}
+      MSG_LOGIN="";aplicarHash();render();return true;});};
+}
+
+/* ================= TOOLTIP ================= */
+const tipEl=document.getElementById("tip");
+document.addEventListener("mousemove",e=>{
+  const t=e.target.closest&&e.target.closest("[data-tip]");
+  if(t){tipEl.innerHTML=t.getAttribute("data-tip");tipEl.style.display="block";
+    tipEl.style.left=Math.min(e.clientX+14,window.innerWidth-tipEl.offsetWidth-10)+"px";
+    tipEl.style.top=Math.min(e.clientY+14,window.innerHeight-tipEl.offsetHeight-10)+"px";}
+  else tipEl.style.display="none";
+});
+
+/* ================= ARRANQUE =================
+   Se baja el índice y los sobres cifrados; nada se descifra hasta que alguien
+   escribe la frase. Con señal mala el fetch puede colgarse: a los 20 s se
+   abandona y se dice. */
+async function bajar(url){
+  const ctl=window.AbortController?new AbortController():null;
+  const reloj=setTimeout(()=>{if(ctl)ctl.abort();},20000);
+  try{const r=await fetch(url,{cache:"no-store",signal:ctl?ctl.signal:undefined});if(!r.ok)throw new Error("HTTP "+r.status);return await r.json();}
+  finally{clearTimeout(reloj);}
+}
+async function boot(){
+  try{
+    INDICE=await bajar(DATOS_URL+"indice.json");
+    await Promise.all((INDICE.grupos||[]).map(async g=>{SOBRES[g.id]=await bajar(DATOS_URL+g.archivo);}));
+  }catch(e){
+    FALLA_CARGA="No se pudieron bajar los datos publicados ("+(e&&e.name==="AbortError"?"la conexión tardó demasiado":"sin conexión o aún no publicados")+"). Puedes recorrer la demostración mientras tanto.";
+    if(INDICE)INDICE.grupos=(INDICE.grupos||[]).filter(g=>SOBRES[g.id]);
+  }
+  render();
+}
+boot();
+</script>
+</body>
+</html>
