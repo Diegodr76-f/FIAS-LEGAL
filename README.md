@@ -10,7 +10,7 @@ una página que lo descifra en el navegador.
 
 ```
 Excel en OneDrive (protegido con contraseña)
-   hojas: Cuerpos · Programas · Actas · Resoluciones · Normativa · Cambios
+   hojas: Fondos · Cuerpos · Actas · Resoluciones · Normativa · Cambios
         │  robot diario y botón «Run workflow» (GitHub Actions)
         ▼
 un archivo cifrado por grupo de acceso  →  GitHub Pages, sin pasar por git
@@ -28,10 +28,10 @@ Se parte de [`plantilla/Quorum_matriz.xlsx`](plantilla/Quorum_matriz.xlsx). Su p
 hoja, **Instrucciones**, explica cada columna; cada encabezado tiene además una nota.
 Lo esencial:
 
-- **Programas y proyectos** van en su hoja, y de ahí se llena la columna «Programa o proyecto» de
-  Actas y Resoluciones (varios, separados con punto y coma; vacío = asunto general). Una resolución
-  es del programa de su acta salvo que diga otro. Al consultar un programa o proyecto aparecen sus
-  actas y resoluciones juntas.
+- **Cada fondo tiene sus cuerpos, y cada cuerpo sus actas.** La hoja Fondos trae el FIAS, el FAP
+  y el FEIG (se añaden otros fondos, programas o proyectos que administre el FIAS), y en Cuerpos
+  cada cuerpo dice de qué fondo es: la Junta Administrativa del FAP es del FAP. Las actas de todos
+  van en la misma hoja, y en Quórum se elige arriba qué fondo ver, o todos.
 - **Un acta** es un cuerpo y una fecha de sesión. Es **provisional** hasta que tiene enlace
   al acta definitiva o fecha de aprobación.
 - **Una resolución** es un cuerpo, una fecha y un punto: «en la Junta Administrativa del

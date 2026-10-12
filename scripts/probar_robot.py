@@ -61,6 +61,10 @@ def libro_dos_grupos():
     return wb
 
 
+def libro_dos_grupos_matriz():
+    return publicar.Matriz().leer(libro_dos_grupos())
+
+
 def descifrar(env, frase):
     from cryptography.hazmat.primitives import hashes
     from cryptography.hazmat.primitives.ciphers.aead import AESGCM
@@ -106,6 +110,8 @@ def main():
             encs = [c.value for c in wb[hoja][1]]
             ok(encs[:len(cols)] == [c[1] for c in cols], f"hoja {hoja}: encabezados en orden", encs)
         ok([c.value for c in wb["Cuerpos"]["A"][1:4]] == ["DIR-FIAS", "JA-FAP", "DIR-FEIG"], "trae los tres cuerpos conocidos")
+        ok([c.value for c in wb["Fondos"]["A"][1:4]] == ["FIAS", "FAP", "FEIG"] and wb["Cuerpos"]["C"][2].value == "FAP",
+           "y el FIAS con sus fondos; la Junta Administrativa es del FAP")
         ok(all(wb[h].max_row <= 2 for h in ("Actas", "Resoluciones", "Normativa", "Cambios")), "y ninguna sesión, resolución ni norma")
         ok("FICTICIOS" not in (wb.properties.title or ""), "la plantilla vacía NO lleva la marca de datos ficticios")
         m = publicar.Matriz().leer(wb)
@@ -170,7 +176,7 @@ def main():
         textos = [r["texto"] for r in dire["resoluciones"]] + [n["nombre"] for n in dire["normas"] + leg["normas"]]
         ok(not any(x in log for x in textos), "el registro no trae ni un texto de resolución ni un nombre de norma")
         ok("DIR-FEIG" not in log and "2022-11-10" not in log and "10/11/2022" not in log, "ni siglas ni fechas de lo que avisa")
-        ok("fila 57" in log, "solo la hoja y el renglón del aviso", log)
+        ok("fila 58" in log, "solo la hoja y el renglón del aviso", log)
 
         seccion("5. Sin frase, nada se publica")
         sal2 = os.path.join(t, "datos2")
@@ -219,7 +225,7 @@ def main():
         ws.cell(row=1, column=1, value="Columna nueva de la Secretaría")
         ws.cell(row=1, column=col(ws, "fecha", "Resoluciones") + 1, value="FECHA DE LA SESION (dd/mm/aaaa)")
         m = publicar.Matriz().leer(wb)
-        ok(len(m.res) == 56, "una columna de más al inicio y un encabezado sin tildes y con añadido", len(m.res))
+        ok(len(m.res) == 59, "una columna de más al inicio y un encabezado sin tildes y con añadido", len(m.res))
         ws.delete_cols(col(ws, "texto", "Resoluciones") + 1)
         try:
             publicar.Matriz().leer(wb)
@@ -234,41 +240,34 @@ def main():
         demo = json.load(open(os.path.join(publicar.RAIZ, "demo", "datos-demo.json")))
         ok(demo.get("demo") is True and len(demo["normas"]) == 10, "demo/datos-demo.json es el de ejemplo y está al día")
 
-        seccion("9. Programas y proyectos")
+        seccion("9. Fondos: cada cuerpo es de un fondo, y sus actas con él")
         m = publicar.Matriz().leer(crear_plantilla.libro(demo=True))
-        PD, GAP = "programa-de-pequenas-donaciones", "programa-de-gestion-de-areas-protegidas"
-        ok(len(m.progs) == 3 and PD in m.progs, "la hoja Programas se lee", list(m.progs))
-        ok(m.actas["ja-fap_2024-06-13"]["programas"] == [PD], "un acta tiene su programa")
-        ok(m.actas["ja-fap_2026-08-08"]["programas"] == [PD, GAP], "una sesión de varios programas: separados con punto y coma")
-        ok(m.res["ja-fap_2026-08-08_p3"]["programas"] == [PD, GAP], "la resolución hereda los de su acta")
-        ok(m.res["ja-fap_2026-08-08_p4"]["programas"] == [GAP], "salvo que diga otro (solo uno de los dos)")
-        ok(m.res["dir-feig_2026-05-14_p3"]["programas"] == ["proyecto-de-monitoreo-de-especies"] and not m.actas["dir-feig_2026-05-14"]["programas"],
-           "una resolución puede tener programa aunque su acta no (asunto general)")
+        ok(list(m.fondos) == ["FIAS", "FAP", "FEIG", "PPD"], "la hoja Fondos se lee", list(m.fondos))
+        ok(m.cuerpos["JA-FAP"]["entidad"] == "FAP" and m.cuerpos["CD-PPD"]["entidad"] == "PPD", "cada cuerpo con su fondo")
+        ok(m.normas["manual-de-operaciones-del-feig"]["entidad"] == "FEIG", "la norma, con el suyo")
         wb = crear_plantilla.libro(demo=True)
-        wa = wb["Actas"]
-        fila = next(i for i in range(2, wa.max_row + 1) if wa.cell(row=i, column=2).value and wa.cell(row=i, column=1).value == "DIR-FIAS")
-        wa.cell(row=fila, column=col(wa, "programa", "Actas"), value="Proyecto que no existe; " + "Programa de Pequeñas Donaciones")
+        wn = wb["Normativa"]
+        fila = next(i for i in range(2, wn.max_row + 1) if wn.cell(row=i, column=1).value == "Manual de Operaciones del FEIG")
+        wn.cell(row=fila, column=col(wn, "entidad", "Normativa")).value = None  # value=None no borra
+        wc = wb["Cuerpos"]
+        wc.cell(row=3, column=col(wc, "entidad", "Cuerpos"), value="fap")
+        wc.cell(row=4, column=col(wc, "entidad", "Cuerpos"), value="FONDO NUEVO")
         m = publicar.Matriz().leer(wb)
-        a0 = next(x for x in m.actas.values() if x.get("fila") == fila)
-        ok(a0["programas"] == [PD] and ("Actas", fila) in {(x["hoja"], x["fila"]) for x in m.avisos},
-           "un programa que no está en la hoja se avisa y se ignora; el otro vale")
+        ok(m.normas["manual-de-operaciones-del-feig"]["entidad"] == "FONDO NUEVO", "una norma sin fondo toma el de su órgano")
+        ok(m.cuerpos["JA-FAP"]["entidad"] == "FAP", "la sigla del fondo se reconoce en minúsculas")
+        ok(("Cuerpos", 4) in {(a["hoja"], a["fila"]) for a in m.avisos} and m.cuerpos["DIR-FEIG"]["entidad"] == "FONDO NUEVO",
+           "un fondo que no está en la hoja Fondos se avisa, y se respeta")
         wb = crear_plantilla.libro(demo=True)
-        del wb["Programas"]
-        for hoja in ("Actas", "Resoluciones"):
-            wb[hoja].delete_cols(col(wb[hoja], "programa", hoja))
+        del wb["Fondos"]
         m = publicar.Matriz().leer(wb)
-        ok(len(m.res) == 56 and len(m.avisos) == 1 and not m.progs, "un Excel anterior (sin hoja ni columnas de programas) se publica igual")
-        wb = libro_dos_grupos()
-        m = publicar.Matriz().leer(wb)
-        pl, pd = m.payload("legal", "x"), m.payload("directorio", "x")
-        ok(len(pl["programas"]) == 3 and pd["programas"] == [], "cada grupo recibe solo los programas que usa")
-        ok(all(set(x.get("programas", [])) <= {p["id"] for p in pl["programas"]} for x in pl["actas"] + pl["resoluciones"]),
-           "y todo programa nombrado por algo suyo viene en su archivo")
-        ok(all("programas" not in x for x in pd["actas"]), "sin programas, el campo no viaja")
-        ruta = guardar(wb, t, "prog.xlsx")
+        ok(len(m.res) == 59 and len(m.avisos) == 1 and m.cuerpos["JA-FAP"]["entidad"] == "FAP",
+           "un Excel sin la hoja Fondos se publica igual, con la sigla escrita en Cuerpos")
+        pl, pd = libro_dos_grupos_matriz().payload("legal", "x"), libro_dos_grupos_matriz().payload("directorio", "x")
+        ok({f["sigla"] for f in pl["fondos"]} == {"FIAS", "FAP", "FEIG", "PPD"} and {f["sigla"] for f in pd["fondos"]} >= {"FIAS"},
+           "cada archivo trae los fondos con que nombrar a sus cuerpos y normas")
+        ruta = guardar(libro_dos_grupos(), t, "fondos.xlsx")
         codigo, error, log = correr(["--excel", ruta, "--salida", os.path.join(t, "d3"), "--permitir-sin-clave"], claves)
-        ok("Pequeñas Donaciones" not in log and "Monitoreo" not in log and "programas y proyectos: 3" in log,
-           "el registro cuenta los programas pero no los nombra")
+        ok("fondos: 4" in log and "Pequeñas Donaciones" not in log, "el registro cuenta los fondos pero no nombra nada")
 
     print(f"\n{pruebas - fallos} de {pruebas} comprobaciones bien" + (f" · {fallos} FALLAN" if fallos else ""))
     sys.exit(1 if fallos else 0)

@@ -118,9 +118,6 @@
   .chip{all:unset;cursor:pointer;font-size:12.5px;font-weight:600;color:var(--muted);padding:8px 13px;border:1.5px solid var(--line);border-radius:99px;background:#fff;white-space:nowrap}
   .chip.on{background:var(--ink);color:#fff;border-color:var(--ink)}
   .chips{display:flex;gap:8px;flex-wrap:wrap}
-  .catchip.pchip{background:var(--tint);color:var(--navy);margin:0 4px 4px 0}
-  button.pchip{all:unset;box-sizing:border-box;cursor:pointer;font-size:10.5px;font-weight:700;padding:3px 9px;border-radius:20px;background:var(--tint);color:var(--navy);margin:0 4px 4px 0}
-  button.pchip:hover{background:#DDE4FA}
   .catchip{display:inline-block;font-size:10.5px;font-weight:700;padding:3px 9px;border-radius:20px;white-space:nowrap;background:#ECEEF4;color:#4A5068}
   .kpis{display:grid;grid-template-columns:repeat(6,1fr);gap:12px;margin-bottom:18px}
   @media(max-width:1000px){.kpis{grid-template-columns:repeat(3,1fr)}}
@@ -138,6 +135,8 @@
   .viewtog{display:flex;border:1.5px solid var(--line);border-radius:10px;overflow:hidden}
   .viewtog button{all:unset;cursor:pointer;padding:8px 12px;font-size:12.5px;font-weight:600;color:var(--muted)}
   .viewtog button.on{background:var(--navy);color:#fff}
+  .fondobar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:0 0 14px}
+  .fondobar .fbname{font-size:12.5px;font-weight:700;color:var(--navy)}
   .countlbl{font-size:12px;color:var(--muted);font-weight:600;margin:0 0 10px}
   .afecha{display:flex;align-items:center;gap:10px;flex-wrap:wrap;background:var(--amberbg);border:1px solid #F0DCA6;color:#8A5E06;border-radius:11px;padding:9px 13px;margin:0 0 12px;font-size:12.5px;font-weight:600}
   .afecha .linkbtn{color:#8A5E06}
@@ -369,20 +368,20 @@ let ABIERTOS=[];          // grupos descifrados en esta sesión
 let DEMO=false;
 let DB=vacia();
 let FALLA_CARGA="";
-function vacia(){return {cuerpos:{},progs:{},actas:{},res:{},normas:{},cambios:{},avisos:[],generado:null};}
-let ST={view:"panel",id:null,from:null,fromY:0,aFecha:null,
+function vacia(){return {fondos:{},cuerpos:{},actas:{},res:{},normas:{},cambios:{},avisos:[],generado:null};}
+let ST={view:"panel",id:null,from:null,fromY:0,aFecha:null,fondo:"all",
   viewMode:(window.innerWidth&&window.innerWidth<700)?"cards":"table",
   nf:{q:"",estado:"all",organo:"all",tipo:"all"},
-  af:{q:"",cuerpo:"all",prog:"all",estado:"all",anio:"all"},
-  rf:{q:"",cuerpo:"all",prog:"all",estado:"all",materia:"all",anio:"all"}};
+  af:{q:"",cuerpo:"all",estado:"all",anio:"all"},
+  rf:{q:"",cuerpo:"all",estado:"all",materia:"all",anio:"all"}};
 
 /* Junta lo que abrió cada frase. Un cambio que toca dos grupos llega en los
    dos archivos: se une por su id. Cada cosa recuerda de qué grupo vino, que es
    con cuya frase se cifran sus notas. */
 function fusionar(p){
   const g=p.grupo;
+  (p.fondos||[]).forEach(f=>{DB.fondos[f.sigla]=f;});
   (p.cuerpos||[]).forEach(c=>{DB.cuerpos[c.sigla]=c;});
-  (p.programas||[]).forEach(x=>{DB.progs[x.id]=x;});
   (p.actas||[]).forEach(a=>{const ya=DB.actas[a.id];if(!ya||ya.stub)DB.actas[a.id]=Object.assign({},a,{_g:g});});
   (p.resoluciones||[]).forEach(r=>{DB.res[r.id]=Object.assign({},r,{_g:g});});
   (p.normas||[]).forEach(n=>{DB.normas[n.id]=Object.assign({},n,{_g:g});});
@@ -455,22 +454,32 @@ function actaRef(a){return `${cuerpo(a.cuerpo).nombre} · ${a.tipo?("sesión "+a
 function resDeActa(aid){return RESOL().filter(r=>r.acta===aid).sort((x,y)=>String(x.punto).localeCompare(String(y.punto),undefined,{numeric:true}));}
 function normasDeRes(rid){return NORMAS().filter(n=>n.res===rid);}
 function anio(iso){return String(iso||"").slice(0,4);}
-/* Programas y proyectos. Una resolución es del programa de su acta salvo que el
-   Excel diga otro (el robot ya lo resolvió). Un acta pertenece a cada programa
-   que ella nombra o del que trata alguna de sus resoluciones: así, al consultar
-   un proyecto aparece la sesión donde se resolvió algo suyo. */
-const PROGS=()=>Object.values(DB.progs).sort((a,b)=>a.nombre.localeCompare(b.nombre,"es"));
-function progNombre(id){return DB.progs[id]?DB.progs[id].nombre:id;}
-function progsActa(a){const s=new Set(a.programas||[]);resDeActa(a.id).forEach(r=>(r.programas||[]).forEach(p=>s.add(p)));return [...s];}
-function progChips(ids,click){return (ids||[]).filter(p=>DB.progs[p]).map(p=>click?`<button class="catchip pchip" data-pg="${esc(p)}" title="Ver las actas de este programa o proyecto">${esc(progNombre(p))}</button>`:`<span class="catchip pchip">${esc(progNombre(p))}</span>`).join(" ");}
-function progFiltro(sel){return PROGS().length?`<select data-f="prog" aria-label="Programa o proyecto">${opciones(PROGS().map(x=>[x.id,x.nombre]),sel,"Todos los programas y proyectos")}</select>`:"";}
-function bindProgChips(){$("#view").querySelectorAll("[data-pg]").forEach(b=>b.onclick=e=>{e.stopPropagation();ST.af=Object.assign({},ST.af,{prog:b.dataset.pg,cuerpo:"all",estado:"all",q:"",anio:"all"});go("actas");});}
+/* Fondos. Cada cuerpo colegiado es de un fondo —la Junta Administrativa del FAP,
+   del FAP— y sus actas y resoluciones van con él, sin escribirlo renglón por
+   renglón. Una norma es del fondo que diga el Excel o, si no dice, del de su
+   órgano. Arriba de cada listado se elige un fondo o todos (ST.fondo). */
+function fondoDeCuerpo(s){return cuerpo(s).entidad||"";}
+function fondoActa(a){return fondoDeCuerpo(a.cuerpo);}
+function fondoNorma(n){return n.entidad||fondoDeCuerpo(n.organo);}
+function fondoNombre(f){return DB.fondos[f]?DB.fondos[f].nombre:f;}
+function enFondo(f){return ST.fondo==="all"||f===ST.fondo;}
+function FONDOS(){
+  const orden=[...Object.keys(DB.fondos),...Object.values(DB.cuerpos).map(c=>c.entidad),...NORMAS().map(fondoNorma)].filter(Boolean);
+  return [...new Set(orden)].filter(f=>ACTAS().some(a=>fondoActa(a)===f)||NORMAS().some(n=>fondoNorma(n)===f)).map(f=>DB.fondos[f]||{sigla:f,nombre:f});
+}
+function fondoBar(){
+  const fs=FONDOS();if(fs.length<2)return "";
+  return `<div class="fondobar"><span class="flbl">Fondo</span><div class="chips">${[{sigla:"all",nombre:"Todos los fondos"}].concat(fs).map(f=>`<button class="chip ${ST.fondo===f.sigla?"on":""}" data-fd="${esc(f.sigla)}" title="${esc(f.nombre)}">${esc(f.sigla==="all"?"Todos":f.sigla)}</button>`).join("")}</div>${ST.fondo!=="all"?`<span class="fbname">${esc(fondoNombre(ST.fondo))}</span>`:""}</div>`;
+}
+function elegirFondo(f){ST.fondo=f;ST.af.cuerpo="all";ST.rf.cuerpo="all";ST.nf.organo="all";}
+function bindFondoBar(re){$("#view").querySelectorAll("[data-fd]").forEach(b=>b.onclick=()=>{elegirFondo(b.dataset.fd);re();});}
+function cuerposDelFondo(){return Object.values(DB.cuerpos).filter(c=>enFondo(c.entidad));}
 /* Todo lo que identifica a cada cosa, también la fecha escrita de las formas en
    que se dice: «8 de agosto de 2026», «08/08/2026», «agosto 2026». */
 function fechasPaja(iso){return iso?[iso,dmy(iso),longDate(iso),fdate(iso),MESES[+iso.slice(5,7)-1]+" "+iso.slice(0,4)].join(" "):"";}
-function pajaNorma(n){return [n.nombre,n.tipo,n.entidad,n.organo,cuerpo(n.organo).nombre,n.obs,fechasPaja(n.fecha)].filter(Boolean).join(" ");}
-function pajaRes(r){return [r.texto,r.materia,r.obs,(r.programas||[]).map(progNombre).join(" "),r.cuerpo,cuerpo(r.cuerpo).nombre,"punto "+r.punto,fechasPaja(r.fecha)].filter(Boolean).join(" ");}
-function pajaActa(a){return [a.cuerpo,cuerpo(a.cuerpo).nombre,progsActa(a).map(progNombre).join(" "),a.tipo,a.numero?"sesion "+a.numero:"",a.obs,fechasPaja(a.fecha)].filter(Boolean).join(" ");}
+function pajaNorma(n){return [n.nombre,n.tipo,fondoNorma(n),fondoNombre(fondoNorma(n)),n.organo,cuerpo(n.organo).nombre,n.obs,fechasPaja(n.fecha)].filter(Boolean).join(" ");}
+function pajaRes(r){return [r.texto,r.materia,r.obs,r.cuerpo,fondoNombre(fondoDeCuerpo(r.cuerpo)),cuerpo(r.cuerpo).nombre,"punto "+r.punto,fechasPaja(r.fecha)].filter(Boolean).join(" ");}
+function pajaActa(a){return [a.cuerpo,cuerpo(a.cuerpo).nombre,fondoActa(a),fondoNombre(fondoActa(a)),a.tipo,a.numero?"sesion "+a.numero:"",a.obs,fechasPaja(a.fecha)].filter(Boolean).join(" ");}
 
 /* ================= NOTAS (cifradas) =================
    Como la bitácora del CLM, pero las actas no admiten notas en claro en el
@@ -520,7 +529,7 @@ function tocar(){if(!ABIERTOS.length)return;clearTimeout(relojBloqueo);relojBloq
 function cerrarSesion(msg){
   clearTimeout(relojBloqueo);
   DB=vacia();ABIERTOS=[];NOTAS={};LLAVES={};DEMO=false;
-  ST.view="panel";ST.id=null;ST.aFecha=null;
+  ST.view="panel";ST.id=null;ST.aFecha=null;ST.fondo="all";
   document.querySelectorAll(".overlay").forEach(o=>o.remove());
   MSG_LOGIN=msg||"";
   if(location.hash)history.replaceState(null,"",location.pathname+location.search);
@@ -671,9 +680,10 @@ function bindGlobalSearch(){
 /* ================= PANEL ================= */
 function alertList(){
   const out=[], hoy=todayISO();
-  ACTAS().forEach(a=>{const e=estadoActa(a);if(e.key==="prov"&&e.dias>PROVISIONAL_DIAS)
+  const fondoCambio=c=>c.a.t==="norma"?(DB.normas[c.a.id]?fondoNorma(DB.normas[c.a.id]):""):fondoDeCuerpo(c.a.cuerpo);
+  ACTAS().filter(a=>enFondo(fondoActa(a))).forEach(a=>{const e=estadoActa(a);if(e.key==="prov"&&e.dias>PROVISIONAL_DIAS)
     out.push({sev:1,icon:"🗂️",bg:"var(--amberbg)",t:`Acta provisional hace ${e.dias} días`,d:`${actaRef(a)} · aún sin acta definitiva`,act:"Abrir",go:["acta",a.id]});});
-  CAMBIOS().filter(c=>c.fecha>hoy).sort((x,y)=>x.fecha.localeCompare(y.fecha)).forEach(c=>{
+  CAMBIOS().filter(c=>c.fecha>hoy&&enFondo(fondoCambio(c))).sort((x,y)=>x.fecha.localeCompare(y.fecha)).forEach(c=>{
     const nom=c.a.t==="norma"?(DB.normas[c.a.id]?DB.normas[c.a.id].nombre:c.a.nombre):(DB.res[c.a.id]?"Resolución "+resCorta(DB.res[c.a.id]):"una resolución");
     out.push({sev:2,icon:ICONO[c.tipo]||"📅",bg:"var(--tint)",t:`Próximo: ${c.tipo.toLowerCase()} el ${fdate(c.fecha)}`,d:nom,act:"Ver",go:[c.a.t==="norma"?"norma":"resolucion",c.a.id]});});
   const r=revisionLista().length;
@@ -683,13 +693,13 @@ function alertList(){
 function alertRowHTML(a,k){return `<div class="alert-row"><div class="aic" style="background:${a.bg}">${a.icon}</div><div style="min-width:0"><div class="at">${esc(a.t)}</div><div class="ad">${esc(a.d)}</div></div><button class="btn sm line go" data-al="${k}">${esc(a.act)}</button></div>`;}
 function movimientos(){
   const hoy=todayISO(),ev=[];
-  ACTAS().filter(a=>!a.stub&&a.fecha<=hoy).forEach(a=>ev.push({d:a.fecha,t:"🗂️ Sesión de "+cuerpo(a.cuerpo).nombre,s:`${longDate(a.fecha)} · ${resDeActa(a.id).length} resoluciones`,go:["acta",a.id]}));
-  CAMBIOS().filter(c=>c.fecha<=hoy).forEach(c=>{const n=c.a.t==="norma"?(DB.normas[c.a.id]||c.a).nombre:"Resolución "+resCorta(DB.res[c.a.id]||c.a);
+  ACTAS().filter(a=>!a.stub&&a.fecha<=hoy&&enFondo(fondoActa(a))).forEach(a=>ev.push({d:a.fecha,t:"🗂️ Sesión de "+cuerpo(a.cuerpo).nombre,s:`${longDate(a.fecha)} · ${resDeActa(a.id).length} resoluciones`,go:["acta",a.id]}));
+  CAMBIOS().filter(c=>c.fecha<=hoy&&enFondo(c.a.t==="norma"?(DB.normas[c.a.id]?fondoNorma(DB.normas[c.a.id]):""):fondoDeCuerpo(c.a.cuerpo))).forEach(c=>{const n=c.a.t==="norma"?(DB.normas[c.a.id]||c.a).nombre:"Resolución "+resCorta(DB.res[c.a.id]||c.a);
     ev.push({d:c.fecha,t:`${ICONO[c.tipo]||"•"} ${c.tipo}: ${n}`,s:longDate(c.fecha)+(c.por?" · "+resCorta(c.por):""),go:[c.a.t==="norma"?"norma":"resolucion",c.a.id],fin:TERMINAN.includes(c.tipo)});});
   return ev.sort((a,b)=>b.d.localeCompare(a.d));
 }
 function vPanel(){
-  const ns=NORMAS(),rs=RESOL(),as=ACTAS().filter(a=>!a.stub);
+  const ns=NORMAS().filter(n=>enFondo(fondoNorma(n))),rs=RESOL().filter(r=>enFondo(fondoDeCuerpo(r.cuerpo))),as=ACTAS().filter(a=>!a.stub&&enFondo(fondoActa(a)));
   const en=ns.map(n=>estadoNorma(n,todayISO()));
   const er=rs.map(r=>estadoRes(r,todayISO()));
   const nVig=en.filter(vigenteGrupo).length,nRef=en.filter(e=>e.key==="reformada").length,nDer=en.filter(e=>e.key==="baja").length;
@@ -700,8 +710,9 @@ function vPanel(){
   const ys=Object.keys(anios).sort();const serie=[];
   if(ys.length)for(let y=+ys[0];y<=+ys[ys.length-1];y++){const o=anios[y]||{n:0,por:{}};serie.push({label:String(y),n:o.n,tip:`<b>${y}</b><br>`+(Object.entries(o.por).map(([c,k])=>`${esc(c)}: ${k}`).join("<br>")||"sin sesiones")});}
   const mov=movimientos().slice(0,7);
-  const cs=Object.values(DB.cuerpos);
+  const cs=cuerposDelFondo(),fs=FONDOS();
   $("#view").innerHTML=`<div class="up">
+    ${fondoBar()}
     <div class="kpis">
       <div class="kpi" data-k="nvig"><div class="kpi-n" style="color:var(--green)">${nVig}</div><div class="kpi-l">Normas vigentes</div></div>
       <div class="kpi" data-k="nref"><div class="kpi-n" style="color:var(--navy)">${nRef}</div><div class="kpi-l">Vigentes con reformas</div></div>
@@ -735,11 +746,11 @@ function vPanel(){
           return `<button class="cuerpo" data-c="${esc(c.sigla)}"><span class="cs">${esc(c.sigla)}</span><span class="cn">${esc(c.nombre)}<small>${na} actas · ${nr} resoluciones · ${nn} normas</small></span></button>`;}).join("")||`<div class="empty">Sin cuerpos.</div>`}</div>
       </div>
     </div>
-    ${PROGS().length?`<div class="panel">
-      <p class="ptitle">Programas y proyectos</p>
-      <p class="psub">Las actas y resoluciones de cada uno, juntas</p>
-      <div class="cuerpos">${PROGS().map(x=>{const na=as.filter(a=>progsActa(a).includes(x.id)).length,nr=rs.filter(r=>(r.programas||[]).includes(x.id)).length;
-        return `<button class="cuerpo" data-pg="${esc(x.id)}"><span class="cs">${esc(x.tipo||"Programa")}</span><span class="cn">${esc(x.nombre)}<small>${esc(x.entidad||"")}${x.entidad?" · ":""}${na} actas · ${nr} resoluciones</small></span></button>`;}).join("")}</div>
+    ${ST.fondo==="all"&&fs.length>1?`<div class="panel" style="margin-bottom:14px">
+      <p class="ptitle">Fondos, programas y proyectos</p>
+      <p class="psub">Elige uno para ver solo sus actas, resoluciones y normas</p>
+      <div class="cuerpos">${fs.map(f=>{const na=as.filter(a=>fondoActa(a)===f.sigla).length,nr=rs.filter(r=>fondoDeCuerpo(r.cuerpo)===f.sigla).length,nn=ns.filter(n=>fondoNorma(n)===f.sigla).length;
+        return `<button class="cuerpo" data-fd="${esc(f.sigla)}"><span class="cs">${esc(f.sigla)}</span><span class="cn">${esc(f.nombre)}<small>${f.tipo?esc(f.tipo)+" · ":""}${na} actas · ${nr} resoluciones · ${nn} normas</small></span></button>`;}).join("")}</div>
     </div>`:""}
     <div class="panel">
       <p class="ptitle">Estado de las resoluciones</p>
@@ -748,9 +759,9 @@ function vPanel(){
     </div>
   </div>`;
   const V=$("#view");
+  bindFondoBar(vPanel);
   V.querySelectorAll("[data-al]").forEach(b=>b.onclick=()=>{const a=alerts[+b.dataset.al];go(...a.go);});
   V.querySelectorAll("[data-mv]").forEach(b=>b.onclick=()=>{const e=mov[+b.dataset.mv];go(...e.go);});
-  bindProgChips();
   V.querySelectorAll("[data-c]").forEach(b=>b.onclick=()=>{ST.af=Object.assign({},ST.af,{cuerpo:b.dataset.c,estado:"all",q:"",anio:"all"});go("actas");});
   V.querySelectorAll("[data-k]").forEach(k=>k.onclick=()=>{const t=k.dataset.k;ST.aFecha=null;
     if(t==="nvig"||t==="nref"||t==="nder"){ST.nf=Object.assign({},ST.nf,{estado:{nvig:"vig",nref:"reformada",nder:"baja"}[t],q:""});go("normativa");}
@@ -798,17 +809,17 @@ function vacioHTML(hay){return `<div class="empty">${hay?"Nada coincide con la b
 /* ================= NORMATIVA ================= */
 function normasFiltradas(){
   const f=ST.nf,ref=hoyRef();
-  return NORMAS().filter(n=>n.fecha<=ref).map(n=>({n,e:estadoNorma(n,ref)}))
+  return NORMAS().filter(n=>n.fecha<=ref&&enFondo(fondoNorma(n))).map(n=>({n,e:estadoNorma(n,ref)}))
     .filter(({n,e})=>(f.estado==="all"||(f.estado==="vig"?vigenteGrupo(e):e.key===f.estado))&&(f.organo==="all"||n.organo===f.organo)&&(f.tipo==="all"||n.tipo===f.tipo)&&(!f.q||coincide(pajaNorma(n),f.q)))
     .sort((a,b)=>a.n.nombre.localeCompare(b.n.nombre,"es"));
 }
 function ultimoCambio(n,ref){const cs=cambiosA(n.id).filter(c=>c.fecha<=(ref||hoyRef()));return cs[cs.length-1]||null;}
 function vNormativa(){
   const f=ST.nf;
-  const organos=[...new Set(NORMAS().map(n=>n.organo))].sort().map(s=>[s,cuerpo(s).nombre]);
+  const organos=[...new Set(NORMAS().filter(n=>enFondo(fondoNorma(n))).map(n=>n.organo))].sort().map(s=>[s,cuerpo(s).nombre]);
   const tipos=[...new Set(NORMAS().map(n=>n.tipo).filter(Boolean))].sort().map(t=>[t,t]);
   $("#view").innerHTML=`<div class="up">
-    ${aFechaBarra()}
+    ${fondoBar()}${aFechaBarra()}
     <div class="toolbar">${toolbarBusqueda("nq","Buscar por nombre, tipo, órgano…",f.q)}
       <select data-f="organo" aria-label="Órgano">${opciones(organos,f.organo,"Todos los órganos")}</select>
       <select data-f="tipo" aria-label="Tipo">${opciones(tipos,f.tipo,"Todos los tipos")}</select>
@@ -816,16 +827,16 @@ function vNormativa(){
     ${chipsEstado(f.estado,[["all","Todas"],["vig","Vigentes"],["reformada","Con reformas"],["vence","Por derogarse"],["baja","Derogadas"]])}
     <p class="countlbl" id="cnt"></p><div id="filas"></div></div>`;
   pintaFilas=()=>{
-    const l=normasFiltradas(),hay=NORMAS().length;
+    const l=normasFiltradas(),hay=NORMAS().filter(n=>enFondo(fondoNorma(n))).length;
     $("#cnt").textContent=`${l.length} de ${hay} norma${hay===1?"":"s"}`;
     if(!l.length){$("#filas").innerHTML=vacioHTML(hay);return;}
     $("#filas").innerHTML=ST.viewMode==="cards"
-      ?`<div class="grid">${l.map(({n,e})=>{const u=ultimoCambio(n);return `<div class="cc ${e.cc}" data-n="${esc(n.id)}"><div class="cc-nro">${esc(n.tipo||"Norma")} · ${esc(n.entidad||n.organo)}</div><div class="cc-title">${esc(n.nombre)}</div><div class="td-sub">${esc(cuerpo(n.organo).nombre)}</div><div class="cc-meta"><span class="badge ${e.b}">${esc(e.label)}</span><span>Aprobada ${fdate(n.fecha)}</span>${u?`<span>· ${esc(u.tipo.toLowerCase())} ${fdate(u.fecha)}</span>`:""}</div></div>`;}).join("")}</div>`
+      ?`<div class="grid">${l.map(({n,e})=>{const u=ultimoCambio(n);return `<div class="cc ${e.cc}" data-n="${esc(n.id)}"><div class="cc-nro">${esc(n.tipo||"Norma")} · ${esc(fondoNorma(n)||n.organo)}</div><div class="cc-title">${esc(n.nombre)}</div><div class="td-sub">${esc(cuerpo(n.organo).nombre)}</div><div class="cc-meta"><span class="badge ${e.b}">${esc(e.label)}</span><span>Aprobada ${fdate(n.fecha)}</span>${u?`<span>· ${esc(u.tipo.toLowerCase())} ${fdate(u.fecha)}</span>`:""}</div></div>`;}).join("")}</div>`
       :`<div class="tablewrap"><table class="list"><thead><tr><th>Norma</th><th class="td-org">Órgano</th><th>Aprobada</th><th>Último cambio</th><th>Estado</th><th class="td-sig"></th></tr></thead><tbody>${l.map(({n,e})=>{const u=ultimoCambio(n);
         return `<tr data-n="${esc(n.id)}"><td class="td-obj">${esc(n.nombre)}<div class="oc"><span class="catchip">${esc(n.tipo||"Norma")}</span></div><div class="oa">${esc(cuerpo(n.organo).nombre)}</div></td><td class="td-org">${esc(cuerpo(n.organo).nombre)}</td><td style="white-space:nowrap">${fdate(n.fecha)}</td><td>${u?`${esc(u.tipo)}<div class="td-sub">${fdate(u.fecha)}</div>`:'<span style="color:var(--muted2)">—</span>'}</td><td><span class="badge ${e.b}">${esc(e.label)}</span></td><td class="td-sig"><button class="btn sm line">Abrir</button></td></tr>`;}).join("")}</tbody></table></div>`;
     $("#filas").querySelectorAll("[data-n]").forEach(r=>r.onclick=()=>go("norma",r.dataset.n));
   };
-  pintaFilas();bindLista(vNormativa,"nf","nq");
+  pintaFilas();bindLista(vNormativa,"nf","nq");bindFondoBar(vNormativa);
 }
 function lineaNorma(n){
   const hoy=todayISO(),ev=[];
@@ -854,7 +865,7 @@ function vNorma(){
     <div class="detail"><div>
       <div class="panel">
         <div class="dhead">
-          <div style="min-width:0"><div class="cc-nro" style="margin-bottom:3px">${esc(n.tipo||"Norma")} · ${esc(n.entidad||"")}</div>
+          <div style="min-width:0"><div class="cc-nro" style="margin-bottom:3px">${esc(n.tipo||"Norma")} · ${esc(fondoNorma(n))}</div>
             <div class="h-title">${esc(n.nombre)}</div><div class="h-sub">${esc(cuerpo(n.organo).nombre)}</div></div>
           <span class="badge ${e.b}">${esc(e.label)}</span>
         </div>
@@ -868,7 +879,7 @@ function vNorma(){
         ${e.key==="vence"?`<div class="note" style="margin-top:12px;background:var(--amberbg);border-color:#F0DCA6;color:#8A5E06">📅 Deja de regir el ${esc(longDate(e.cambio.fecha))}: ${esc(e.cambio.tipo.toLowerCase())} aprobada por ${esc(e.cambio.por?cuerpo(e.cambio.por.cuerpo).nombre+", sesión del "+longDate(e.cambio.por.fecha):"la matriz")}.</div>`:""}
         <div class="dl">
           <div><div class="k">Tipo</div><div class="v">${esc(n.tipo||"—")}</div></div>
-          <div><div class="k">Entidad</div><div class="v">${esc(n.entidad||"—")}</div></div>
+          <div><div class="k">Fondo</div><div class="v">${esc(fondoNorma(n)?fondoNombre(fondoNorma(n)):"—")}</div></div>
           <div><div class="k">Aprobada</div><div class="v">${fdate(n.fecha)}</div></div>
           <div><div class="k">Cambios registrados</div><div class="v">${cs.length||"Ninguno"}</div></div>
           ${n.obs?`<div class="full"><div class="k">Observaciones</div><div class="v" style="font-weight:400">${esc(n.obs)}</div></div>`:""}
@@ -895,33 +906,33 @@ function vNorma(){
 /* ================= ACTAS ================= */
 function actasFiltradas(){
   const f=ST.af;
-  return ACTAS().map(a=>({a,e:estadoActa(a)}))
-    .filter(({a,e})=>(f.cuerpo==="all"||a.cuerpo===f.cuerpo)&&(f.prog==="all"||progsActa(a).includes(f.prog))&&(f.anio==="all"||anio(a.fecha)===f.anio)&&(f.estado==="all"||e.key===f.estado)&&(!f.q||coincide(pajaActa(a)+" "+resDeActa(a.id).map(pajaRes).join(" "),f.q)))
+  return ACTAS().filter(a=>enFondo(fondoActa(a))).map(a=>({a,e:estadoActa(a)}))
+    .filter(({a,e})=>(f.cuerpo==="all"||a.cuerpo===f.cuerpo)&&(f.anio==="all"||anio(a.fecha)===f.anio)&&(f.estado==="all"||e.key===f.estado)&&(!f.q||coincide(pajaActa(a)+" "+resDeActa(a.id).map(pajaRes).join(" "),f.q)))
     .sort((x,y)=>y.a.fecha.localeCompare(x.a.fecha));
 }
 function vActas(){
   const f=ST.af;
-  const cs=Object.values(DB.cuerpos).map(c=>[c.sigla,c.nombre]);
+  const cs=cuerposDelFondo().map(c=>[c.sigla,c.nombre]);
   const ys=[...new Set(ACTAS().map(a=>anio(a.fecha)))].sort().reverse().map(y=>[y,y]);
   $("#view").innerHTML=`<div class="up">
+    ${fondoBar()}
     <div class="toolbar">${toolbarBusqueda("aq","Buscar por cuerpo, fecha o lo resuelto…",f.q)}
       <select data-f="cuerpo" aria-label="Cuerpo colegiado">${opciones(cs,f.cuerpo,"Todos los cuerpos")}</select>
-      ${progFiltro(f.prog)}
       <select data-f="anio" aria-label="Año">${opciones(ys,f.anio,"Todos los años")}</select>${viewTog()}</div>
     ${chipsEstado(f.estado,[["all","Todas"],["def","Definitivas"],["prov","Provisionales"],["stub","Sin registrar"]])}
     <p class="countlbl" id="cnt"></p><div id="filas"></div></div>`;
   pintaFilas=()=>{
-    const l=actasFiltradas(),hay=ACTAS().length;
+    const l=actasFiltradas(),hay=ACTAS().filter(a=>enFondo(fondoActa(a))).length;
     $("#cnt").textContent=`${l.length} de ${hay} acta${hay===1?"":"s"}`;
     if(!l.length){$("#filas").innerHTML=vacioHTML(hay);return;}
     $("#filas").innerHTML=ST.viewMode==="cards"
-      ?`<div class="grid">${l.map(({a,e})=>`<div class="cc ${e.cc}" data-a="${esc(a.id)}"><div class="cc-nro">${esc(a.cuerpo)}${a.tipo?" · "+esc(a.tipo):""}</div><div class="cc-title">${esc(longDate(a.fecha))}</div><div class="td-sub">${esc(cuerpo(a.cuerpo).nombre)}</div><div class="cc-meta"><span class="badge ${e.b}">${esc(e.label)}</span><span>${resDeActa(a.id).length} resoluciones</span></div>${progsActa(a).length?`<div style="margin-top:8px">${progChips(progsActa(a))}</div>`:""}</div>`).join("")}</div>`
-      :`<div class="tablewrap"><table class="list"><thead><tr><th>Sesión</th><th>Cuerpo colegiado</th><th>Resoluciones</th><th>Acta</th><th class="td-sig"></th></tr></thead><tbody>${l.map(({a,e})=>`<tr data-a="${esc(a.id)}"><td class="td-nro">${esc(fdate(a.fecha))}<div class="td-sub">${esc(a.tipo||"")}${a.numero?" · n.º "+esc(a.numero):""}</div></td><td class="td-obj">${esc(cuerpo(a.cuerpo).nombre)}${progsActa(a).length?`<div class="oc">${progChips(progsActa(a))}</div>`:""}</td><td>${resDeActa(a.id).length}</td><td><span class="badge ${e.b}">${esc(e.label)}</span>${e.key==="prov"?`<div class="td-sub">hace ${e.dias} días</div>`:""}</td><td class="td-sig"><button class="btn sm line">Abrir</button></td></tr>`).join("")}</tbody></table></div>`;
+      ?`<div class="grid">${l.map(({a,e})=>`<div class="cc ${e.cc}" data-a="${esc(a.id)}"><div class="cc-nro">${esc(a.cuerpo)}${a.tipo?" · "+esc(a.tipo):""}</div><div class="cc-title">${esc(longDate(a.fecha))}</div><div class="td-sub">${esc(cuerpo(a.cuerpo).nombre)}</div><div class="cc-meta"><span class="badge ${e.b}">${esc(e.label)}</span><span>${resDeActa(a.id).length} resoluciones</span></div></div>`).join("")}</div>`
+      :`<div class="tablewrap"><table class="list"><thead><tr><th>Sesión</th><th>Cuerpo colegiado</th><th>Resoluciones</th><th>Acta</th><th class="td-sig"></th></tr></thead><tbody>${l.map(({a,e})=>`<tr data-a="${esc(a.id)}"><td class="td-nro">${esc(fdate(a.fecha))}<div class="td-sub">${esc(a.tipo||"")}${a.numero?" · n.º "+esc(a.numero):""}</div></td><td class="td-obj">${esc(cuerpo(a.cuerpo).nombre)}</td><td>${resDeActa(a.id).length}</td><td><span class="badge ${e.b}">${esc(e.label)}</span>${e.key==="prov"?`<div class="td-sub">hace ${e.dias} días</div>`:""}</td><td class="td-sig"><button class="btn sm line">Abrir</button></td></tr>`).join("")}</tbody></table></div>`;
     $("#filas").querySelectorAll("[data-a]").forEach(r=>r.onclick=()=>go("acta",r.dataset.a));
   };
-  pintaFilas();bindLista(vActas,"af","aq");
+  pintaFilas();bindLista(vActas,"af","aq");bindFondoBar(vActas);
 }
-function filaResHTML(r,ref){const e=estadoRes(r,ref);return `<button class="rowitem" data-r="${esc(r.id)}"><span class="pn">${esc(r.punto)}</span><span style="min-width:0;flex:1"><span class="rt">${esc(r.texto)}</span><span class="rs"><span class="badge ${e.b}">${esc(e.label)}</span>${r.materia?`<span class="catchip">${esc(r.materia)}</span>`:""}${progChips(r.programas)}</span></span></button>`;}
+function filaResHTML(r,ref){const e=estadoRes(r,ref);return `<button class="rowitem" data-r="${esc(r.id)}"><span class="pn">${esc(r.punto)}</span><span style="min-width:0;flex:1"><span class="rt">${esc(r.texto)}</span><span class="rs"><span class="badge ${e.b}">${esc(e.label)}</span>${r.materia?`<span class="catchip">${esc(r.materia)}</span>`:""}</span></span></button>`;}
 function vActa(){
   const a=DB.actas[ST.id];if(!a){go("actas");return;}
   const e=estadoActa(a),rs=resDeActa(a.id);
@@ -931,13 +942,12 @@ function vActa(){
       <div class="panel">
         <div class="dhead">
           <div style="min-width:0"><div class="cc-nro" style="margin-bottom:3px">${esc(a.cuerpo)}${a.tipo?" · sesión "+esc(a.tipo.toLowerCase()):""}${a.numero?" · n.º "+esc(a.numero):""}</div>
-            <div class="h-title">${esc(longDate(a.fecha))}</div><div class="h-sub">${esc(cuerpo(a.cuerpo).nombre)}</div></div>
+            <div class="h-title">${esc(longDate(a.fecha))}</div><div class="h-sub">${esc(cuerpo(a.cuerpo).nombre)}${fondoActa(a)?" · "+esc(fondoNombre(fondoActa(a))):""}</div></div>
           <span class="badge ${e.b}">${esc(e.label)}</span>
         </div>
         ${a.stub?`<div class="note" style="margin-top:12px">Esta sesión no está en la hoja <b>Actas</b> del Excel: aparece porque tiene resoluciones registradas. Al añadir su renglón se completan el tipo de sesión y los enlaces.</div>`:""}
         ${linkbarHTML("Acta definitiva",a.definitiva,a.aprobacion?`Aprobada el ${longDate(a.aprobacion)}`:"Documento firmado",a.aprobacion?`Aprobada el ${longDate(a.aprobacion)}, sin enlace en la matriz`:"Todavía no hay acta definitiva")}
         ${a.provisional||!a.definitiva?linkbarHTML("Acta provisional",a.provisional,"Versión previa a la aprobación","Sin enlace en la matriz"):""}
-        ${progsActa(a).length?`<div class="dl"><div class="full"><div class="k">Programas y proyectos</div><div class="v">${progChips(progsActa(a),true)}</div></div></div>`:""}
         ${a.obs?`<div class="note" style="margin-top:12px">${esc(a.obs)}</div>`:""}
       </div>
       <div class="panel"><p class="ptitle">Lo que se resolvió</p><p class="psub">${rs.length} punto${rs.length===1?"":"s"} con resolución · su estado es el de hoy</p>
@@ -948,7 +958,7 @@ function vActa(){
       </div>
       ${notasPanelHTML()}
     </div></div></div>`;
-  bindVolver("actas");bindNotas("acta",a.id,a._g,vActa);bindProgChips();
+  bindVolver("actas");bindNotas("acta",a.id,a._g,vActa);
   $("#view").querySelectorAll("[data-r]").forEach(b=>b.onclick=()=>go("resolucion",b.dataset.r));
   $("#view").querySelectorAll("[data-ef]").forEach(b=>b.onclick=()=>{const x=efectos[+b.dataset.ef];if(x.n)go("norma",x.n.id);else if(x.c.a.t==="norma"?DB.normas[x.c.a.id]:DB.res[x.c.a.id])go(x.c.a.t==="norma"?"norma":"resolucion",x.c.a.id);else toast("Eso es de otro grupo de acceso.");});
 }
@@ -956,35 +966,34 @@ function vActa(){
 /* ================= RESOLUCIONES ================= */
 function resFiltradas(){
   const f=ST.rf,ref=hoyRef();
-  return RESOL().filter(r=>r.fecha<=ref).map(r=>({r,e:estadoRes(r,ref)}))
-    .filter(({r,e})=>(f.cuerpo==="all"||r.cuerpo===f.cuerpo)&&(f.prog==="all"||(r.programas||[]).includes(f.prog))&&(f.materia==="all"||r.materia===f.materia)&&(f.anio==="all"||anio(r.fecha)===f.anio)&&(f.estado==="all"||(f.estado==="vig"?vigenteGrupo(e):e.key===f.estado))&&(!f.q||coincide(pajaRes(r),f.q)))
+  return RESOL().filter(r=>r.fecha<=ref&&enFondo(fondoDeCuerpo(r.cuerpo))).map(r=>({r,e:estadoRes(r,ref)}))
+    .filter(({r,e})=>(f.cuerpo==="all"||r.cuerpo===f.cuerpo)&&(f.materia==="all"||r.materia===f.materia)&&(f.anio==="all"||anio(r.fecha)===f.anio)&&(f.estado==="all"||(f.estado==="vig"?vigenteGrupo(e):e.key===f.estado))&&(!f.q||coincide(pajaRes(r),f.q)))
     .sort((x,y)=>y.r.fecha.localeCompare(x.r.fecha)||String(x.r.punto).localeCompare(String(y.r.punto),undefined,{numeric:true}));
 }
 function vResoluciones(){
   const f=ST.rf;
-  const cs=Object.values(DB.cuerpos).map(c=>[c.sigla,c.nombre]);
+  const cs=cuerposDelFondo().map(c=>[c.sigla,c.nombre]);
   const ms=[...new Set(RESOL().map(r=>r.materia).filter(Boolean))].sort().map(m=>[m,m]);
   const ys=[...new Set(RESOL().map(r=>anio(r.fecha)))].sort().reverse().map(y=>[y,y]);
   $("#view").innerHTML=`<div class="up">
-    ${aFechaBarra()}
+    ${fondoBar()}${aFechaBarra()}
     <div class="toolbar">${toolbarBusqueda("rq","Buscar en lo resuelto, materia, cuerpo, fecha…",f.q)}
       <select data-f="cuerpo" aria-label="Cuerpo colegiado">${opciones(cs,f.cuerpo,"Todos los cuerpos")}</select>
-      ${progFiltro(f.prog)}
       <select data-f="materia" aria-label="Materia">${opciones(ms,f.materia,"Todas las materias")}</select>
       <select data-f="anio" aria-label="Año">${opciones(ys,f.anio,"Todos los años")}</select>
       ${aFechaInput()}${viewTog()}</div>
     ${chipsEstado(f.estado,[["all","Todas"],["vig","Vigentes"],["reformada","Reformadas"],["baja","Sin efecto o derogadas"]])}
     <p class="countlbl" id="cnt"></p><div id="filas"></div></div>`;
   pintaFilas=()=>{
-    const l=resFiltradas(),hay=RESOL().length;
+    const l=resFiltradas(),hay=RESOL().filter(r=>enFondo(fondoDeCuerpo(r.cuerpo))).length;
     $("#cnt").textContent=`${l.length} de ${hay} resolucion${hay===1?"":"es"}`;
     if(!l.length){$("#filas").innerHTML=vacioHTML(hay);return;}
     $("#filas").innerHTML=ST.viewMode==="cards"
-      ?`<div class="grid">${l.map(({r,e})=>`<div class="cc ${e.cc}" data-r="${esc(r.id)}"><div class="cc-nro">${esc(resCorta(r))}</div><div class="cc-title">${esc(trunc(r.texto,140))}</div><div class="cc-meta"><span class="badge ${e.b}">${esc(e.label)}</span>${r.materia?`<span class="catchip">${esc(r.materia)}</span>`:""}${progChips(r.programas)}</div></div>`).join("")}</div>`
-      :`<div class="tablewrap"><table class="list"><thead><tr><th>Sesión · punto</th><th>Lo que se resolvió</th><th>Estado</th><th class="td-sig"></th></tr></thead><tbody>${l.map(({r,e})=>`<tr data-r="${esc(r.id)}"><td class="td-nro">${esc(fdate(r.fecha))}<div class="td-sub">${esc(r.cuerpo)} · punto ${esc(r.punto)}</div></td><td class="td-obj">${esc(trunc(r.texto,180))}${r.materia||(r.programas||[]).length?`<div class="oc">${r.materia?`<span class="catchip">${esc(r.materia)}</span> `:""}${progChips(r.programas)}</div>`:""}</td><td><span class="badge ${e.b}">${esc(e.label)}</span></td><td class="td-sig"><button class="btn sm line">Abrir</button></td></tr>`).join("")}</tbody></table></div>`;
+      ?`<div class="grid">${l.map(({r,e})=>`<div class="cc ${e.cc}" data-r="${esc(r.id)}"><div class="cc-nro">${esc(resCorta(r))}</div><div class="cc-title">${esc(trunc(r.texto,140))}</div><div class="cc-meta"><span class="badge ${e.b}">${esc(e.label)}</span>${r.materia?`<span class="catchip">${esc(r.materia)}</span>`:""}</div></div>`).join("")}</div>`
+      :`<div class="tablewrap"><table class="list"><thead><tr><th>Sesión · punto</th><th>Lo que se resolvió</th><th>Estado</th><th class="td-sig"></th></tr></thead><tbody>${l.map(({r,e})=>`<tr data-r="${esc(r.id)}"><td class="td-nro">${esc(fdate(r.fecha))}<div class="td-sub">${esc(r.cuerpo)} · punto ${esc(r.punto)}</div></td><td class="td-obj">${esc(trunc(r.texto,180))}${r.materia?`<div class="oc"><span class="catchip">${esc(r.materia)}</span></div>`:""}</td><td><span class="badge ${e.b}">${esc(e.label)}</span></td><td class="td-sig"><button class="btn sm line">Abrir</button></td></tr>`).join("")}</tbody></table></div>`;
     $("#filas").querySelectorAll("[data-r]").forEach(r=>r.onclick=()=>go("resolucion",r.dataset.r));
   };
-  pintaFilas();bindLista(vResoluciones,"rf","rq");
+  pintaFilas();bindLista(vResoluciones,"rf","rq");bindFondoBar(vResoluciones);
 }
 function vResolucion(){
   const r=DB.res[ST.id];if(!r){go("resoluciones");return;}
@@ -1009,7 +1018,7 @@ function vResolucion(){
           <div><div class="k">Sesión</div><div class="v">${fdate(r.fecha)}${a&&a.tipo?" · "+esc(a.tipo.toLowerCase()):""}</div></div>
           <div><div class="k">Punto</div><div class="v">${esc(r.punto)}</div></div>
           <div><div class="k">Materia</div><div class="v">${esc(r.materia||"—")}</div></div>
-          ${(r.programas||[]).length?`<div class="full"><div class="k">Programas y proyectos</div><div class="v">${progChips(r.programas,true)}</div></div>`:""}
+          <div><div class="k">Fondo</div><div class="v">${esc(fondoDeCuerpo(r.cuerpo)?fondoNombre(fondoDeCuerpo(r.cuerpo)):"—")}</div></div>
           ${r.obs?`<div class="full"><div class="k">Observaciones</div><div class="v" style="font-weight:400">${esc(r.obs)}</div></div>`:""}
         </div>
       </div>
@@ -1022,7 +1031,7 @@ function vResolucion(){
       </div>
       ${notasPanelHTML()}
     </div></div></div>`;
-  bindVolver("resoluciones");bindTimeline(ev);bindNotas("res",r.id,r._g,vResolucion);bindProgChips();
+  bindVolver("resoluciones");bindTimeline(ev);bindNotas("res",r.id,r._g,vResolucion);
   if($("#a-acta"))$("#a-acta").onclick=()=>go("acta",a.id);
   $("#view").querySelectorAll("[data-ef]").forEach(b=>b.onclick=()=>{const x=efectos[+b.dataset.ef];if(x.n)go("norma",x.n.id);else if(x.c.a.t==="norma"?DB.normas[x.c.a.id]:DB.res[x.c.a.id])go(x.c.a.t==="norma"?"norma":"resolucion",x.c.a.id);else toast("Eso es de otro grupo de acceso.");});
 }
@@ -1126,7 +1135,7 @@ function renderLogin(){
   $("#app").innerHTML=`<div class="login-shell"><div class="login-card up">
     <div class="login-top">${logoHTML()}<span class="eyebrow">${esc(MARCA.nombre)} · ${esc(MARCA.sigla)}</span></div>
     <h1>Actas, resoluciones y normativa, con su vigencia al día</h1>
-    <p class="lead">Las sesiones del Directorio del FIAS, la Junta Administrativa del FAP y el Directorio del FEIG; lo que resolvieron, y qué norma rige hoy —o regía cualquier día— después de cada reforma.</p>
+    <p class="lead">Las sesiones de los cuerpos colegiados del FIAS y de cada fondo, programa o proyecto que administra; lo que resolvieron, y qué norma rige hoy —o regía cualquier día— después de cada reforma.</p>
     ${MSG_LOGIN?`<div class="errbox" style="background:var(--tint);color:var(--navy)">${esc(MSG_LOGIN)}</div>`:""}
     <div id="lerr"></div>
     ${sinDatos?`<div class="note" style="margin-bottom:14px">${FALLA_CARGA?esc(FALLA_CARGA):INDICE&&INDICE.pendiente?"Todavía no hay datos publicados: falta configurar el robot (ver el README del repositorio). Mientras tanto, puedes recorrer la demostración.":"No se pudieron cargar los datos. Revisa la conexión y vuelve a abrir la página."}</div>`

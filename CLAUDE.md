@@ -40,15 +40,15 @@ para regenerar `demo/datos-demo.json`, en el mismo commit.
 Toda columna que no esté en `OBLIGATORIAS` es opcional: el Excel lo maneja una persona y se
 reordena. La prueba que importa al añadir una es que **sin ella se publique lo mismo que antes**.
 
-## Programas y proyectos
+## Fondos
 
-Las actas se organizan por programa o proyecto, y se llenan en la hoja Programas. La columna
-«Programa o proyecto» de Actas y Resoluciones es **opcional y de varios valores** (separados con
-`;`): vacía = asunto general. La resolución hereda los de su acta salvo que diga otros
-(`publicar.py`, `_programas_de`). En la página, un acta pertenece a un programa si ella lo nombra
-**o** si alguna de sus resoluciones lo hace (`progsActa`), así el proyecto muestra la sesión donde
-se resolvió algo suyo. Cada grupo de acceso recibe solo los programas que usa: el nombre de un
-proyecto también es información. Un Excel sin la hoja ni las columnas se publica igual.
+El FIAS administra fondos (FAP, FEIG…), programas y proyectos, cada uno con sus cuerpos
+colegiados. La hoja Fondos los lista y la columna «Fondo» de Cuerpos dice de cuál es cada cuerpo;
+las actas y resoluciones **heredan el fondo de su cuerpo**, no lo repiten. Una norma lleva el suyo
+o, vacío, el de su órgano (`fondoNorma`). Todas las actas van en una sola hoja, a propósito: una
+hoja por fondo obligaría a cambiar código cada vez que llega un fondo nuevo y partiría la hoja
+Cambios, que cruza fondos. En la página, `ST.fondo` filtra panel y listados (`enFondo()`), con la
+barra de arriba. Un Excel sin la hoja Fondos se publica igual, con la sigla escrita en Cuerpos.
 
 ## La vigencia se deduce, no se marca
 

@@ -172,7 +172,7 @@ def enlace(v):
 # ------------------------------------------------------------- el modelo
 class Matriz:
     def __init__(self):
-        self.cuerpos, self.progs, self.actas, self.res, self.normas, self.cambios = {}, {}, {}, {}, {}, []
+        self.fondos, self.cuerpos, self.actas, self.res, self.normas, self.cambios = {}, {}, {}, {}, {}, []
         self.avisos = []
 
     def aviso(self, hoja, fila, generico, detalle=None, grupo=None):
@@ -187,8 +187,8 @@ class Matriz:
         return f"{slug(sigla)}_{f}_p{slug(p) or 'x'}"
 
     def leer(self, wb):
+        self._fondos(wb)
         self._cuerpos(wb)
-        self._programas(wb)
         self._actas(wb)
         self._resoluciones(wb)
         self._normas(wb)
@@ -217,6 +217,34 @@ class Matriz:
             return False
         return f
 
+    def _fondos(self, wb):
+        """La hoja es opcional: un Excel sin ella sigue publicándose, con el fondo
+        tal como esté escrito en Cuerpos y Normativa."""
+        if "Fondos" not in wb.sheetnames:
+            return
+        for i, d in filas(wb, "Fondos"):
+            s = texto(d.get("sigla"))
+            if not s:
+                self.aviso("Fondos", i, "falta la sigla; el renglón no se publica")
+                continue
+            s = s.upper()
+            if s in self.fondos:
+                self.aviso("Fondos", i, "sigla repetida; vale el primer renglón", f"El fondo {s} está repetido; vale el primer renglón.")
+                continue
+            self.fondos[s] = {"sigla": s, "nombre": texto(d.get("nombre")) or s, "tipo": texto(d.get("tipo"))}
+
+    def _fondo(self, hoja, i, v, grupo=None):
+        """La sigla del fondo, como está en la hoja Fondos. Una que no está se
+        avisa pero se respeta: es solo una etiqueta, no decide quién ve qué."""
+        s = texto(v)
+        if not s:
+            return None
+        s = s.upper()
+        if self.fondos and s not in self.fondos:
+            self.aviso(hoja, i, "el fondo no está en la hoja Fondos",
+                       f"«{s}» no está en la hoja Fondos. Añádelo allí para que se vea con su nombre completo.", grupo)
+        return s
+
     def _cuerpos(self, wb):
         for i, d in filas(wb, "Cuerpos"):
             s = texto(d.get("sigla"))
@@ -228,39 +256,8 @@ class Matriz:
                 self.aviso("Cuerpos", i, "sigla repetida; vale el primer renglón", f"La sigla {s} está repetida; vale el primer renglón.")
                 continue
             self.cuerpos[s] = {"sigla": s, "nombre": texto(d.get("nombre")) or s,
-                               "entidad": texto(d.get("entidad")),
+                               "entidad": self._fondo("Cuerpos", i, d.get("entidad")),
                                "grupo": slug(texto(d.get("grupo")) or "") or GRUPO_POR_OMISION}
-
-    def _programas(self, wb):
-        """La hoja es opcional: un Excel anterior a los programas sigue publicándose igual."""
-        if "Programas" not in wb.sheetnames:
-            return
-        for i, d in filas(wb, "Programas"):
-            n = texto(d.get("nombre"))
-            if not n:
-                self.aviso("Programas", i, "falta el nombre; el renglón no se publica")
-                continue
-            pid = slug(n)
-            if pid in self.progs:
-                self.aviso("Programas", i, "programa o proyecto repetido; vale el primer renglón", f"«{n}» está dos veces; vale el primer renglón.")
-                continue
-            self.progs[pid] = {"id": pid, "nombre": n, "tipo": texto(d.get("tipo")), "entidad": texto(d.get("entidad")),
-                               "obs": texto(d.get("obs"))}
-
-    def _programas_de(self, hoja, i, valor, grupo):
-        """«A; B» → [id, id]. Uno que no está en la hoja Programas se avisa y se ignora."""
-        out = []
-        for parte in re.split(r"[;\n]", texto(valor) or ""):
-            n = texto(parte)
-            if not n:
-                continue
-            pid = slug(n)
-            if pid not in self.progs:
-                self.aviso(hoja, i, "un programa o proyecto no está en la hoja Programas; se ignora",
-                           f"«{n}» no está en la hoja Programas. Añádelo allí o corrige el nombre: mientras tanto el renglón se publica sin ese programa.", grupo)
-            elif pid not in out:
-                out.append(pid)
-        return out
 
     def _actas(self, wb):
         for i, d in filas(wb, "Actas"):
@@ -279,8 +276,7 @@ class Matriz:
                            f"Ya hay un acta de {s} del {fh(f)}: vale el primer renglón. Si fueron dos sesiones el mismo día, avisa: Quórum las identifica por cuerpo y fecha.", g)
                 continue
             a = {"id": aid, "cuerpo": s, "fecha": f, "tipo": texto(d.get("tipo")),
-                 "numero": texto(d.get("numero")), "obs": texto(d.get("obs")), "fila": i,
-                 "programas": self._programas_de("Actas", i, d.get("programa"), g)}
+                 "numero": texto(d.get("numero")), "obs": texto(d.get("obs")), "fila": i}
             for k, rot in (("provisional", "acta provisional"), ("definitiva", "acta definitiva")):
                 u, malo = enlace(d.get(k))
                 if malo:
@@ -321,12 +317,8 @@ class Matriz:
             u, malo = enlace(d.get("enlace"))
             if malo:
                 self.aviso("Resoluciones", i, "el enlace no empieza por https://; se ignora", None, g)
-            propio = self._programas_de("Resoluciones", i, d.get("programa"), g)
-            # Por omisión, la resolución es del programa o proyecto de su acta.
-            progs = propio or list(self.actas[aid].get("programas") or [])
             self.res[rid] = {"id": rid, "acta": aid, "cuerpo": s, "fecha": f, "punto": p, "texto": t,
-                             "materia": texto(d.get("materia")), "enlace": u, "obs": texto(d.get("obs")), "fila": i,
-                             "programas": progs}
+                             "materia": texto(d.get("materia")), "enlace": u, "obs": texto(d.get("obs")), "fila": i}
 
     def _normas(self, wb):
         self.por_nombre = {}
@@ -359,7 +351,8 @@ class Matriz:
             if malo:
                 self.aviso("Normativa", i, "el enlace no empieza por https://; se ignora", None, g)
             aid = f"{slug(s)}_{f}"
-            self.normas[nid] = {"id": nid, "nombre": n, "tipo": texto(d.get("tipo")), "entidad": texto(d.get("entidad")),
+            self.normas[nid] = {"id": nid, "nombre": n, "tipo": texto(d.get("tipo")),
+                                "entidad": self._fondo("Normativa", i, d.get("entidad"), g) or self.cuerpos[s]["entidad"],
                                 "organo": s, "fecha": f, "punto": p, "res": res,
                                 "acta": aid if aid in self.actas else None, "enlace": u,
                                 "obs": texto(d.get("obs")), "grupo": g, "fila": i}
@@ -449,17 +442,15 @@ class Matriz:
         def de(sigla):
             return self.grupo_de(sigla) == grupo
         limpio = lambda d: {k: v for k, v in d.items() if k not in ("fila", "grupos") and v not in (None, "", [])}
-        acs = [limpio(a) for a in self.actas.values() if de(a["cuerpo"])]
-        rss = [limpio(r) for r in self.res.values() if de(r["cuerpo"])]
-        # Solo los programas que ese grupo usa: el nombre de un proyecto también es información.
-        usados = {p for x in acs + rss for p in x.get("programas", [])}
+        normas = [limpio(n) for n in self.normas.values() if n["grupo"] == grupo]
+        usados = {c["entidad"] for c in self.cuerpos.values()} | {n.get("entidad") for n in normas}
         return {
             "v": 1, "grupo": grupo, "generado": generado,
             "cuerpos": [{"sigla": c["sigla"], "nombre": c["nombre"], "entidad": c["entidad"]} for c in self.cuerpos.values()],
-            "programas": [limpio(p) for p in self.progs.values() if p["id"] in usados],
-            "actas": acs,
-            "resoluciones": rss,
-            "normas": [limpio(n) for n in self.normas.values() if n["grupo"] == grupo],
+            "fondos": [limpio(f) for f in self.fondos.values() if f["sigla"] in usados],
+            "actas": [limpio(a) for a in self.actas.values() if de(a["cuerpo"])],
+            "resoluciones": [limpio(r) for r in self.res.values() if de(r["cuerpo"])],
+            "normas": normas,
             "cambios": [limpio(c) for c in self.cambios if grupo in c["grupos"]],
             "avisos": [{"hoja": a["hoja"], "fila": a["fila"], "texto": a["texto"]}
                        for a in self.avisos if a["grupo"] in (None, grupo)],
@@ -500,7 +491,7 @@ def escribir(ruta, obj):
 
 
 def resumen(m, grupos):
-    lineas = [f"Cuerpos: {len(m.cuerpos)} · programas y proyectos: {len(m.progs)} · actas: {sum(1 for a in m.actas.values() if not a.get('stub'))} · "
+    lineas = [f"Cuerpos: {len(m.cuerpos)} · fondos: {len(m.fondos)} · actas: {sum(1 for a in m.actas.values() if not a.get('stub'))} · "
               f"resoluciones: {len(m.res)} · normas: {len(m.normas)} · cambios: {len(m.cambios)}",
               f"Grupos publicados: {', '.join(grupos)}"]
     if m.avisos:

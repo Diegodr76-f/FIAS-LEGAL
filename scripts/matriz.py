@@ -18,9 +18,8 @@ Cada columna es (clave, encabezado, ayuda, ancho, tipo):
 import re
 import unicodedata
 
-ENTIDADES = ["FIAS", "FAP", "FEIG"]
 TIPOS_SESION = ["Ordinaria", "Extraordinaria"]
-TIPOS_PROG = ["Programa", "Proyecto"]
+TIPOS_FONDO = ["Institución", "Fondo", "Programa", "Proyecto"]
 TIPOS_NORMA = ["Estatuto", "Reglamento", "Manual", "Política", "Procedimiento",
                "Instructivo", "Lineamiento", "Código", "Otro"]
 MATERIAS = ["Normativa", "Presupuesto y finanzas", "Inversiones",
@@ -35,13 +34,20 @@ TERMINAN = {"Derogación", "Deja sin efecto"}
 NUEVA_VERSION = {"Reforma", "Reforma parcial", "Codificación"}
 
 LISTAS = {
-    "ENTIDADES": ENTIDADES,
     "TIPOS_SESION": TIPOS_SESION,
-    "TIPOS_PROG": TIPOS_PROG,
+    "TIPOS_FONDO": TIPOS_FONDO,
     "TIPOS_NORMA": TIPOS_NORMA,
     "MATERIAS": MATERIAS,
     "TIPOS_CAMBIO": TIPOS_CAMBIO,
 }
+
+# El FIAS y los fondos que administra. Se añaden más renglones en la hoja Fondos
+# (otros fondos, programas o proyectos), y sus cuerpos en la hoja Cuerpos.
+FONDOS_INICIALES = [
+    ("FIAS", "Fondo de Inversión Ambiental Sostenible", "Institución"),
+    ("FAP", "Fondo de Áreas Protegidas", "Fondo"),
+    ("FEIG", "Fondo para el Control de Especies Invasoras de Galápagos", "Fondo"),
+]
 
 # Los tres que se conocen hoy. Se pueden añadir más filas en la hoja Cuerpos.
 CUERPOS_INICIALES = [
@@ -53,17 +59,17 @@ CUERPOS_INICIALES = [
 GRUPO_POR_OMISION = "legal"
 
 HOJAS = {
+    "Fondos": [
+        ("sigla", "Sigla", "Corta y sin repetirse: FIAS, FAP, FEIG… Es como se escribe el fondo en las hojas Cuerpos y Normativa.", 12, "texto"),
+        ("nombre", "Nombre completo", "Como debe leerse en pantalla.", 50, "texto"),
+        ("tipo", "Tipo", "Institución, Fondo, Programa o Proyecto.", 14, "lista:TIPOS_FONDO"),
+        ("obs", "Observaciones", "", 40, "texto"),
+    ],
     "Cuerpos": [
         ("sigla", "Sigla", "Corta y sin repetirse (p. ej. JA-FAP). Es como se escribe el cuerpo en las demás hojas.", 14, "texto"),
         ("nombre", "Nombre completo", "Como debe leerse en pantalla: «Junta Administrativa del FAP».", 40, "texto"),
-        ("entidad", "Entidad", "FIAS, FAP o FEIG.", 12, "lista:ENTIDADES"),
+        ("entidad", "Fondo", "De qué fondo, programa o proyecto es este cuerpo (sigla de la hoja Fondos). Sus actas y resoluciones se ven bajo ese fondo: la Junta Administrativa del FAP es del FAP.", 12, "lista:FONDOS"),
         ("grupo", "Grupo de acceso", "Qué frase abre las actas y resoluciones de este cuerpo. Si todos los abogados ven todo, deja «legal» en todas las filas.", 18, "texto"),
-        ("obs", "Observaciones", "", 40, "texto"),
-    ],
-    "Programas": [
-        ("nombre", "Programa o proyecto", "Sin repetirse. Es como se escribe en las hojas Actas y Resoluciones.", 44, "texto"),
-        ("tipo", "Tipo", "Programa o Proyecto.", 12, "lista:TIPOS_PROG"),
-        ("entidad", "Entidad", "FIAS, FAP o FEIG.", 10, "lista:ENTIDADES"),
         ("obs", "Observaciones", "", 40, "texto"),
     ],
     "Actas": [
@@ -71,7 +77,6 @@ HOJAS = {
         ("fecha", "Fecha de la sesión", "dd/mm/aaaa. Con el cuerpo, es lo que identifica al acta.", 14, "fecha"),
         ("tipo", "Tipo de sesión", "Ordinaria o Extraordinaria.", 14, "lista:TIPOS_SESION"),
         ("numero", "N.º de sesión", "Opcional. Solo si la sesión tiene número.", 11, "texto"),
-        ("programa", "Programa o proyecto", "De cuál trata la sesión (como está en la hoja Programas). Si trata de varios, sepáralos con punto y coma. Vacío = asunto general.", 34, "texto"),
         ("provisional", "Acta provisional (enlace)", "Enlace al PDF en la carpeta. Opcional.", 34, "enlace"),
         ("definitiva", "Acta definitiva (enlace)", "Enlace al PDF firmado. Mientras esté vacío, el acta se muestra como provisional.", 34, "enlace"),
         ("aprobacion", "Fecha de aprobación del acta definitiva", "Cuándo se aprobó el acta definitiva (normalmente, en la sesión siguiente).", 18, "fecha"),
@@ -83,14 +88,13 @@ HOJAS = {
         ("punto", "Punto del orden del día", "El número del punto: 3, no «tercero». Cuerpo + fecha + punto identifican a la resolución.", 12, "texto"),
         ("texto", "Lo que se resolvió", "El texto o un resumen fiel de lo resuelto.", 70, "texto"),
         ("materia", "Materia", "Para filtrar. Se puede escribir otra si ninguna sirve.", 22, "lista:MATERIAS"),
-        ("programa", "Programa o proyecto (solo si es distinto del acta)", "Por omisión, la resolución es del programa o proyecto de su acta. Escríbelo aquí solo si esta resolución trata de otro, o de uno solo entre varios. Varios: separados con punto y coma.", 34, "texto"),
         ("enlace", "Enlace (opcional)", "Si la resolución tiene documento propio (certificación, extracto).", 30, "enlace"),
         ("obs", "Observaciones", "", 40, "texto"),
     ],
     "Normativa": [
         ("nombre", "Nombre de la norma", "Sin repetirse. Es como se la nombra en la hoja Cambios.", 46, "texto"),
         ("tipo", "Tipo", "Reglamento, Manual, Política…", 14, "lista:TIPOS_NORMA"),
-        ("entidad", "Entidad", "FIAS, FAP o FEIG.", 10, "lista:ENTIDADES"),
+        ("entidad", "Fondo", "De qué fondo es la norma (sigla de la hoja Fondos). Vacío = el fondo del órgano que la aprueba.", 10, "lista:FONDOS"),
         ("organo", "Órgano que la aprueba", "Sigla del cuerpo competente (p. ej. el Manual de Ciclo lo aprueba la JA-FAP).", 16, "lista:CUERPOS"),
         ("fecha", "Fecha de aprobación", "Fecha de la sesión que la aprobó.", 14, "fecha"),
         ("punto", "Punto en que se aprobó", "Opcional. Con órgano + fecha + punto, la norma queda enlazada a su resolución.", 12, "texto"),
@@ -119,7 +123,7 @@ HOJAS = {
 # una fila, esa fila se salta con un aviso.
 OBLIGATORIAS = {
     "Cuerpos": ["sigla"],
-    "Programas": ["nombre"],
+    "Fondos": ["sigla"],
     "Actas": ["cuerpo", "fecha"],
     "Resoluciones": ["cuerpo", "fecha", "punto", "texto"],
     "Normativa": ["nombre", "organo", "fecha"],
