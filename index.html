@@ -118,6 +118,9 @@
   .chip{all:unset;cursor:pointer;font-size:12.5px;font-weight:600;color:var(--muted);padding:8px 13px;border:1.5px solid var(--line);border-radius:99px;background:#fff;white-space:nowrap}
   .chip.on{background:var(--ink);color:#fff;border-color:var(--ink)}
   .chips{display:flex;gap:8px;flex-wrap:wrap}
+  .catchip.pchip{background:var(--tint);color:var(--navy);margin:0 4px 4px 0}
+  button.pchip{all:unset;box-sizing:border-box;cursor:pointer;font-size:10.5px;font-weight:700;padding:3px 9px;border-radius:20px;background:var(--tint);color:var(--navy);margin:0 4px 4px 0}
+  button.pchip:hover{background:#DDE4FA}
   .catchip{display:inline-block;font-size:10.5px;font-weight:700;padding:3px 9px;border-radius:20px;white-space:nowrap;background:#ECEEF4;color:#4A5068}
   .kpis{display:grid;grid-template-columns:repeat(6,1fr);gap:12px;margin-bottom:18px}
   @media(max-width:1000px){.kpis{grid-template-columns:repeat(3,1fr)}}
@@ -366,12 +369,12 @@ let ABIERTOS=[];          // grupos descifrados en esta sesión
 let DEMO=false;
 let DB=vacia();
 let FALLA_CARGA="";
-function vacia(){return {cuerpos:{},actas:{},res:{},normas:{},cambios:{},avisos:[],generado:null};}
+function vacia(){return {cuerpos:{},progs:{},actas:{},res:{},normas:{},cambios:{},avisos:[],generado:null};}
 let ST={view:"panel",id:null,from:null,fromY:0,aFecha:null,
   viewMode:(window.innerWidth&&window.innerWidth<700)?"cards":"table",
   nf:{q:"",estado:"all",organo:"all",tipo:"all"},
-  af:{q:"",cuerpo:"all",estado:"all",anio:"all"},
-  rf:{q:"",cuerpo:"all",estado:"all",materia:"all",anio:"all"}};
+  af:{q:"",cuerpo:"all",prog:"all",estado:"all",anio:"all"},
+  rf:{q:"",cuerpo:"all",prog:"all",estado:"all",materia:"all",anio:"all"}};
 
 /* Junta lo que abrió cada frase. Un cambio que toca dos grupos llega en los
    dos archivos: se une por su id. Cada cosa recuerda de qué grupo vino, que es
@@ -379,6 +382,7 @@ let ST={view:"panel",id:null,from:null,fromY:0,aFecha:null,
 function fusionar(p){
   const g=p.grupo;
   (p.cuerpos||[]).forEach(c=>{DB.cuerpos[c.sigla]=c;});
+  (p.programas||[]).forEach(x=>{DB.progs[x.id]=x;});
   (p.actas||[]).forEach(a=>{const ya=DB.actas[a.id];if(!ya||ya.stub)DB.actas[a.id]=Object.assign({},a,{_g:g});});
   (p.resoluciones||[]).forEach(r=>{DB.res[r.id]=Object.assign({},r,{_g:g});});
   (p.normas||[]).forEach(n=>{DB.normas[n.id]=Object.assign({},n,{_g:g});});
@@ -451,12 +455,22 @@ function actaRef(a){return `${cuerpo(a.cuerpo).nombre} · ${a.tipo?("sesión "+a
 function resDeActa(aid){return RESOL().filter(r=>r.acta===aid).sort((x,y)=>String(x.punto).localeCompare(String(y.punto),undefined,{numeric:true}));}
 function normasDeRes(rid){return NORMAS().filter(n=>n.res===rid);}
 function anio(iso){return String(iso||"").slice(0,4);}
+/* Programas y proyectos. Una resolución es del programa de su acta salvo que el
+   Excel diga otro (el robot ya lo resolvió). Un acta pertenece a cada programa
+   que ella nombra o del que trata alguna de sus resoluciones: así, al consultar
+   un proyecto aparece la sesión donde se resolvió algo suyo. */
+const PROGS=()=>Object.values(DB.progs).sort((a,b)=>a.nombre.localeCompare(b.nombre,"es"));
+function progNombre(id){return DB.progs[id]?DB.progs[id].nombre:id;}
+function progsActa(a){const s=new Set(a.programas||[]);resDeActa(a.id).forEach(r=>(r.programas||[]).forEach(p=>s.add(p)));return [...s];}
+function progChips(ids,click){return (ids||[]).filter(p=>DB.progs[p]).map(p=>click?`<button class="catchip pchip" data-pg="${esc(p)}" title="Ver las actas de este programa o proyecto">${esc(progNombre(p))}</button>`:`<span class="catchip pchip">${esc(progNombre(p))}</span>`).join(" ");}
+function progFiltro(sel){return PROGS().length?`<select data-f="prog" aria-label="Programa o proyecto">${opciones(PROGS().map(x=>[x.id,x.nombre]),sel,"Todos los programas y proyectos")}</select>`:"";}
+function bindProgChips(){$("#view").querySelectorAll("[data-pg]").forEach(b=>b.onclick=e=>{e.stopPropagation();ST.af=Object.assign({},ST.af,{prog:b.dataset.pg,cuerpo:"all",estado:"all",q:"",anio:"all"});go("actas");});}
 /* Todo lo que identifica a cada cosa, también la fecha escrita de las formas en
    que se dice: «8 de agosto de 2026», «08/08/2026», «agosto 2026». */
 function fechasPaja(iso){return iso?[iso,dmy(iso),longDate(iso),fdate(iso),MESES[+iso.slice(5,7)-1]+" "+iso.slice(0,4)].join(" "):"";}
 function pajaNorma(n){return [n.nombre,n.tipo,n.entidad,n.organo,cuerpo(n.organo).nombre,n.obs,fechasPaja(n.fecha)].filter(Boolean).join(" ");}
-function pajaRes(r){return [r.texto,r.materia,r.obs,r.cuerpo,cuerpo(r.cuerpo).nombre,"punto "+r.punto,fechasPaja(r.fecha)].filter(Boolean).join(" ");}
-function pajaActa(a){return [a.cuerpo,cuerpo(a.cuerpo).nombre,a.tipo,a.numero?"sesion "+a.numero:"",a.obs,fechasPaja(a.fecha)].filter(Boolean).join(" ");}
+function pajaRes(r){return [r.texto,r.materia,r.obs,(r.programas||[]).map(progNombre).join(" "),r.cuerpo,cuerpo(r.cuerpo).nombre,"punto "+r.punto,fechasPaja(r.fecha)].filter(Boolean).join(" ");}
+function pajaActa(a){return [a.cuerpo,cuerpo(a.cuerpo).nombre,progsActa(a).map(progNombre).join(" "),a.tipo,a.numero?"sesion "+a.numero:"",a.obs,fechasPaja(a.fecha)].filter(Boolean).join(" ");}
 
 /* ================= NOTAS (cifradas) =================
    Como la bitácora del CLM, pero las actas no admiten notas en claro en el
@@ -721,6 +735,12 @@ function vPanel(){
           return `<button class="cuerpo" data-c="${esc(c.sigla)}"><span class="cs">${esc(c.sigla)}</span><span class="cn">${esc(c.nombre)}<small>${na} actas · ${nr} resoluciones · ${nn} normas</small></span></button>`;}).join("")||`<div class="empty">Sin cuerpos.</div>`}</div>
       </div>
     </div>
+    ${PROGS().length?`<div class="panel">
+      <p class="ptitle">Programas y proyectos</p>
+      <p class="psub">Las actas y resoluciones de cada uno, juntas</p>
+      <div class="cuerpos">${PROGS().map(x=>{const na=as.filter(a=>progsActa(a).includes(x.id)).length,nr=rs.filter(r=>(r.programas||[]).includes(x.id)).length;
+        return `<button class="cuerpo" data-pg="${esc(x.id)}"><span class="cs">${esc(x.tipo||"Programa")}</span><span class="cn">${esc(x.nombre)}<small>${esc(x.entidad||"")}${x.entidad?" · ":""}${na} actas · ${nr} resoluciones</small></span></button>`;}).join("")}</div>
+    </div>`:""}
     <div class="panel">
       <p class="ptitle">Estado de las resoluciones</p>
       <p class="psub">Hoy, según los cambios registrados</p>
@@ -730,6 +750,7 @@ function vPanel(){
   const V=$("#view");
   V.querySelectorAll("[data-al]").forEach(b=>b.onclick=()=>{const a=alerts[+b.dataset.al];go(...a.go);});
   V.querySelectorAll("[data-mv]").forEach(b=>b.onclick=()=>{const e=mov[+b.dataset.mv];go(...e.go);});
+  bindProgChips();
   V.querySelectorAll("[data-c]").forEach(b=>b.onclick=()=>{ST.af=Object.assign({},ST.af,{cuerpo:b.dataset.c,estado:"all",q:"",anio:"all"});go("actas");});
   V.querySelectorAll("[data-k]").forEach(k=>k.onclick=()=>{const t=k.dataset.k;ST.aFecha=null;
     if(t==="nvig"||t==="nref"||t==="nder"){ST.nf=Object.assign({},ST.nf,{estado:{nvig:"vig",nref:"reformada",nder:"baja"}[t],q:""});go("normativa");}
@@ -875,7 +896,7 @@ function vNorma(){
 function actasFiltradas(){
   const f=ST.af;
   return ACTAS().map(a=>({a,e:estadoActa(a)}))
-    .filter(({a,e})=>(f.cuerpo==="all"||a.cuerpo===f.cuerpo)&&(f.anio==="all"||anio(a.fecha)===f.anio)&&(f.estado==="all"||e.key===f.estado)&&(!f.q||coincide(pajaActa(a)+" "+resDeActa(a.id).map(pajaRes).join(" "),f.q)))
+    .filter(({a,e})=>(f.cuerpo==="all"||a.cuerpo===f.cuerpo)&&(f.prog==="all"||progsActa(a).includes(f.prog))&&(f.anio==="all"||anio(a.fecha)===f.anio)&&(f.estado==="all"||e.key===f.estado)&&(!f.q||coincide(pajaActa(a)+" "+resDeActa(a.id).map(pajaRes).join(" "),f.q)))
     .sort((x,y)=>y.a.fecha.localeCompare(x.a.fecha));
 }
 function vActas(){
@@ -885,6 +906,7 @@ function vActas(){
   $("#view").innerHTML=`<div class="up">
     <div class="toolbar">${toolbarBusqueda("aq","Buscar por cuerpo, fecha o lo resuelto…",f.q)}
       <select data-f="cuerpo" aria-label="Cuerpo colegiado">${opciones(cs,f.cuerpo,"Todos los cuerpos")}</select>
+      ${progFiltro(f.prog)}
       <select data-f="anio" aria-label="Año">${opciones(ys,f.anio,"Todos los años")}</select>${viewTog()}</div>
     ${chipsEstado(f.estado,[["all","Todas"],["def","Definitivas"],["prov","Provisionales"],["stub","Sin registrar"]])}
     <p class="countlbl" id="cnt"></p><div id="filas"></div></div>`;
@@ -893,13 +915,13 @@ function vActas(){
     $("#cnt").textContent=`${l.length} de ${hay} acta${hay===1?"":"s"}`;
     if(!l.length){$("#filas").innerHTML=vacioHTML(hay);return;}
     $("#filas").innerHTML=ST.viewMode==="cards"
-      ?`<div class="grid">${l.map(({a,e})=>`<div class="cc ${e.cc}" data-a="${esc(a.id)}"><div class="cc-nro">${esc(a.cuerpo)}${a.tipo?" · "+esc(a.tipo):""}</div><div class="cc-title">${esc(longDate(a.fecha))}</div><div class="td-sub">${esc(cuerpo(a.cuerpo).nombre)}</div><div class="cc-meta"><span class="badge ${e.b}">${esc(e.label)}</span><span>${resDeActa(a.id).length} resoluciones</span></div></div>`).join("")}</div>`
-      :`<div class="tablewrap"><table class="list"><thead><tr><th>Sesión</th><th>Cuerpo colegiado</th><th>Resoluciones</th><th>Acta</th><th class="td-sig"></th></tr></thead><tbody>${l.map(({a,e})=>`<tr data-a="${esc(a.id)}"><td class="td-nro">${esc(fdate(a.fecha))}<div class="td-sub">${esc(a.tipo||"")}${a.numero?" · n.º "+esc(a.numero):""}</div></td><td class="td-obj">${esc(cuerpo(a.cuerpo).nombre)}</td><td>${resDeActa(a.id).length}</td><td><span class="badge ${e.b}">${esc(e.label)}</span>${e.key==="prov"?`<div class="td-sub">hace ${e.dias} días</div>`:""}</td><td class="td-sig"><button class="btn sm line">Abrir</button></td></tr>`).join("")}</tbody></table></div>`;
+      ?`<div class="grid">${l.map(({a,e})=>`<div class="cc ${e.cc}" data-a="${esc(a.id)}"><div class="cc-nro">${esc(a.cuerpo)}${a.tipo?" · "+esc(a.tipo):""}</div><div class="cc-title">${esc(longDate(a.fecha))}</div><div class="td-sub">${esc(cuerpo(a.cuerpo).nombre)}</div><div class="cc-meta"><span class="badge ${e.b}">${esc(e.label)}</span><span>${resDeActa(a.id).length} resoluciones</span></div>${progsActa(a).length?`<div style="margin-top:8px">${progChips(progsActa(a))}</div>`:""}</div>`).join("")}</div>`
+      :`<div class="tablewrap"><table class="list"><thead><tr><th>Sesión</th><th>Cuerpo colegiado</th><th>Resoluciones</th><th>Acta</th><th class="td-sig"></th></tr></thead><tbody>${l.map(({a,e})=>`<tr data-a="${esc(a.id)}"><td class="td-nro">${esc(fdate(a.fecha))}<div class="td-sub">${esc(a.tipo||"")}${a.numero?" · n.º "+esc(a.numero):""}</div></td><td class="td-obj">${esc(cuerpo(a.cuerpo).nombre)}${progsActa(a).length?`<div class="oc">${progChips(progsActa(a))}</div>`:""}</td><td>${resDeActa(a.id).length}</td><td><span class="badge ${e.b}">${esc(e.label)}</span>${e.key==="prov"?`<div class="td-sub">hace ${e.dias} días</div>`:""}</td><td class="td-sig"><button class="btn sm line">Abrir</button></td></tr>`).join("")}</tbody></table></div>`;
     $("#filas").querySelectorAll("[data-a]").forEach(r=>r.onclick=()=>go("acta",r.dataset.a));
   };
   pintaFilas();bindLista(vActas,"af","aq");
 }
-function filaResHTML(r,ref){const e=estadoRes(r,ref);return `<button class="rowitem" data-r="${esc(r.id)}"><span class="pn">${esc(r.punto)}</span><span style="min-width:0;flex:1"><span class="rt">${esc(r.texto)}</span><span class="rs"><span class="badge ${e.b}">${esc(e.label)}</span>${r.materia?`<span class="catchip">${esc(r.materia)}</span>`:""}</span></span></button>`;}
+function filaResHTML(r,ref){const e=estadoRes(r,ref);return `<button class="rowitem" data-r="${esc(r.id)}"><span class="pn">${esc(r.punto)}</span><span style="min-width:0;flex:1"><span class="rt">${esc(r.texto)}</span><span class="rs"><span class="badge ${e.b}">${esc(e.label)}</span>${r.materia?`<span class="catchip">${esc(r.materia)}</span>`:""}${progChips(r.programas)}</span></span></button>`;}
 function vActa(){
   const a=DB.actas[ST.id];if(!a){go("actas");return;}
   const e=estadoActa(a),rs=resDeActa(a.id);
@@ -915,6 +937,7 @@ function vActa(){
         ${a.stub?`<div class="note" style="margin-top:12px">Esta sesión no está en la hoja <b>Actas</b> del Excel: aparece porque tiene resoluciones registradas. Al añadir su renglón se completan el tipo de sesión y los enlaces.</div>`:""}
         ${linkbarHTML("Acta definitiva",a.definitiva,a.aprobacion?`Aprobada el ${longDate(a.aprobacion)}`:"Documento firmado",a.aprobacion?`Aprobada el ${longDate(a.aprobacion)}, sin enlace en la matriz`:"Todavía no hay acta definitiva")}
         ${a.provisional||!a.definitiva?linkbarHTML("Acta provisional",a.provisional,"Versión previa a la aprobación","Sin enlace en la matriz"):""}
+        ${progsActa(a).length?`<div class="dl"><div class="full"><div class="k">Programas y proyectos</div><div class="v">${progChips(progsActa(a),true)}</div></div></div>`:""}
         ${a.obs?`<div class="note" style="margin-top:12px">${esc(a.obs)}</div>`:""}
       </div>
       <div class="panel"><p class="ptitle">Lo que se resolvió</p><p class="psub">${rs.length} punto${rs.length===1?"":"s"} con resolución · su estado es el de hoy</p>
@@ -925,7 +948,7 @@ function vActa(){
       </div>
       ${notasPanelHTML()}
     </div></div></div>`;
-  bindVolver("actas");bindNotas("acta",a.id,a._g,vActa);
+  bindVolver("actas");bindNotas("acta",a.id,a._g,vActa);bindProgChips();
   $("#view").querySelectorAll("[data-r]").forEach(b=>b.onclick=()=>go("resolucion",b.dataset.r));
   $("#view").querySelectorAll("[data-ef]").forEach(b=>b.onclick=()=>{const x=efectos[+b.dataset.ef];if(x.n)go("norma",x.n.id);else if(x.c.a.t==="norma"?DB.normas[x.c.a.id]:DB.res[x.c.a.id])go(x.c.a.t==="norma"?"norma":"resolucion",x.c.a.id);else toast("Eso es de otro grupo de acceso.");});
 }
@@ -934,7 +957,7 @@ function vActa(){
 function resFiltradas(){
   const f=ST.rf,ref=hoyRef();
   return RESOL().filter(r=>r.fecha<=ref).map(r=>({r,e:estadoRes(r,ref)}))
-    .filter(({r,e})=>(f.cuerpo==="all"||r.cuerpo===f.cuerpo)&&(f.materia==="all"||r.materia===f.materia)&&(f.anio==="all"||anio(r.fecha)===f.anio)&&(f.estado==="all"||(f.estado==="vig"?vigenteGrupo(e):e.key===f.estado))&&(!f.q||coincide(pajaRes(r),f.q)))
+    .filter(({r,e})=>(f.cuerpo==="all"||r.cuerpo===f.cuerpo)&&(f.prog==="all"||(r.programas||[]).includes(f.prog))&&(f.materia==="all"||r.materia===f.materia)&&(f.anio==="all"||anio(r.fecha)===f.anio)&&(f.estado==="all"||(f.estado==="vig"?vigenteGrupo(e):e.key===f.estado))&&(!f.q||coincide(pajaRes(r),f.q)))
     .sort((x,y)=>y.r.fecha.localeCompare(x.r.fecha)||String(x.r.punto).localeCompare(String(y.r.punto),undefined,{numeric:true}));
 }
 function vResoluciones(){
@@ -946,6 +969,7 @@ function vResoluciones(){
     ${aFechaBarra()}
     <div class="toolbar">${toolbarBusqueda("rq","Buscar en lo resuelto, materia, cuerpo, fecha…",f.q)}
       <select data-f="cuerpo" aria-label="Cuerpo colegiado">${opciones(cs,f.cuerpo,"Todos los cuerpos")}</select>
+      ${progFiltro(f.prog)}
       <select data-f="materia" aria-label="Materia">${opciones(ms,f.materia,"Todas las materias")}</select>
       <select data-f="anio" aria-label="Año">${opciones(ys,f.anio,"Todos los años")}</select>
       ${aFechaInput()}${viewTog()}</div>
@@ -956,8 +980,8 @@ function vResoluciones(){
     $("#cnt").textContent=`${l.length} de ${hay} resolucion${hay===1?"":"es"}`;
     if(!l.length){$("#filas").innerHTML=vacioHTML(hay);return;}
     $("#filas").innerHTML=ST.viewMode==="cards"
-      ?`<div class="grid">${l.map(({r,e})=>`<div class="cc ${e.cc}" data-r="${esc(r.id)}"><div class="cc-nro">${esc(resCorta(r))}</div><div class="cc-title">${esc(trunc(r.texto,140))}</div><div class="cc-meta"><span class="badge ${e.b}">${esc(e.label)}</span>${r.materia?`<span class="catchip">${esc(r.materia)}</span>`:""}</div></div>`).join("")}</div>`
-      :`<div class="tablewrap"><table class="list"><thead><tr><th>Sesión · punto</th><th>Lo que se resolvió</th><th>Estado</th><th class="td-sig"></th></tr></thead><tbody>${l.map(({r,e})=>`<tr data-r="${esc(r.id)}"><td class="td-nro">${esc(fdate(r.fecha))}<div class="td-sub">${esc(r.cuerpo)} · punto ${esc(r.punto)}</div></td><td class="td-obj">${esc(trunc(r.texto,180))}${r.materia?`<div class="oc"><span class="catchip">${esc(r.materia)}</span></div>`:""}</td><td><span class="badge ${e.b}">${esc(e.label)}</span></td><td class="td-sig"><button class="btn sm line">Abrir</button></td></tr>`).join("")}</tbody></table></div>`;
+      ?`<div class="grid">${l.map(({r,e})=>`<div class="cc ${e.cc}" data-r="${esc(r.id)}"><div class="cc-nro">${esc(resCorta(r))}</div><div class="cc-title">${esc(trunc(r.texto,140))}</div><div class="cc-meta"><span class="badge ${e.b}">${esc(e.label)}</span>${r.materia?`<span class="catchip">${esc(r.materia)}</span>`:""}${progChips(r.programas)}</div></div>`).join("")}</div>`
+      :`<div class="tablewrap"><table class="list"><thead><tr><th>Sesión · punto</th><th>Lo que se resolvió</th><th>Estado</th><th class="td-sig"></th></tr></thead><tbody>${l.map(({r,e})=>`<tr data-r="${esc(r.id)}"><td class="td-nro">${esc(fdate(r.fecha))}<div class="td-sub">${esc(r.cuerpo)} · punto ${esc(r.punto)}</div></td><td class="td-obj">${esc(trunc(r.texto,180))}${r.materia||(r.programas||[]).length?`<div class="oc">${r.materia?`<span class="catchip">${esc(r.materia)}</span> `:""}${progChips(r.programas)}</div>`:""}</td><td><span class="badge ${e.b}">${esc(e.label)}</span></td><td class="td-sig"><button class="btn sm line">Abrir</button></td></tr>`).join("")}</tbody></table></div>`;
     $("#filas").querySelectorAll("[data-r]").forEach(r=>r.onclick=()=>go("resolucion",r.dataset.r));
   };
   pintaFilas();bindLista(vResoluciones,"rf","rq");
@@ -985,6 +1009,7 @@ function vResolucion(){
           <div><div class="k">Sesión</div><div class="v">${fdate(r.fecha)}${a&&a.tipo?" · "+esc(a.tipo.toLowerCase()):""}</div></div>
           <div><div class="k">Punto</div><div class="v">${esc(r.punto)}</div></div>
           <div><div class="k">Materia</div><div class="v">${esc(r.materia||"—")}</div></div>
+          ${(r.programas||[]).length?`<div class="full"><div class="k">Programas y proyectos</div><div class="v">${progChips(r.programas,true)}</div></div>`:""}
           ${r.obs?`<div class="full"><div class="k">Observaciones</div><div class="v" style="font-weight:400">${esc(r.obs)}</div></div>`:""}
         </div>
       </div>
@@ -997,7 +1022,7 @@ function vResolucion(){
       </div>
       ${notasPanelHTML()}
     </div></div></div>`;
-  bindVolver("resoluciones");bindTimeline(ev);bindNotas("res",r.id,r._g,vResolucion);
+  bindVolver("resoluciones");bindTimeline(ev);bindNotas("res",r.id,r._g,vResolucion);bindProgChips();
   if($("#a-acta"))$("#a-acta").onclick=()=>go("acta",a.id);
   $("#view").querySelectorAll("[data-ef]").forEach(b=>b.onclick=()=>{const x=efectos[+b.dataset.ef];if(x.n)go("norma",x.n.id);else if(x.c.a.t==="norma"?DB.normas[x.c.a.id]:DB.res[x.c.a.id])go(x.c.a.t==="norma"?"norma":"resolucion",x.c.a.id);else toast("Eso es de otro grupo de acceso.");});
 }

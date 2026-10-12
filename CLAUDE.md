@@ -40,6 +40,16 @@ para regenerar `demo/datos-demo.json`, en el mismo commit.
 Toda columna que no esté en `OBLIGATORIAS` es opcional: el Excel lo maneja una persona y se
 reordena. La prueba que importa al añadir una es que **sin ella se publique lo mismo que antes**.
 
+## Programas y proyectos
+
+Las actas se organizan por programa o proyecto, y se llenan en la hoja Programas. La columna
+«Programa o proyecto» de Actas y Resoluciones es **opcional y de varios valores** (separados con
+`;`): vacía = asunto general. La resolución hereda los de su acta salvo que diga otros
+(`publicar.py`, `_programas_de`). En la página, un acta pertenece a un programa si ella lo nombra
+**o** si alguna de sus resoluciones lo hace (`progsActa`), así el proyecto muestra la sesión donde
+se resolvió algo suyo. Cada grupo de acceso recibe solo los programas que usa: el nombre de un
+proyecto también es información. Un Excel sin la hoja ni las columnas se publica igual.
+
 ## La vigencia se deduce, no se marca
 
 No hay columna «vigente». `estado()` en `index.html` la calcula de la hoja Cambios a la fecha

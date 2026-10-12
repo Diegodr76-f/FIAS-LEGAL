@@ -20,6 +20,7 @@ import unicodedata
 
 ENTIDADES = ["FIAS", "FAP", "FEIG"]
 TIPOS_SESION = ["Ordinaria", "Extraordinaria"]
+TIPOS_PROG = ["Programa", "Proyecto"]
 TIPOS_NORMA = ["Estatuto", "Reglamento", "Manual", "Política", "Procedimiento",
                "Instructivo", "Lineamiento", "Código", "Otro"]
 MATERIAS = ["Normativa", "Presupuesto y finanzas", "Inversiones",
@@ -36,6 +37,7 @@ NUEVA_VERSION = {"Reforma", "Reforma parcial", "Codificación"}
 LISTAS = {
     "ENTIDADES": ENTIDADES,
     "TIPOS_SESION": TIPOS_SESION,
+    "TIPOS_PROG": TIPOS_PROG,
     "TIPOS_NORMA": TIPOS_NORMA,
     "MATERIAS": MATERIAS,
     "TIPOS_CAMBIO": TIPOS_CAMBIO,
@@ -58,11 +60,18 @@ HOJAS = {
         ("grupo", "Grupo de acceso", "Qué frase abre las actas y resoluciones de este cuerpo. Si todos los abogados ven todo, deja «legal» en todas las filas.", 18, "texto"),
         ("obs", "Observaciones", "", 40, "texto"),
     ],
+    "Programas": [
+        ("nombre", "Programa o proyecto", "Sin repetirse. Es como se escribe en las hojas Actas y Resoluciones.", 44, "texto"),
+        ("tipo", "Tipo", "Programa o Proyecto.", 12, "lista:TIPOS_PROG"),
+        ("entidad", "Entidad", "FIAS, FAP o FEIG.", 10, "lista:ENTIDADES"),
+        ("obs", "Observaciones", "", 40, "texto"),
+    ],
     "Actas": [
         ("cuerpo", "Cuerpo colegiado", "La sigla de la hoja Cuerpos.", 16, "lista:CUERPOS"),
         ("fecha", "Fecha de la sesión", "dd/mm/aaaa. Con el cuerpo, es lo que identifica al acta.", 14, "fecha"),
         ("tipo", "Tipo de sesión", "Ordinaria o Extraordinaria.", 14, "lista:TIPOS_SESION"),
         ("numero", "N.º de sesión", "Opcional. Solo si la sesión tiene número.", 11, "texto"),
+        ("programa", "Programa o proyecto", "De cuál trata la sesión (como está en la hoja Programas). Si trata de varios, sepáralos con punto y coma. Vacío = asunto general.", 34, "texto"),
         ("provisional", "Acta provisional (enlace)", "Enlace al PDF en la carpeta. Opcional.", 34, "enlace"),
         ("definitiva", "Acta definitiva (enlace)", "Enlace al PDF firmado. Mientras esté vacío, el acta se muestra como provisional.", 34, "enlace"),
         ("aprobacion", "Fecha de aprobación del acta definitiva", "Cuándo se aprobó el acta definitiva (normalmente, en la sesión siguiente).", 18, "fecha"),
@@ -74,6 +83,7 @@ HOJAS = {
         ("punto", "Punto del orden del día", "El número del punto: 3, no «tercero». Cuerpo + fecha + punto identifican a la resolución.", 12, "texto"),
         ("texto", "Lo que se resolvió", "El texto o un resumen fiel de lo resuelto.", 70, "texto"),
         ("materia", "Materia", "Para filtrar. Se puede escribir otra si ninguna sirve.", 22, "lista:MATERIAS"),
+        ("programa", "Programa o proyecto (solo si es distinto del acta)", "Por omisión, la resolución es del programa o proyecto de su acta. Escríbelo aquí solo si esta resolución trata de otro, o de uno solo entre varios. Varios: separados con punto y coma.", 34, "texto"),
         ("enlace", "Enlace (opcional)", "Si la resolución tiene documento propio (certificación, extracto).", 30, "enlace"),
         ("obs", "Observaciones", "", 40, "texto"),
     ],
@@ -109,6 +119,7 @@ HOJAS = {
 # una fila, esa fila se salta con un aviso.
 OBLIGATORIAS = {
     "Cuerpos": ["sigla"],
+    "Programas": ["nombre"],
     "Actas": ["cuerpo", "fecha"],
     "Resoluciones": ["cuerpo", "fecha", "punto", "texto"],
     "Normativa": ["nombre", "organo", "fecha"],

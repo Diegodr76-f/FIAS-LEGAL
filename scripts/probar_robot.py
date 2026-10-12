@@ -234,6 +234,42 @@ def main():
         demo = json.load(open(os.path.join(publicar.RAIZ, "demo", "datos-demo.json")))
         ok(demo.get("demo") is True and len(demo["normas"]) == 10, "demo/datos-demo.json es el de ejemplo y está al día")
 
+        seccion("9. Programas y proyectos")
+        m = publicar.Matriz().leer(crear_plantilla.libro(demo=True))
+        PD, GAP = "programa-de-pequenas-donaciones", "programa-de-gestion-de-areas-protegidas"
+        ok(len(m.progs) == 3 and PD in m.progs, "la hoja Programas se lee", list(m.progs))
+        ok(m.actas["ja-fap_2024-06-13"]["programas"] == [PD], "un acta tiene su programa")
+        ok(m.actas["ja-fap_2026-08-08"]["programas"] == [PD, GAP], "una sesión de varios programas: separados con punto y coma")
+        ok(m.res["ja-fap_2026-08-08_p3"]["programas"] == [PD, GAP], "la resolución hereda los de su acta")
+        ok(m.res["ja-fap_2026-08-08_p4"]["programas"] == [GAP], "salvo que diga otro (solo uno de los dos)")
+        ok(m.res["dir-feig_2026-05-14_p3"]["programas"] == ["proyecto-de-monitoreo-de-especies"] and not m.actas["dir-feig_2026-05-14"]["programas"],
+           "una resolución puede tener programa aunque su acta no (asunto general)")
+        wb = crear_plantilla.libro(demo=True)
+        wa = wb["Actas"]
+        fila = next(i for i in range(2, wa.max_row + 1) if wa.cell(row=i, column=2).value and wa.cell(row=i, column=1).value == "DIR-FIAS")
+        wa.cell(row=fila, column=col(wa, "programa", "Actas"), value="Proyecto que no existe; " + "Programa de Pequeñas Donaciones")
+        m = publicar.Matriz().leer(wb)
+        a0 = next(x for x in m.actas.values() if x.get("fila") == fila)
+        ok(a0["programas"] == [PD] and ("Actas", fila) in {(x["hoja"], x["fila"]) for x in m.avisos},
+           "un programa que no está en la hoja se avisa y se ignora; el otro vale")
+        wb = crear_plantilla.libro(demo=True)
+        del wb["Programas"]
+        for hoja in ("Actas", "Resoluciones"):
+            wb[hoja].delete_cols(col(wb[hoja], "programa", hoja))
+        m = publicar.Matriz().leer(wb)
+        ok(len(m.res) == 56 and len(m.avisos) == 1 and not m.progs, "un Excel anterior (sin hoja ni columnas de programas) se publica igual")
+        wb = libro_dos_grupos()
+        m = publicar.Matriz().leer(wb)
+        pl, pd = m.payload("legal", "x"), m.payload("directorio", "x")
+        ok(len(pl["programas"]) == 3 and pd["programas"] == [], "cada grupo recibe solo los programas que usa")
+        ok(all(set(x.get("programas", [])) <= {p["id"] for p in pl["programas"]} for x in pl["actas"] + pl["resoluciones"]),
+           "y todo programa nombrado por algo suyo viene en su archivo")
+        ok(all("programas" not in x for x in pd["actas"]), "sin programas, el campo no viaja")
+        ruta = guardar(wb, t, "prog.xlsx")
+        codigo, error, log = correr(["--excel", ruta, "--salida", os.path.join(t, "d3"), "--permitir-sin-clave"], claves)
+        ok("Pequeñas Donaciones" not in log and "Monitoreo" not in log and "programas y proyectos: 3" in log,
+           "el registro cuenta los programas pero no los nombra")
+
     print(f"\n{pruebas - fallos} de {pruebas} comprobaciones bien" + (f" · {fallos} FALLAN" if fallos else ""))
     sys.exit(1 if fallos else 0)
 

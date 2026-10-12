@@ -125,6 +125,23 @@ const texto=w=>w.document.body.textContent;
   ev(w,'go("revision")');
   ok(/renglón 57/.test(texto(w)),'«Revisión de la matriz» trae el aviso del robot con su renglón');
 
+  seccion('4b. Programas y proyectos');
+  const PD='programa-de-pequenas-donaciones',GAP='programa-de-gestion-de-areas-protegidas',MON='proyecto-de-monitoreo-de-especies';
+  const cuenta=(p)=>[ev(w,`(ST.af.prog=${JSON.stringify(p)},actasFiltradas().length)`),ev(w,`(ST.rf.prog=${JSON.stringify(p)},resFiltradas().length)`)];
+  ok(cuenta(PD).join()==='3,6','Pequeñas Donaciones: 3 actas y 6 resoluciones',cuenta(PD));
+  ok(cuenta(GAP).join()==='1,3','Gestión de Áreas Protegidas: 1 acta (de dos programas) y 3 resoluciones',cuenta(GAP));
+  ok(cuenta(MON).join()==='1,1','un proyecto con una sola resolución trae también la sesión donde se resolvió',cuenta(MON));
+  ev(w,'ST.af.prog="all";ST.rf.prog="all"');
+  ev(w,'go("panel")');
+  ok(/Programas y proyectos/.test(texto(w))&&w.document.querySelectorAll('#view button.cuerpo[data-pg]').length===3,'el panel lista los tres programas y proyectos');
+  w.document.querySelector('#view button.cuerpo[data-pg="'+PD+'"]').click();
+  ok(ev(w,'ST.view')==='actas'&&ev(w,'ST.af.prog')===PD&&/3 de 26 actas/.test(texto(w)),'y al elegir uno se ven sus actas',texto(w).match(/\d+ de \d+ actas?/));
+  ok(w.document.querySelector('select[data-f=prog]')&&/Pequeñas Donaciones/.test(w.document.querySelector('select[data-f=prog]').textContent),'con su filtro en el listado');
+  ev(w,'go("acta","ja-fap_2026-08-08")');
+  ok(w.document.querySelectorAll('#view button.pchip').length>=2,'el acta muestra sus programas como botones');
+  ok(ev(w,'buscarTodo("pequenas donaciones").some(h=>h.t==="acta")&&buscarTodo("monitoreo de especies").some(h=>h.t==="resolucion")'),'y el buscador los encuentra, en actas y en resoluciones');
+  ev(w,'ST.af.prog="all"');
+
   seccion('5. Un enlace a algo de otro grupo o que ya no está');
   let w2=nuevoDom({hash:'#/norma/reglamento-de-adquisiciones-del-fias'});
   await cargado(w2);await entrar(w2,FRASES.legal);

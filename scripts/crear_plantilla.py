@@ -34,10 +34,11 @@ INSTRUCCIONES = [
     ("", "Este libro es la fuente de Quórum. Lo que se escribe aquí es lo que se ve en la herramienta, cifrado, después de que el robot lo publica."),
     ("seccion", "Cómo se llena"),
     ("", "1. Cuerpos: un renglón por cada cuerpo colegiado. Ya vienen el Directorio del FIAS, la Junta Administrativa del FAP y el Directorio del FEIG; se pueden añadir más."),
-    ("", "2. Actas: un renglón por sesión. Cuerpo + fecha de la sesión identifican al acta. Mientras no tenga enlace al acta definitiva ni fecha de aprobación, se muestra como provisional."),
-    ("", "3. Resoluciones: un renglón por cada punto en que se resolvió algo. Cuerpo + fecha + punto la identifican: «en la Junta Administrativa del 8 de agosto de 2026, en el tercer punto» se escribe JA-FAP · 08/08/2026 · 3."),
-    ("", "4. Normativa: un renglón por norma, con el órgano que la aprueba y la fecha (y si se sabe, el punto) en que se aprobó."),
-    ("", "5. Cambios: un renglón cada vez que una resolución reforma, codifica, deroga, deja sin efecto o aclara una norma u otra resolución."),
+    ("", "2. Programas: un renglón por cada programa o proyecto. Con ellos se llena la columna «Programa o proyecto» de Actas y Resoluciones, y así se puede consultar todo lo de un proyecto junto. Si algo es general (no es de ningún proyecto), esa columna se deja vacía."),
+    ("", "3. Actas: un renglón por sesión. Cuerpo + fecha de la sesión identifican al acta. Si la sesión trata de uno o varios programas o proyectos, se escriben en «Programa o proyecto», separados con punto y coma. Mientras no tenga enlace al acta definitiva ni fecha de aprobación, se muestra como provisional."),
+    ("", "4. Resoluciones: un renglón por cada punto en que se resolvió algo. Cuerpo + fecha + punto la identifican: «en la Junta Administrativa del 8 de agosto de 2026, en el tercer punto» se escribe JA-FAP · 08/08/2026 · 3. Por omisión es del programa o proyecto de su acta; la columna de programa solo se llena si trata de otro."),
+    ("", "5. Normativa: un renglón por norma, con el órgano que la aprueba y la fecha (y si se sabe, el punto) en que se aprobó."),
+    ("", "6. Cambios: un renglón cada vez que una resolución reforma, codifica, deroga, deja sin efecto o aclara una norma u otra resolución."),
     ("seccion", "La vigencia no se escribe: se deduce"),
     ("", "No hay columna «vigente». Quórum la calcula de la hoja Cambios, a la fecha que se pregunte: una norma con una Derogación es derogada desde esa fecha; con una Reforma o Codificación, sigue vigente con texto nuevo."),
     ("", "Cuando un acta nueva da de baja algo, solo se añade un renglón en Cambios. El renglón viejo no se toca: así nunca hay dos lugares que se contradigan."),
@@ -45,7 +46,7 @@ INSTRUCCIONES = [
     ("seccion", "Ejemplo de un renglón en Cambios"),
     ("", "Norma afectada: Manual Operativo del Ciclo de Proyectos del FAP · Tipo de cambio: Reforma · Resuelto por: JA-FAP · 08/08/2026 · 3 · Texto vigente: enlace al manual reformado."),
     ("seccion", "Confidencialidad: tres reglas"),
-    ("", "1. Este libro se protege con contraseña: Archivo → Información → Proteger libro → Cifrar con contraseña. El robot lo abre con esa contraseña, guardada como secreto en GitHub; sin ella, el enlace de descarga solo entrega un archivo cerrado."),
+    ("", "1. Este libro se protege con contraseña, como un PDF: en Excel de escritorio, Archivo → Información → Proteger libro → Cifrar con contraseña. Es una contraseña que tú inventas y que se guarda en GitHub como secreto (EXCEL_CLAVE): con ella el robot abre el libro. Sin ella, el enlace de descarga solo entrega un archivo cerrado. Este libro se edita en Excel de escritorio (Excel en el navegador no abre libros con contraseña)."),
     ("", "2. Los enlaces a los PDF deben ser de la carpeta compartida solo con quien corresponde, nunca «cualquier persona con el vínculo»."),
     ("", "3. No se cambia el nombre de las hojas ni de los encabezados de la fila 1. Las columnas sí se pueden reordenar o ensanchar."),
     ("seccion", "Publicar"),
@@ -217,6 +218,17 @@ RESOLUCIONES = [
     ("DIR-FEIG", "2022-11-10", "2", "Ratificar la integración del comité técnico del FEIG.", "Gobierno corporativo"),
 ]
 
+PROGRAMAS = [
+    ("Programa de Pequeñas Donaciones", "Programa", "FAP"),
+    ("Programa de Gestión de Áreas Protegidas", "Programa", "FAP"),
+    ("Proyecto de Monitoreo de Especies", "Proyecto", "FEIG"),
+]
+PD, GAP, MON = (p[0] for p in PROGRAMAS)
+# Programa o proyecto de cada sesión, y de las resoluciones que difieren de su acta.
+PROG_ACTA = {("JA-FAP", "2024-06-13"): PD, ("JA-FAP", "2024-09-12"): PD,
+             ("JA-FAP", "2026-08-08"): f"{PD}; {GAP}"}
+PROG_RES = {("JA-FAP", "2026-08-08", "4"): GAP, ("DIR-FEIG", "2026-05-14", "3"): MON}
+
 NORMAS = [
     ("Reglamento de Adquisiciones del FIAS", "Reglamento", "FIAS", "DIR-FIAS", "2017-05-18", "4"),
     ("Política de Inversiones del FIAS", "Política", "FIAS", "DIR-FIAS", "2017-11-23", "2"),
@@ -254,7 +266,7 @@ def demo_datos():
     for cuerpo, ses in SESIONES.items():
         for k, (fecha, tipo) in enumerate(ses):
             sig = ses[k + 1][0] if k + 1 < len(ses) else None
-            a = {"cuerpo": cuerpo, "fecha": fecha, "tipo": tipo,
+            a = {"cuerpo": cuerpo, "fecha": fecha, "tipo": tipo, "programa": PROG_ACTA.get((cuerpo, fecha)),
                  "provisional": f"{EJ}{cuerpo}/{fecha}-provisional.pdf"}
             if sig:   # la definitiva se aprueba en la sesión siguiente
                 a["definitiva"] = f"{EJ}{cuerpo}/{fecha}-definitiva.pdf"
@@ -265,7 +277,8 @@ def demo_datos():
                 resol.append({"cuerpo": cuerpo, "fecha": fecha, "punto": "1",
                               "texto": f"Aprobar el acta de la sesión del {ant}.", "materia": "Gobierno corporativo"})
     for cuerpo, fecha, punto, texto, materia in RESOLUCIONES:
-        resol.append({"cuerpo": cuerpo, "fecha": fecha, "punto": punto, "texto": texto, "materia": materia})
+        resol.append({"cuerpo": cuerpo, "fecha": fecha, "punto": punto, "texto": texto, "materia": materia,
+                      "programa": PROG_RES.get((cuerpo, fecha, punto))})
     normas = [{"nombre": n, "tipo": t, "entidad": e, "organo": o, "fecha": f, "punto": p,
                "enlace": f"{EJ}normativa/{i + 1}-original.pdf"} for i, (n, t, e, o, f, p) in enumerate(NORMAS)]
     cambios = []
@@ -279,7 +292,8 @@ def demo_datos():
         if texto:
             c["enlace"] = f"{EJ}normativa/cambio-{i + 1}.pdf"
         cambios.append(c)
-    return {"Cuerpos": cuerpos, "Actas": actas, "Resoluciones": resol, "Normativa": normas, "Cambios": cambios}
+    progs = [{"nombre": n, "tipo": t, "entidad": e} for n, t, e in PROGRAMAS]
+    return {"Cuerpos": cuerpos, "Programas": progs, "Actas": actas, "Resoluciones": resol, "Normativa": normas, "Cambios": cambios}
 
 
 if __name__ == "__main__":

@@ -172,7 +172,7 @@ def enlace(v):
 # ------------------------------------------------------------- el modelo
 class Matriz:
     def __init__(self):
-        self.cuerpos, self.actas, self.res, self.normas, self.cambios = {}, {}, {}, {}, []
+        self.cuerpos, self.progs, self.actas, self.res, self.normas, self.cambios = {}, {}, {}, {}, {}, []
         self.avisos = []
 
     def aviso(self, hoja, fila, generico, detalle=None, grupo=None):
@@ -188,6 +188,7 @@ class Matriz:
 
     def leer(self, wb):
         self._cuerpos(wb)
+        self._programas(wb)
         self._actas(wb)
         self._resoluciones(wb)
         self._normas(wb)
@@ -230,6 +231,37 @@ class Matriz:
                                "entidad": texto(d.get("entidad")),
                                "grupo": slug(texto(d.get("grupo")) or "") or GRUPO_POR_OMISION}
 
+    def _programas(self, wb):
+        """La hoja es opcional: un Excel anterior a los programas sigue publicándose igual."""
+        if "Programas" not in wb.sheetnames:
+            return
+        for i, d in filas(wb, "Programas"):
+            n = texto(d.get("nombre"))
+            if not n:
+                self.aviso("Programas", i, "falta el nombre; el renglón no se publica")
+                continue
+            pid = slug(n)
+            if pid in self.progs:
+                self.aviso("Programas", i, "programa o proyecto repetido; vale el primer renglón", f"«{n}» está dos veces; vale el primer renglón.")
+                continue
+            self.progs[pid] = {"id": pid, "nombre": n, "tipo": texto(d.get("tipo")), "entidad": texto(d.get("entidad")),
+                               "obs": texto(d.get("obs"))}
+
+    def _programas_de(self, hoja, i, valor, grupo):
+        """«A; B» → [id, id]. Uno que no está en la hoja Programas se avisa y se ignora."""
+        out = []
+        for parte in re.split(r"[;\n]", texto(valor) or ""):
+            n = texto(parte)
+            if not n:
+                continue
+            pid = slug(n)
+            if pid not in self.progs:
+                self.aviso(hoja, i, "un programa o proyecto no está en la hoja Programas; se ignora",
+                           f"«{n}» no está en la hoja Programas. Añádelo allí o corrige el nombre: mientras tanto el renglón se publica sin ese programa.", grupo)
+            elif pid not in out:
+                out.append(pid)
+        return out
+
     def _actas(self, wb):
         for i, d in filas(wb, "Actas"):
             s = self._sigla("Actas", i, d.get("cuerpo"))
@@ -247,7 +279,8 @@ class Matriz:
                            f"Ya hay un acta de {s} del {fh(f)}: vale el primer renglón. Si fueron dos sesiones el mismo día, avisa: Quórum las identifica por cuerpo y fecha.", g)
                 continue
             a = {"id": aid, "cuerpo": s, "fecha": f, "tipo": texto(d.get("tipo")),
-                 "numero": texto(d.get("numero")), "obs": texto(d.get("obs")), "fila": i}
+                 "numero": texto(d.get("numero")), "obs": texto(d.get("obs")), "fila": i,
+                 "programas": self._programas_de("Actas", i, d.get("programa"), g)}
             for k, rot in (("provisional", "acta provisional"), ("definitiva", "acta definitiva")):
                 u, malo = enlace(d.get(k))
                 if malo:
@@ -288,8 +321,12 @@ class Matriz:
             u, malo = enlace(d.get("enlace"))
             if malo:
                 self.aviso("Resoluciones", i, "el enlace no empieza por https://; se ignora", None, g)
+            propio = self._programas_de("Resoluciones", i, d.get("programa"), g)
+            # Por omisión, la resolución es del programa o proyecto de su acta.
+            progs = propio or list(self.actas[aid].get("programas") or [])
             self.res[rid] = {"id": rid, "acta": aid, "cuerpo": s, "fecha": f, "punto": p, "texto": t,
-                             "materia": texto(d.get("materia")), "enlace": u, "obs": texto(d.get("obs")), "fila": i}
+                             "materia": texto(d.get("materia")), "enlace": u, "obs": texto(d.get("obs")), "fila": i,
+                             "programas": progs}
 
     def _normas(self, wb):
         self.por_nombre = {}
@@ -411,12 +448,17 @@ class Matriz:
     def payload(self, grupo, generado):
         def de(sigla):
             return self.grupo_de(sigla) == grupo
-        limpio = lambda d: {k: v for k, v in d.items() if k not in ("fila", "grupos") and v not in (None, "")}
+        limpio = lambda d: {k: v for k, v in d.items() if k not in ("fila", "grupos") and v not in (None, "", [])}
+        acs = [limpio(a) for a in self.actas.values() if de(a["cuerpo"])]
+        rss = [limpio(r) for r in self.res.values() if de(r["cuerpo"])]
+        # Solo los programas que ese grupo usa: el nombre de un proyecto también es información.
+        usados = {p for x in acs + rss for p in x.get("programas", [])}
         return {
             "v": 1, "grupo": grupo, "generado": generado,
             "cuerpos": [{"sigla": c["sigla"], "nombre": c["nombre"], "entidad": c["entidad"]} for c in self.cuerpos.values()],
-            "actas": [limpio(a) for a in self.actas.values() if de(a["cuerpo"])],
-            "resoluciones": [limpio(r) for r in self.res.values() if de(r["cuerpo"])],
+            "programas": [limpio(p) for p in self.progs.values() if p["id"] in usados],
+            "actas": acs,
+            "resoluciones": rss,
             "normas": [limpio(n) for n in self.normas.values() if n["grupo"] == grupo],
             "cambios": [limpio(c) for c in self.cambios if grupo in c["grupos"]],
             "avisos": [{"hoja": a["hoja"], "fila": a["fila"], "texto": a["texto"]}
@@ -458,7 +500,7 @@ def escribir(ruta, obj):
 
 
 def resumen(m, grupos):
-    lineas = [f"Cuerpos: {len(m.cuerpos)} · actas: {sum(1 for a in m.actas.values() if not a.get('stub'))} · "
+    lineas = [f"Cuerpos: {len(m.cuerpos)} · programas y proyectos: {len(m.progs)} · actas: {sum(1 for a in m.actas.values() if not a.get('stub'))} · "
               f"resoluciones: {len(m.res)} · normas: {len(m.normas)} · cambios: {len(m.cambios)}",
               f"Grupos publicados: {', '.join(grupos)}"]
     if m.avisos:

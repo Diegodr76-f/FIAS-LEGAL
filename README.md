@@ -10,7 +10,7 @@ una página que lo descifra en el navegador.
 
 ```
 Excel en OneDrive (protegido con contraseña)
-   hojas: Cuerpos · Actas · Resoluciones · Normativa · Cambios
+   hojas: Cuerpos · Programas · Actas · Resoluciones · Normativa · Cambios
         │  robot diario y botón «Run workflow» (GitHub Actions)
         ▼
 un archivo cifrado por grupo de acceso  →  GitHub Pages, sin pasar por git
@@ -28,6 +28,10 @@ Se parte de [`plantilla/Quorum_matriz.xlsx`](plantilla/Quorum_matriz.xlsx). Su p
 hoja, **Instrucciones**, explica cada columna; cada encabezado tiene además una nota.
 Lo esencial:
 
+- **Programas y proyectos** van en su hoja, y de ahí se llena la columna «Programa o proyecto» de
+  Actas y Resoluciones (varios, separados con punto y coma; vacío = asunto general). Una resolución
+  es del programa de su acta salvo que diga otro. Al consultar un programa o proyecto aparecen sus
+  actas y resoluciones juntas.
 - **Un acta** es un cuerpo y una fecha de sesión. Es **provisional** hasta que tiene enlace
   al acta definitiva o fecha de aprobación.
 - **Una resolución** es un cuerpo, una fecha y un punto: «en la Junta Administrativa del
@@ -71,12 +75,17 @@ Microsoft.
 
 ## Configuración (una sola vez)
 
-1. **El Excel.** Copia la plantilla a tu carpeta de OneDrive, llénala y protégela:
-   *Archivo → Información → Proteger libro → Cifrar con contraseña*.
+1. **El Excel.** Copia la plantilla a tu carpeta de OneDrive, llénala y ponle contraseña, como
+   a un PDF: en Excel de escritorio, *Archivo → Información → Proteger libro → Cifrar con
+   contraseña*. La contraseña la inventas tú (anótala: Excel no la recupera). Es el secreto
+   `EXCEL_CLAVE` del paso 4. Un libro con contraseña se edita en Excel de escritorio, no en el
+   navegador.
 2. **El enlace.** En OneDrive: *Compartir → Cualquier persona con el vínculo → puede ver*,
    y copia el enlace. Como el libro tiene contraseña, el enlace solo entrega un archivo
    cerrado.
-3. **Las frases.** En la página, «Generar una frase nueva»: una por grupo de acceso.
+3. **Las frases.** No hay que inventarlas: en la página de entrada, el botón «Generar una frase
+   nueva» da seis palabras al azar. Una por grupo de acceso (con un solo grupo, `legal`, es una).
+   Es la que se entrega a quienes van a consultar; no es la contraseña del Excel.
 4. **Los secretos.** En GitHub: *Settings → Secrets and variables → Actions → New
    repository secret*:
 
