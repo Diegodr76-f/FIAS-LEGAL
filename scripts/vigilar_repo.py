@@ -29,10 +29,14 @@ def main():
     malos = []
     for a in archivos:
         bajo = a.lower()
-        if bajo.startswith(("datos/", "_site/")):
+        if bajo.startswith(("datos/", "_site/", ".cache-textos/")):
             malos.append(f"{a}: lo publicado no se sube al repositorio (lo despliega el robot)")
         elif bajo.endswith(".xlsx") and a not in PERMITIDOS_XLSX:
             malos.append(f"{a}: un Excel que no es la plantilla ni la demostración")
+        elif bajo.startswith("demo/textos/") and bajo.endswith(".json"):
+            with open(os.path.join(RAIZ, a), encoding="utf-8") as f:
+                if json.load(f).get("demo") is not True:
+                    malos.append(f"{a}: un texto de norma que no es de la demostración")
         elif bajo.endswith(".json") and a not in PERMITIDOS_JSON:
             malos.append(f"{a}: un JSON que no es el de la demostración")
         elif bajo.endswith(PROHIBIDAS):

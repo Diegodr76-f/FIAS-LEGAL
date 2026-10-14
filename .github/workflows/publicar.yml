@@ -39,7 +39,19 @@ jobs:
           python-version: '3.12'
 
       - name: Instalar dependencias
-        run: pip install openpyxl requests cryptography msoffcrypto-tool
+        run: |
+          sudo apt-get install -y -q tesseract-ocr tesseract-ocr-spa
+          pip install openpyxl requests cryptography msoffcrypto-tool pymupdf
+
+      # El texto ya leído de cada PDF (el OCR de un escaneo toma un minuto). Va
+      # cifrado con una llave que sale de los secretos: un pull request ajeno
+      # puede leer cachés, pero no tiene los secretos.
+      - name: Recordar los textos ya leídos
+        uses: actions/cache@v4
+        with:
+          path: .cache-textos
+          key: textos-${{ github.run_id }}
+          restore-keys: textos-
 
       - name: Armar el sitio
         run: |

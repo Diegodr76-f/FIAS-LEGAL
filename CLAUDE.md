@@ -50,6 +50,22 @@ hoja por fondo obligaría a cambiar código cada vez que llega un fondo nuevo y 
 Cambios, que cruza fondos. En la página, `ST.fondo` filtra panel y listados (`enFondo()`), con la
 barra de arriba. Un Excel sin la hoja Fondos se publica igual, con la sigla escrita en Cuerpos.
 
+## El texto de las normas: `scripts/texto.py`
+
+Solo el texto **vigente**: el PDF que se da es el que rige hoy, y no se guarda historia (lo pidió así
+quien lo usa). `texto.extraer()` saca el texto (PyMuPDF; la negrita marca títulos), mide si la capa
+de texto es un OCR viejo y malo (`calidad()`: «C6digo», «lnterno») y entonces vuelve a leer con
+Tesseract en español; quita encabezados y números de página y lo parte en `h1`/`h2`/`art`/`p`.
+Si la numeración de artículos vuelve a 1 (la resolución que aprueba un reglamento trae su propio
+Art. 1), es otra parte: los ids llevan la parte (`p1-a14`).
+
+En el robot (`leer_textos`, `escribir_textos`): cada texto va en un archivo aparte, cifrado con una
+llave al azar que viaja dentro del archivo del grupo, y con un nombre que no dice qué norma es. El
+enlace de descarga («PDF para leer en Quórum») nunca se publica. Lo ya leído se guarda en el caché
+de Actions, **cifrado con una llave de los secretos**: los pull requests de un fork pueden leer
+cachés. En la página, `vTexto()` es el lector; las reformas con artículos de la hoja Cambios se
+anotan al pie de cada uno (`artsDe`).
+
 ## La vigencia se deduce, no se marca
 
 No hay columna «vigente». `estado()` en `index.html` la calcula de la hoja Cambios a la fecha

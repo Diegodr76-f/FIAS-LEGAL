@@ -26,6 +26,7 @@ Tres reglas que no se negocian, porque son actas de directorio:
 import argparse
 import base64
 import datetime as dt
+import hashlib
 import io
 import json
 import os
@@ -350,8 +351,11 @@ class Matriz:
             u, malo = enlace(d.get("enlace"))
             if malo:
                 self.aviso("Normativa", i, "el enlace no empieza por https://; se ignora", None, g)
+            pdf, malo = enlace(d.get("pdf"))
+            if malo:
+                self.aviso("Normativa", i, "el «PDF para leer en Quórum» no empieza por https://; se ignora", None, g)
             aid = f"{slug(s)}_{f}"
-            self.normas[nid] = {"id": nid, "nombre": n, "tipo": texto(d.get("tipo")),
+            self.normas[nid] = {"pdf": pdf,"id": nid, "nombre": n, "tipo": texto(d.get("tipo")),
                                 "entidad": self._fondo("Normativa", i, d.get("entidad"), g) or self.cuerpos[s]["entidad"],
                                 "organo": s, "fecha": f, "punto": p, "res": res,
                                 "acta": aid if aid in self.actas else None, "enlace": u,
@@ -438,11 +442,26 @@ class Matriz:
         gs = {c["grupo"] for c in self.cuerpos.values()} | {n["grupo"] for n in self.normas.values()}
         return sorted(gs)
 
-    def payload(self, grupo, generado):
+    def payload(self, grupo, generado, textos=None, clave_textos=None, inline=False):
+        """`textos`: id de norma → nombre del archivo cifrado con su texto. Con
+        `inline`, el texto va dentro (solo la demostración, que no se cifra)."""
+        textos = textos or {}
+
         def de(sigla):
             return self.grupo_de(sigla) == grupo
-        limpio = lambda d: {k: v for k, v in d.items() if k not in ("fila", "grupos") and v not in (None, "", [])}
-        normas = [limpio(n) for n in self.normas.values() if n["grupo"] == grupo]
+        # El enlace «PDF para leer en Quórum» es para el robot: no se publica.
+        limpio = lambda d: {k: v for k, v in d.items() if k not in ("fila", "grupos", "pdf", "_texto") and v not in (None, "", [])}
+
+        def norma(n):
+            x = limpio(n)
+            t = n.get("_texto")
+            if t and inline:
+                x["texto"] = t
+            elif t and n["id"] in textos:
+                x["texto"] = textos[n["id"]]
+                x["textoInfo"] = {"articulos": t.get("articulos", 0), "paginas": t.get("paginas"), "ocr": t.get("ocr", False)}
+            return x
+        normas = [norma(n) for n in self.normas.values() if n["grupo"] == grupo]
         usados = {c["entidad"] for c in self.cuerpos.values()} | {n.get("entidad") for n in normas}
         return {
             "v": 1, "grupo": grupo, "generado": generado,
@@ -454,7 +473,105 @@ class Matriz:
             "cambios": [limpio(c) for c in self.cambios if grupo in c["grupos"]],
             "avisos": [{"hoja": a["hoja"], "fila": a["fila"], "texto": a["texto"]}
                        for a in self.avisos if a["grupo"] in (None, grupo)],
+            **({"claveTextos": base64.b64encode(clave_textos).decode("ascii")} if clave_textos and textos else {}),
         }
+
+
+# ------------------------------------------------------- textos de normas
+def descargar_pdf(url):
+    import requests
+    if "download=1" not in url:
+        url += ("&" if "?" in url else "?") + "download=1"
+    r = requests.get(url, timeout=120, allow_redirects=True)
+    if r.status_code != 200 or not r.content.startswith(b"%PDF"):
+        raise ValueError("no es un PDF")
+    return r.content
+
+
+def _llave_cache(secreto):
+    from cryptography.hazmat.primitives import hashes
+    from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
+    return PBKDF2HMAC(algorithm=hashes.SHA256(), length=32, salt=b"quorum-cache-textos-v1",
+                      iterations=200000).derive(secreto.encode("utf-8"))
+
+
+def leer_textos(m, cache=None, secreto=None, bajar=None, extraer=None):
+    """Baja el PDF vigente de cada norma que lo tenga y lo parte en artículos.
+
+    Leer un escaneo con OCR toma un minuto, y el robot corre a diario: lo ya
+    leído se guarda en `cache`, por la huella del PDF, para no repetirlo
+    mientras el PDF no cambie. Ese caché vive en GitHub Actions, y los pull
+    requests de otros pueden leer cachés: por eso va CIFRADO con una llave que
+    sale de los secretos, que esos pull requests no tienen."""
+    from cryptography.hazmat.primitives.ciphers.aead import AESGCM
+    pend = [n for n in m.normas.values() if n.get("pdf")]
+    if not pend:
+        return 0
+    bajar = bajar or descargar_pdf
+    if extraer is None:
+        import texto
+        extraer = texto.extraer
+    k = _llave_cache(secreto) if cache and secreto else None
+    usados, hechos = set(), 0
+    for n in pend:
+        try:
+            pdf = bajar(n["pdf"])
+        except Exception:
+            m.aviso("Normativa", n["fila"], "el «PDF para leer en Quórum» no se pudo bajar (¿pide iniciar sesión?)",
+                    f"«{n['nombre']}»: el enlace de «PDF para leer en Quórum» no entrega un PDF. Tiene que ser un enlace "
+                    "«cualquier persona con el vínculo», de descarga.", n["grupo"])
+            continue
+        h = hashlib.sha256(pdf).hexdigest()
+        usados.add(h)
+        ruta = os.path.join(cache, h + ".bin") if k else None
+        t = None
+        if ruta and os.path.exists(ruta):
+            try:
+                with open(ruta, "rb") as f:
+                    blob = f.read()
+                t = json.loads(AESGCM(k).decrypt(blob[:12], blob[12:], h.encode()))
+            except Exception:
+                t = None
+        if t is None:
+            try:
+                t = extraer(pdf)
+            except Exception as e:
+                m.aviso("Normativa", n["fila"], "no se pudo leer el texto del «PDF para leer en Quórum»",
+                        f"«{n['nombre']}»: no se pudo leer el texto del PDF ({type(e).__name__}).", n["grupo"])
+                continue
+            if ruta:
+                os.makedirs(cache, exist_ok=True)
+                iv = os.urandom(12)
+                with open(ruta, "wb") as f:
+                    f.write(iv + AESGCM(k).encrypt(iv, json.dumps(t, ensure_ascii=False).encode(), h.encode()))
+        if not t.get("unidades"):
+            m.aviso("Normativa", n["fila"], "el «PDF para leer en Quórum» no trae texto legible",
+                    f"«{n['nombre']}»: del PDF no salió texto. ¿Es una imagen de muy baja calidad?", n["grupo"])
+            continue
+        n["_texto"] = t
+        hechos += 1
+    if k and os.path.isdir(cache):   # lo que ya no se usa, fuera
+        for f in os.listdir(cache):
+            if f.endswith(".bin") and f[:-4] not in usados:
+                os.remove(os.path.join(cache, f))
+    return hechos
+
+
+def escribir_textos(m, grupo, salida):
+    """Un archivo por norma, cifrado con una llave al azar de esta publicación
+    (que viaja dentro del archivo del grupo). El nombre no dice qué norma es."""
+    from cryptography.hazmat.primitives.ciphers.aead import AESGCM
+    clave, archivos = os.urandom(32), {}
+    for n in m.normas.values():
+        if n["grupo"] != grupo or not n.get("_texto"):
+            continue
+        nombre = "t-" + hashlib.sha256(clave + n["id"].encode()).hexdigest()[:24] + ".json"
+        iv = os.urandom(12)
+        ct = AESGCM(clave).encrypt(iv, json.dumps(n["_texto"], ensure_ascii=False, separators=(",", ":")).encode(), n["id"].encode())
+        b = lambda x: base64.b64encode(x).decode("ascii")
+        escribir(os.path.join(salida, nombre), {"iv": b(iv), "ct": b(ct)})
+        archivos[n["id"]] = nombre
+    return archivos, clave
 
 
 # ------------------------------------------------------------- cifrado
@@ -492,7 +609,7 @@ def escribir(ruta, obj):
 
 def resumen(m, grupos):
     lineas = [f"Cuerpos: {len(m.cuerpos)} · fondos: {len(m.fondos)} · actas: {sum(1 for a in m.actas.values() if not a.get('stub'))} · "
-              f"resoluciones: {len(m.res)} · normas: {len(m.normas)} · cambios: {len(m.cambios)}",
+              f"resoluciones: {len(m.res)} · normas: {len(m.normas)} · con texto: {sum(1 for n in m.normas.values() if n.get('_texto'))} · cambios: {len(m.cambios)}",
               f"Grupos publicados: {', '.join(grupos)}"]
     if m.avisos:
         lineas.append(f"Avisos: {len(m.avisos)} (el detalle está en Quórum → Revisión de la matriz)")
@@ -506,6 +623,8 @@ def main(argv=None):
     ap.add_argument("--salida", default=os.path.join(RAIZ, "_site", "datos"))
     ap.add_argument("--demo", action="store_true", help="publica demo/matriz_demo.xlsx SIN cifrar (solo datos ficticios)")
     ap.add_argument("--permitir-sin-clave", action="store_true", help="acepta un Excel sin contraseña (pruebas)")
+    ap.add_argument("--cache", default=os.path.join(RAIZ, ".cache-textos"),
+                    help="dónde guardar, cifrado, el texto ya leído de cada PDF")
     ap.add_argument("--si-falta-config", action="store_true",
                     help="si aún no hay secretos, publica la herramienta sin datos en vez de fallar")
     a = ap.parse_args(argv)
@@ -519,7 +638,12 @@ def main(argv=None):
             raise Alto("--demo solo publica el libro de ejemplo (el que crea crear_plantilla.py --demo). "
                        "Un Excel real nunca se publica sin cifrar.")
         m = Matriz().leer(wb)
-        datos = m.payload(GRUPO_POR_OMISION, ahora)
+        for n in m.normas.values():   # textos de ejemplo, también ficticios
+            ruta_t = os.path.join(RAIZ, "demo", "textos", n["id"] + ".json")
+            if os.path.exists(ruta_t):
+                with open(ruta_t, encoding="utf-8") as f:
+                    n["_texto"] = json.load(f)
+        datos = m.payload(GRUPO_POR_OMISION, ahora, inline=True)
         datos.update({"demo": True, "grupo": "demo"})
         escribir(os.path.join(RAIZ, "demo", "datos-demo.json"), datos)
         print(resumen(m, ["demo (sin cifrar: datos ficticios)"]))
@@ -552,10 +676,14 @@ def main(argv=None):
         raise Alto(f"La frase de {', '.join(cortas)} es corta (menos de {MIN_FRASE} caracteres). "
                    "Genera una en Quórum → «Generar una frase nueva».")
 
+    secreto = os.environ.get("EXCEL_CLAVE", "").strip() or "\n".join(claves[g] for g in sorted(claves))
+    leer_textos(m, a.cache, secreto)
+
     indice = {"generado": ahora, "grupos": []}
     for g in grupos:
         archivo = f"g-{g}.json"
-        escribir(os.path.join(a.salida, archivo), cifrar(m.payload(g, ahora), claves[g]))
+        textos, clave_textos = escribir_textos(m, g, a.salida)
+        escribir(os.path.join(a.salida, archivo), cifrar(m.payload(g, ahora, textos, clave_textos), claves[g]))
         indice["grupos"].append({"id": g, "archivo": archivo})
     escribir(os.path.join(a.salida, "indice.json"), indice)
 

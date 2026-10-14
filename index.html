@@ -222,6 +222,39 @@
   .quedia input{padding:9px 10px;border:1.5px solid var(--line);border-radius:10px}
   .resq{margin-top:12px;border-radius:11px;padding:11px 13px;font-size:13px;line-height:1.5;border:1px solid var(--line2);background:var(--bg)}
 
+  /* lector de normas (estilo Lexis): índice al costado, texto por artículos */
+  .lector{display:grid;grid-template-columns:300px minmax(0,1fr);gap:18px;align-items:start;margin-top:14px}
+  .lindice{position:sticky;top:72px;max-height:calc(100vh - 92px);overflow:auto;padding:14px 12px}
+  .lindice .search{min-width:0;margin-bottom:8px}
+  .lindice .lcnt{font-size:11.5px;color:var(--muted);font-weight:600;margin:0 4px 8px}
+  .lix{all:unset;box-sizing:border-box;cursor:pointer;display:block;width:100%;padding:5px 8px;border-radius:7px;font-size:12.5px;line-height:1.35;color:var(--ink)}
+  .lix:hover,.lix.on{background:var(--tint);color:var(--navy)}
+  .lix.h1{font-weight:700;margin-top:8px;font-size:12px;text-transform:uppercase;letter-spacing:.2px;color:var(--navy)}
+  .lix.h2{font-weight:700;padding-left:14px}
+  .lix.art{padding-left:14px;color:var(--muted)}
+  .lix.art b{color:var(--ink);font-weight:700}
+  .lix .ref{color:var(--amber);font-weight:700}
+  .ltexto{padding:30px 40px 40px;font-family:Georgia,'Times New Roman',serif;font-size:15.5px;line-height:1.72;color:#1B2140}
+  @media(max-width:560px){.ltexto{padding:20px 16px 26px;font-size:15px}}
+  .ltexto .lh1{font-family:'Titillium Web',system-ui,sans-serif;font-size:15.5px;font-weight:700;color:var(--navy);text-align:center;margin:30px 0 12px;scroll-margin-top:84px;line-height:1.4}
+  .ltexto .lh1:first-child{margin-top:0}
+  .ltexto .lh2{font-family:'Titillium Web',system-ui,sans-serif;font-size:14px;font-weight:700;margin:22px 0 8px;scroll-margin-top:84px}
+  .ltexto p{margin:0 0 10px}
+  .ltexto p.lli{padding-left:24px;margin-bottom:6px}
+  .lart{margin:0 0 16px;scroll-margin-top:84px;border-radius:8px;transition:background .6s}
+  .lart.flash{background:#FFF6CC}
+  .lart{position:relative}
+  .lart .lnum{font-weight:700}
+  .lart .lk2{all:unset;cursor:pointer;position:absolute;right:-30px;top:2px;font-size:13px;opacity:0;transition:opacity .15s}
+  @media(max-width:560px){.lart .lk2{right:-14px}}
+  .lart:hover .lk2,.lart .lk2:focus-visible{opacity:.8}
+  .lref{font-family:'Titillium Web',system-ui,sans-serif;font-size:12px;line-height:1.45;background:var(--amberbg);color:#8A5E06;border-radius:8px;padding:6px 10px;margin:4px 0 8px}
+  .lref button{all:unset;cursor:pointer;text-decoration:underline;font-weight:700}
+  .ltexto mark{background:#FFE58A;color:inherit;border-radius:3px;padding:0 1px}
+  .lmovil{display:none}
+  @media(max-width:920px){.lector{grid-template-columns:1fr}.lindice{display:none}.lmovil{display:block;margin-top:12px}}
+  .lmovil select{width:100%;padding:10px 12px;border:1.5px solid var(--line);border-radius:10px;background:#fff}
+
   /* notas */
   .nota{border:1px solid var(--line2);border-radius:10px;padding:9px 11px;margin-top:8px;font-size:13px;line-height:1.45;display:flex;gap:8px}
   .nota .nt{flex:1;white-space:pre-wrap;overflow-wrap:anywhere}
@@ -389,6 +422,7 @@ function fusionar(p){
   const vistos=new Set(DB.avisos.map(a=>a.hoja+"|"+a.fila+"|"+a.texto));
   (p.avisos||[]).forEach(a=>{const k=a.hoja+"|"+a.fila+"|"+a.texto;if(!vistos.has(k)){vistos.add(k);DB.avisos.push(a);}});
   DB.generado=p.generado||DB.generado;
+  if(p.claveTextos)CLAVES_TEXTO[g]=p.claveTextos;
   if(!ABIERTOS.includes(g))ABIERTOS.push(g);
 }
 const NORMAS=()=>Object.values(DB.normas);
@@ -488,6 +522,11 @@ function pajaActa(a){return [a.cuerpo,cuerpo(a.cuerpo).nombre,fondoActa(a),fondo
    guardan. */
 let NOTAS={};       // grupo -> [{id,ref:{t,id},txt,ts}]
 let LLAVES={};      // grupo -> {key, salt}
+/* Textos de las normas. Cada uno es un archivo aparte, cifrado con una llave al
+   azar que viaja DENTRO del archivo del grupo (ya cifrado con su frase): así se
+   bajan solo al abrir la norma, y descifrarlos no cuesta otra vuelta de PBKDF2. */
+let TEXTOS={};      // id de norma -> {unidades, ocr, paginas}
+let CLAVES_TEXTO={};// grupo -> llave AES en base64
 const lsGet=k=>{try{return localStorage.getItem(k);}catch(e){return null;}};
 function lsSet(k,v){try{localStorage.setItem(k,v);return true;}catch(e){toast("No se pudo guardar la nota en este navegador (¿modo privado o sin espacio?).",5000);return false;}}
 async function abrirNotas(grupo,frase){
@@ -528,7 +567,7 @@ function tocar(){if(!ABIERTOS.length)return;clearTimeout(relojBloqueo);relojBloq
 /* Cerrar es olvidar: los datos descifrados, las llaves de las notas y la vista. */
 function cerrarSesion(msg){
   clearTimeout(relojBloqueo);
-  DB=vacia();ABIERTOS=[];NOTAS={};LLAVES={};DEMO=false;
+  DB=vacia();ABIERTOS=[];NOTAS={};LLAVES={};TEXTOS={};CLAVES_TEXTO={};DEMO=false;ST.art=null;
   ST.view="panel";ST.id=null;ST.aFecha=null;ST.fondo="all";
   document.querySelectorAll(".overlay").forEach(o=>o.remove());
   MSG_LOGIN=msg||"";
@@ -555,17 +594,20 @@ async function entrarDemo(){
 /* ================= RUTAS =================
    Los enlaces llevan el id de la cosa (norma, acta, resolución), nunca su
    posición en una lista: la lista cambia cada vez que se publica. */
-const VIEWS={panel:"Panel",normativa:"Normativa interna",norma:"Norma",actas:"Actas de sesión",acta:"Acta",resoluciones:"Resoluciones",resolucion:"Resolución",notas:"Mis notas",revision:"Revisión de la matriz"};
-const DETALLE={norma:"normativa",acta:"actas",resolucion:"resoluciones"};
-function hashDe(){return "#/"+ST.view+(DETALLE[ST.view]&&ST.id?"/"+encodeURIComponent(ST.id):"");}
+const VIEWS={panel:"Panel",normativa:"Normativa interna",norma:"Norma",texto:"Texto vigente",actas:"Actas de sesión",acta:"Acta",resoluciones:"Resoluciones",resolucion:"Resolución",notas:"Mis notas",revision:"Revisión de la matriz"};
+const DETALLE={norma:"normativa",texto:"normativa",acta:"actas",resolucion:"resoluciones"};
+function hashDe(){return "#/"+ST.view+(DETALLE[ST.view]&&ST.id?"/"+encodeURIComponent(ST.id)+(ST.view==="texto"&&ST.art?"~"+encodeURIComponent(ST.art):""):"");}
 function leerHash(){
   const m=location.hash.match(/^#\/([a-z]+)(?:\/(.+))?$/);
   if(!m||!VIEWS[m[1]])return null;
-  let id=null;if(m[2]!=null){try{id=decodeURIComponent(m[2]);}catch(e){id=m[2];}}
-  return {view:m[1],id};
+  let id=null,art=null;if(m[2]!=null){try{id=decodeURIComponent(m[2]);}catch(e){id=m[2];}}
+  // El texto de una norma puede llevar el artículo: #/texto/<norma>~<artículo>
+  if(m[1]==="texto"&&id&&id.includes("~")){[id,art]=id.split("~");}
+  return {view:m[1],id,art};
 }
-function existe(view,id){return view==="norma"?!!DB.normas[id]:view==="acta"?!!DB.actas[id]:view==="resolucion"?!!DB.res[id]:true;}
-function go(view,id){
+function existe(view,id){return view==="norma"||view==="texto"?!!DB.normas[id]:view==="acta"?!!DB.actas[id]:view==="resolucion"?!!DB.res[id]:true;}
+function go(view,id,art){
+  ST.art=art||null;
   if(DETALLE[view]&&!DETALLE[ST.view]){ST.from=ST.view;ST.fromY=window.scrollY||0;}
   if(!DETALLE[view])ST.from=null;
   ST.view=view;ST.id=id===undefined?null:id;
@@ -578,10 +620,11 @@ function aplicarHash(){
     toast(h.id?"Eso no está entre lo que abriste: puede ser de otro grupo de acceso, o ya no estar en la matriz.":"Enlace incompleto.",5000);
     ST.view=DETALLE[h.view];ST.id=null;history.replaceState(null,"","#/"+ST.view);return;
   }
-  ST.view=h.view;ST.id=h.id;
+  ST.view=h.view;ST.id=h.id;ST.art=h.art||null;
 }
 window.addEventListener("popstate",()=>{if(!ABIERTOS.length)return;aplicarHash();render();});
-window.addEventListener("hashchange",()=>{if(!ABIERTOS.length)return;const h=leerHash();if(h&&(h.view!==ST.view||h.id!==ST.id)){aplicarHash();render();}});
+window.addEventListener("hashchange",()=>{if(!ABIERTOS.length)return;const h=leerHash();if(h&&(h.view!==ST.view||h.id!==ST.id)){aplicarHash();render();}
+  else if(h&&h.view==="texto"&&h.art&&h.art!==ST.art){ST.art=h.art;irArticulo(h.art);}});
 
 /* ================= PINTAR ================= */
 const I={
@@ -643,7 +686,7 @@ function render(){
   const side=$("aside.side",app),on=$(".navitem.on",app);
   if(side&&on&&side.scrollWidth>side.clientWidth)side.scrollLeft=Math.max(0,on.offsetLeft-70);
   bindGlobalSearch();
-  const V={panel:vPanel,normativa:vNormativa,norma:vNorma,actas:vActas,acta:vActa,resoluciones:vResoluciones,resolucion:vResolucion,notas:vNotas,revision:vRevision};
+  const V={panel:vPanel,normativa:vNormativa,norma:vNorma,texto:vTexto,actas:vActas,acta:vActa,resoluciones:vResoluciones,resolucion:vResolucion,notas:vNotas,revision:vRevision};
   (V[ST.view]||vPanel)();
 }
 function srcPillHTML(){
@@ -659,12 +702,15 @@ function buscarTodo(q,max){
   const out=[];
   NORMAS().filter(n=>coincide(pajaNorma(n),q)).forEach(n=>out.push({t:"norma",id:n.id,a:"📘 "+n.nombre,b:`${n.tipo||"Norma"} · ${cuerpo(n.organo).nombre} · ${estadoNorma(n).label}`,o:0}));
   RESOL().filter(r=>coincide(pajaRes(r),q)).sort((x,y)=>y.fecha.localeCompare(x.fecha)).forEach(r=>out.push({t:"resolucion",id:r.id,a:"📄 "+trunc(r.texto,80),b:`${resRef(r)} · ${estadoRes(r).label}`,o:1}));
+  NORMAS().forEach(n=>{const t=textoCargado(n);if(!t)return;let k=0;
+    t.unidades.forEach(u=>{if(u.t!=="art"||k>=3)return;const txt=[u.rub||"",...u.p].join(" ");if(coincide("art "+u.n+" "+txt,q)){k++;
+      out.push({t:"texto",id:n.id,art:u.id,a:`📖 Art. ${u.n}${u.rub?" · "+trunc(u.rub,40):""} — ${trunc(n.nombre,46)}`,b:trunc(u.p.join(" "),110),o:1});}});});
   ACTAS().filter(a=>coincide(pajaActa(a),q)).sort((x,y)=>y.fecha.localeCompare(x.fecha)).forEach(a=>out.push({t:"acta",id:a.id,a:"🗂️ "+actaRef(a),b:`${resDeActa(a.id).length} resoluciones · ${estadoActa(a).label}`,o:2}));
   return out.slice(0,max||10);
 }
 function bindGlobalSearch(){
   const inp=$("#gq"),box=$("#gres");let hits=[],sel=0;
-  const abrir=h=>{box.style.display="none";inp.value="";go(h.t,h.id);};
+  const abrir=h=>{box.style.display="none";inp.value="";go(h.t,h.id,h.art);};
   const pinta=()=>{box.innerHTML=hits.map((h,k)=>`<div class="gres${k===sel?" sel":""}" data-k="${k}"><div class="a">${esc(h.a)}</div><div class="b">${esc(h.b)}</div></div>`).join("");
     box.querySelectorAll("[data-k]").forEach(el=>el.onmousedown=e=>{e.preventDefault();abrir(hits[+el.dataset.k]);});};
   inp.oninput=()=>{const q=inp.value.trim();if(q.length<2){box.style.display="none";hits=[];return;}
@@ -869,7 +915,8 @@ function vNorma(){
             <div class="h-title">${esc(n.nombre)}</div><div class="h-sub">${esc(cuerpo(n.organo).nombre)}</div></div>
           <span class="badge ${e.b}">${esc(e.label)}</span>
         </div>
-        ${linkbarHTML(e.key==="baja"?"Último texto":"Texto vigente",v&&v.conTexto&&v.conTexto.enlace,`${vigTxt} · ${v&&v.conTexto?v.conTexto.tipo+" desde el "+fdate(v.conTexto.desde):""}`,"No hay enlace al texto en la matriz")}
+        ${n.texto?`<div class="linkbar"><span style="color:var(--navy);font-size:18px">📖</span><div style="flex:1;min-width:0"><div class="lt">Leer el texto vigente en Quórum</div><div class="ls">${esc(resumenTexto(n))}</div></div><button class="btn sm" id="a-leer">Leer</button></div>`:""}
+        ${linkbarHTML(e.key==="baja"?"Último texto":"PDF del texto vigente",v&&v.conTexto&&v.conTexto.enlace,`${vigTxt} · ${v&&v.conTexto?v.conTexto.tipo+" desde el "+fdate(v.conTexto.desde):""}`,"No hay enlace al texto en la matriz")}
         <div class="expbox"><div class="expt">Aprobación</div>
           <div class="exprow"><span class="k">Órgano</span><span class="v">${esc(cuerpo(n.organo).nombre)}</span></div>
           <div class="exprow"><span class="k">Sesión</span>${a&&!a.stub?`<span class="v"><button class="linkbtn" id="a-acta" style="font-size:inherit">${esc(longDate(n.fecha))}</button></span>`:`<span class="v">${esc(longDate(n.fecha))}</span>`}</div>
@@ -895,12 +942,122 @@ function vNorma(){
     </div></div></div>`;
   bindVolver("normativa");bindTimeline(ev);bindNotas("norma",n.id,n._g,vNorma);
   if($("#a-acta"))$("#a-acta").onclick=()=>go("acta",n.acta);
+  if($("#a-leer"))$("#a-leer").onclick=()=>go("texto",n.id);
   if($("#a-res"))$("#a-res").onclick=()=>go("resolucion",r.id);
   const consulta=()=>{const d=$("#qd").value;if(!d)return;const out=$("#qdr");
     if(d<n.fecha){out.innerHTML=`<div class="resq">El ${esc(longDate(d))} esta norma <b>todavía no existía</b>: se aprobó el ${esc(longDate(n.fecha))}.</div>`;return;}
     const es=estadoNorma(n,d),vv=versionA(n,d);
     out.innerHTML=`<div class="resq"><div style="margin-bottom:6px"><span class="badge ${es.b}">${esc(es.label)}</span></div>${es.key==="baja"?`El ${esc(longDate(d))} ya no regía: ${esc(es.cambio.tipo.toLowerCase())} el ${esc(longDate(es.cambio.fecha))}.`:`El ${esc(longDate(d))} regía <b>${esc(vv.ultima.tipo)}</b>, desde el ${esc(longDate(vv.ultima.desde))}.`}${vv&&vv.conTexto&&es.key!=="baja"?` <a href="${esc(vv.conTexto.enlace)}" target="_blank" rel="noopener noreferrer">Abrir ese texto</a>${vv.sinTextoUltima?" (la versión anterior: esa reforma no tiene enlace)":""}`:""}</div>`;};
   $("#qdb").onclick=consulta;$("#qd").onkeydown=ev2=>{if(ev2.key==="Enter")consulta();};
+}
+
+/* ================= TEXTO VIGENTE (como en Lexis) =================
+   Solo el texto que rige hoy: el robot lo saca del PDF vigente y lo parte en
+   títulos y artículos (scripts/texto.py). Las reformas registradas en la hoja
+   Cambios con sus artículos se anotan al pie de cada uno. */
+function textoCargado(n){return n.texto&&typeof n.texto==="object"?n.texto:TEXTOS[n.id]||null;}
+function textoInfo(n){return textoCargado(n)||n.textoInfo||{};}
+function resumenTexto(n){const t=textoInfo(n),na=t.articulos!=null?t.articulos:(t.unidades||[]).filter(u=>u.t==="art").length;
+  return (na?na+" artículos · ":"")+(t.paginas?t.paginas+" páginas · ":"")+"índice y buscador"+(t.ocr?" · leído de un escaneo":"");}
+async function textoDe(n){
+  const ya=textoCargado(n);if(ya)return ya;
+  if(!n.texto)return null;
+  const env=await bajar(DATOS_URL+n.texto);
+  const k=await crypto.subtle.importKey("raw",b64(CLAVES_TEXTO[n._g]),"AES-GCM",false,["decrypt"]);
+  const pt=await crypto.subtle.decrypt({name:"AES-GCM",iv:b64(env.iv),additionalData:new TextEncoder().encode(n.id)},k,b64(env.ct));
+  return TEXTOS[n.id]=JSON.parse(new TextDecoder().decode(pt));
+}
+/* Al entrar, los textos se bajan de a uno en segundo plano: así el buscador de
+   arriba encuentra también dentro de los artículos. */
+async function precargarTextos(){
+  for(const n of NORMAS()){if(!ABIERTOS.length)return;if(n.texto&&!textoCargado(n)){try{await textoDe(n);}catch(e){}}}
+}
+/* «arts. 12 y 15», «art. 8», «arts. 22 a 25», «artículos 3, 4 y 7» → {"12","15"}… */
+function artsDe(txt){
+  const out=new Set();if(!txt)return out;
+  const s=plano(txt);if(!/art/.test(s))return out;
+  s.replace(/(\d+)\s*(?:a|al|-|–)\s*(\d+)/g,(m,a,b)=>{for(let i=+a;i<=+b&&i-a<300;i++)out.add(String(i));return " ";})
+   .replace(/\d+/g,m=>{out.add(m);return m;});
+  return out;
+}
+function reformasPorArticulo(n){
+  const m={},hoy=todayISO();
+  cambiosA(n.id).filter(c=>c.fecha<=hoy&&c.articulos&&(NUEVA_VERSION.includes(c.tipo)||c.tipo==="Aclaración")).forEach(c=>artsDe(c.articulos).forEach(a=>(m[a]=m[a]||[]).push(c)));
+  return m;
+}
+function marcar(texto,q){
+  const s=String(texto||"");const ws=plano(q||"").split(/\s+/).filter(w=>w.length>1);
+  if(!ws.length)return esc(s);
+  const p=plano(s),r=[];
+  ws.forEach(w=>{let i=p.indexOf(w);while(i>=0){r.push([i,i+w.length]);i=p.indexOf(w,i+w.length);}});
+  if(!r.length)return esc(s);
+  r.sort((a,b)=>a[0]-b[0]);const u=[];r.forEach(x=>{const l=u[u.length-1];if(l&&x[0]<=l[1])l[1]=Math.max(l[1],x[1]);else u.push(x.slice());});
+  let o="",k=0;u.forEach(([a,b])=>{o+=esc(s.slice(k,a))+"<mark>"+esc(s.slice(a,b))+"</mark>";k=b;});
+  return o+esc(s.slice(k));
+}
+const ES_LISTA=/^(?:[a-zñ]\)|[a-zñ]\.\s|\d+(?:\.\d+)+\.?\s|•|-\s|\((?:\d{1,2}|[a-z]|[ivx]{1,4})\)\s)/i;
+function vTexto(){
+  const n=DB.normas[ST.id];if(!n){go("normativa");return;}
+  $("#view").innerHTML=`<div class="up"><button class="back" id="back">← Volver a la ficha de la norma</button><div class="panel"><div class="empty">Abriendo el texto…</div></div></div>`;
+  $("#back").onclick=()=>go("norma",n.id);
+  textoDe(n).then(t=>{if(ST.view==="texto"&&ST.id===n.id)pintaTexto(n,t);})
+    .catch(()=>{if(ST.view!=="texto")return;$("#view .panel").innerHTML=`<div class="empty">No se pudo abrir el texto de esta norma (¿sin conexión?).<br>Prueba de nuevo, o abre el PDF desde la ficha.</div>`;});
+}
+function pintaTexto(n,t){
+  if(!t){go("norma",n.id);return;}
+  const e=estadoNorma(n,todayISO()),v=versionA(n,todayISO()),refs=reformasPorArticulo(n);
+  // Si la numeración se repite (la resolución que aprueba un reglamento trae su
+  // propio Art. 1), las reformas se anotan en la parte con más artículos: el cuerpo.
+  const partes={};t.unidades.forEach(u=>{if(u.t==="art"){const p=u.id.split("-")[0];partes[p]=(partes[p]||0)+1;}});
+  const cuerpoP=Object.entries(partes).sort((a,b)=>b[1]-a[1]).map(x=>x[0])[0];
+  const pdf=v&&v.conTexto&&v.conTexto.enlace;
+  $("#view").innerHTML=`<div class="up"><button class="back" id="back">← Volver a la ficha de la norma</button>
+    <div class="panel"><div class="dhead"><div style="min-width:0"><div class="cc-nro" style="margin-bottom:3px">${esc(n.tipo||"Norma")} · ${esc(fondoNorma(n))} · texto vigente</div>
+      <div class="h-title">${esc(n.nombre)}</div><div class="h-sub">${esc(resumenTexto(n))}</div></div>
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><span class="badge ${e.b}">${esc(e.label)}</span>${pdf?`<a class="btn sm line" href="${esc(pdf)}" target="_blank" rel="noopener noreferrer">PDF</a>`:""}</div></div>
+      ${t.ocr?`<div class="note" style="margin-top:12px;background:var(--amberbg);border-color:#F0DCA6;color:#8A5E06">Este texto se leyó de un PDF escaneado: puede tener alguna palabra mal leída. Para citar, confirma en el PDF.</div>`:""}
+      ${e.key==="baja"?`<div class="note" style="margin-top:12px;background:var(--redbg);border-color:#F3C0C0;color:#A32020">Esta norma ya no rige: ${esc(e.cambio.tipo.toLowerCase())} el ${esc(longDate(e.cambio.fecha))}.</div>`:""}
+      <div class="lmovil"><select id="lsel" aria-label="Ir a"><option value="">Ir a…</option></select></div>
+    </div>
+    <div class="lector">
+      <div class="panel lindice"><div class="search">${I.lupa}<input id="lq" placeholder="Buscar en esta norma…" autocomplete="off"></div><div class="lcnt" id="lcnt"></div><div id="lidx"></div></div>
+      <div class="panel ltexto" id="ltx"></div>
+    </div></div>`;
+  $("#back").onclick=()=>go("norma",n.id);
+  const nota=u=>{if(u.id.split("-")[0]!==cuerpoP)return "";const cs=refs[u.n];if(!cs)return "";
+    return cs.map(c=>`<div class="lref">✏️ ${esc(c.tipo)}${c.por?` por ${esc(cuerpo(c.por.cuerpo).nombre)}, sesión del ${esc(longDate(c.por.fecha))}, punto ${esc(c.por.punto)}`:` el ${esc(longDate(c.fecha))}`}${c.por&&c.por.id&&DB.res[c.por.id]?` · <button data-res="${esc(c.por.id)}">ver la resolución</button>`:""}</div>`).join("");};
+  const parr=(x,q)=>`<p${ES_LISTA.test(x)?' class="lli"':""}>${marcar(x,q)}</p>`;
+  const pintaCuerpo=q=>{
+    $("#ltx").innerHTML=t.unidades.map((u,k)=>u.t==="h1"?`<div class="lh1" id="u${k}">${marcar(u.txt,q)}</div>`
+      :u.t==="h2"?`<div class="lh2" id="u${k}">${marcar(u.txt,q)}</div>`
+      :u.t==="art"?(()=>{const cab=`<b class="lnum">Art. ${esc(u.n)}.-${u.rub?" "+marcar(u.rub,q)+".":""}</b>`,p0=u.p[0];
+        const cuerpoA=p0&&!ES_LISTA.test(p0)?`<p>${cab} ${marcar(p0,q)}</p>`+u.p.slice(1).map(x=>parr(x,q)).join(""):`<p>${cab}</p>`+u.p.map(x=>parr(x,q)).join("");
+        return `<div class="lart" id="a-${esc(u.id)}"><button class="lk2" data-lk="${esc(u.id)}" title="Copiar el enlace a este artículo">🔗</button>${cuerpoA}${nota(u)}</div>`;})()
+      :parr(u.txt,q)).join("")||`<div class="empty">El texto de esta norma está vacío.</div>`;
+    $("#ltx").querySelectorAll("[data-res]").forEach(b=>b.onclick=()=>go("resolucion",b.dataset.res));
+    $("#ltx").querySelectorAll("[data-lk]").forEach(b=>b.onclick=async()=>{const url=location.href.split("#")[0]+"#/texto/"+encodeURIComponent(n.id)+"~"+encodeURIComponent(b.dataset.lk);
+      try{await navigator.clipboard.writeText(url);toast("Enlace al artículo copiado. Solo lo abre quien tenga la frase.");}catch(err){toast("No se pudo copiar el enlace.");}});
+  };
+  const pintaIndice=q=>{
+    const hay=q&&q.trim().length>1;
+    const items=t.unidades.map((u,k)=>({u,k})).filter(({u})=>u.t!=="p");
+    const vis=hay?t.unidades.map((u,k)=>({u,k})).filter(({u})=>u.t!=="p"&&coincide(u.t==="art"?["art",u.n,u.rub||"",...u.p].join(" "):u.txt,q)):items;
+    $("#lcnt").textContent=hay?(vis.length?`${vis.length} coincidencia${vis.length===1?"":"s"}`:"Nada coincide. Prueba con menos palabras."):"";
+    $("#lidx").innerHTML=vis.map(({u,k})=>u.t==="art"?`<button class="lix art" data-go="a-${esc(u.id)}"><b>Art. ${esc(u.n)}</b>${u.rub?" · "+esc(trunc(u.rub,46)):""}${refs[u.n]&&u.id.split("-")[0]===cuerpoP?' <span class="ref" title="Reformado">✏️</span>':""}</button>`
+      :`<button class="lix ${u.t}" data-go="u${k}">${esc(trunc(u.txt,90))}</button>`).join("");
+    $("#lidx").querySelectorAll("[data-go]").forEach(b=>b.onclick=()=>{const el=document.getElementById(b.dataset.go);if(el)el.scrollIntoView({behavior:"smooth",block:"start"});});
+  };
+  const sel=$("#lsel");
+  t.unidades.forEach((u,k)=>{if(u.t==="p")return;const o=document.createElement("option");o.value=u.t==="art"?"a-"+u.id:"u"+k;o.textContent=u.t==="art"?`Art. ${u.n}${u.rub?" · "+trunc(u.rub,40):""}`:trunc(u.txt,60);sel.appendChild(o);});
+  sel.onchange=()=>{const el=document.getElementById(sel.value);if(el)el.scrollIntoView({block:"start"});};
+  let reloj=null;
+  $("#lq").oninput=()=>{clearTimeout(reloj);reloj=setTimeout(()=>{const q=$("#lq").value.trim();pintaCuerpo(q.length>1?q:"");pintaIndice(q);},160);};
+  pintaCuerpo("");pintaIndice("");
+  if(ST.art)setTimeout(()=>irArticulo(ST.art),30);
+}
+function irArticulo(art){
+  const el=document.getElementById("a-"+art);if(!el)return;
+  el.scrollIntoView({block:"start"});el.classList.add("flash");setTimeout(()=>el.classList.remove("flash"),1800);
 }
 
 /* ================= ACTAS ================= */
@@ -1153,7 +1310,7 @@ function renderLogin(){
     mientras($("#lok"),"Abriendo…",async()=>{
       const ab=await probarFrase(fr);
       if(!ab.length){$("#lerr").innerHTML=`<div class="errbox">Esa frase no abre nada. Revísala (van las palabras con guiones, en minúsculas) o pide la tuya a quien administra ${esc(MARCA.nombre)}.</div>`;inp.select();return false;}
-      MSG_LOGIN="";aplicarHash();render();return true;});};
+      MSG_LOGIN="";aplicarHash();render();setTimeout(precargarTextos,400);return true;});};
 }
 
 /* ================= TOOLTIP ================= */

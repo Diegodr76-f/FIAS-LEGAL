@@ -99,6 +99,7 @@ HOJAS = {
         ("fecha", "Fecha de aprobación", "Fecha de la sesión que la aprobó.", 14, "fecha"),
         ("punto", "Punto en que se aprobó", "Opcional. Con órgano + fecha + punto, la norma queda enlazada a su resolución.", 12, "texto"),
         ("enlace", "Texto original (enlace)", "PDF del texto aprobado.", 34, "enlace"),
+        ("pdf", "PDF para leer en Quórum", "Opcional. Enlace de descarga («cualquier persona con el vínculo») al PDF del texto VIGENTE. El robot lo lee y lo publica cifrado, por artículos, para leerlo en Quórum con índice y buscador. Este enlace no se muestra a nadie. Cuando la norma se reforme, se cambia por el PDF nuevo.", 30, "enlace"),
         ("grupo", "Grupo de acceso", "Opcional. Vacío = el mismo grupo del órgano que la aprueba.", 16, "texto"),
         ("obs", "Observaciones", "", 40, "texto"),
     ],

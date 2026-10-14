@@ -39,6 +39,9 @@ INSTRUCCIONES = [
     ("", "4. Resoluciones: un renglón por cada punto en que se resolvió algo. Cuerpo + fecha + punto la identifican: «en la Junta Administrativa del 8 de agosto de 2026, en el tercer punto» se escribe JA-FAP · 08/08/2026 · 3."),
     ("", "5. Normativa: un renglón por norma, con el órgano que la aprueba y la fecha (y si se sabe, el punto) en que se aprobó. Su fondo es el del órgano, salvo que se escriba otro."),
     ("", "6. Cambios: un renglón cada vez que una resolución reforma, codifica, deroga, deja sin efecto o aclara una norma u otra resolución."),
+    ("seccion", "Leer una norma en Quórum, artículo por artículo"),
+    ("", "Si en la hoja Normativa se pone un enlace en «PDF para leer en Quórum», el robot lee ese PDF y lo publica cifrado, partido en capítulos y artículos, con índice y buscador (como en Lexis). Sirve el PDF exportado de Word y también el escaneado: el escaneado se lee con OCR y Quórum avisa que puede tener alguna palabra mal leída."),
+    ("", "Es solo el texto vigente: cuando la norma se reforma, se cambia el enlace por el PDF reformado. El enlace tiene que ser «cualquier persona con el vínculo» (de descarga); no se muestra a nadie, solo lo usa el robot."),
     ("seccion", "La vigencia no se escribe: se deduce"),
     ("", "No hay columna «vigente». Quórum la calcula de la hoja Cambios, a la fecha que se pregunte: una norma con una Derogación es derogada desde esa fecha; con una Reforma o Codificación, sigue vigente con texto nuevo."),
     ("", "Cuando un acta nueva da de baja algo, solo se añade un renglón en Cambios. El renglón viejo no se toca: así nunca hay dos lugares que se contradigan."),
@@ -254,6 +257,38 @@ CAMBIOS = [
 ]
 
 
+# El texto (inventado) de una norma de ejemplo, como lo deja scripts/texto.py,
+# para que la demostración muestre el lector: índice, artículos y las reformas
+# de los artículos 12 y 15 anotadas al pie.
+def _art(n, rub, *p):
+    return {"t": "art", "id": f"p0-a{n}", "n": str(n), "rub": rub, "p": list(p)}
+
+
+DEMO_TEXTOS = {"reglamento-de-adquisiciones-del-fias": {"demo": True, "paginas": 6, "ocr": False, "unidades": [
+    {"t": "h1", "txt": "REGLAMENTO DE ADQUISICIONES DEL FIAS (TEXTO DE EJEMPLO)"},
+    {"t": "p", "txt": "Texto ficticio, escrito solo para mostrar cómo se lee una norma en Quórum."},
+    {"t": "h1", "txt": "CAPÍTULO I · DISPOSICIONES GENERALES"},
+    _art(1, "OBJETO", "El presente reglamento regula la adquisición de bienes, obras y servicios, incluidos los de consultoría, que realice el FIAS con recursos propios o administrados."),
+    _art(2, "ÁMBITO", "Se aplica a todas las direcciones, programas y proyectos administrados por el FIAS, salvo que el convenio de financiamiento establezca reglas propias."),
+    _art(3, "PRINCIPIOS", "Los procesos se rigen por los principios de:", "a) Transparencia;", "b) Economía y eficiencia;", "c) Igualdad de trato a los oferentes;", "d) Publicidad, cuando corresponda."),
+    _art(4, "CONFLICTO DE INTERESES", "Ninguna persona que intervenga en un proceso podrá tener relación de parentesco, hasta el cuarto grado de consanguinidad o segundo de afinidad, con los oferentes."),
+    {"t": "h1", "txt": "CAPÍTULO II · DE LOS PROCEDIMIENTOS"},
+    _art(10, "PLANIFICACIÓN", "Toda adquisición debe constar en el plan anual aprobado, con su presupuesto referencial."),
+    _art(11, "TIPOS DE PROCEDIMIENTO", "Según el presupuesto referencial, los procedimientos son: contratación directa, comparación de precios y concurso."),
+    _art(12, "CONTRATACIÓN DIRECTA", "Procede la contratación directa cuando el presupuesto referencial no supere los montos que fije la Dirección Ejecutiva para cada ejercicio, con al menos una proforma."),
+    _art(13, "COMPARACIÓN DE PRECIOS", "Procede cuando el presupuesto referencial supere el monto de contratación directa, con al menos tres proformas comparables."),
+    _art(14, "CONCURSO", "Para montos superiores a los de comparación de precios se convocará a concurso, con bases aprobadas por la Dirección Ejecutiva."),
+    _art(15, "COMISIÓN TÉCNICA", "En los concursos, la calificación de las ofertas la realizará una comisión técnica de tres miembros designados por la Dirección Ejecutiva.",
+         "La comisión dejará constancia de su trabajo en un acta de calificación."),
+    {"t": "h1", "txt": "CAPÍTULO III · DE LOS CONTRATOS"},
+    _art(20, "INSTRUMENTO", "Las adquisiciones se formalizan mediante orden de compra o de servicio, o mediante contrato cuando el plazo de ejecución supere treinta días."),
+    _art(21, "GARANTÍAS", "Los contratos de obra o de bienes con anticipo llevarán garantía de buen uso del anticipo y de fiel cumplimiento."),
+    _art(22, "ADMINISTRACIÓN DEL CONTRATO", "Cada contrato tendrá un administrador designado, responsable de velar por su cumplimiento y de suscribir el acta de entrega-recepción."),
+    {"t": "h1", "txt": "DISPOSICIONES GENERALES"},
+    {"t": "p", "txt": "PRIMERA.- Los casos no previstos en este reglamento serán resueltos por la Dirección Ejecutiva."},
+]}}
+
+
 def demo_datos():
     fondos = [{"sigla": s, "nombre": n, "tipo": t} for s, n, t in FONDOS_INICIALES]
     fondos.append({"sigla": "PPD", "nombre": "Programa de Pequeñas Donaciones", "tipo": "Programa"})
@@ -297,4 +332,10 @@ if __name__ == "__main__":
         else os.path.join(RAIZ, "plantilla", "Quorum_matriz.xlsx")
     os.makedirs(os.path.dirname(destino), exist_ok=True)
     libro(demo).save(destino)
+    if demo:   # el texto de ejemplo, al lado del libro de ejemplo
+        import json
+        os.makedirs(os.path.join(RAIZ, "demo", "textos"), exist_ok=True)
+        for nid, t in DEMO_TEXTOS.items():
+            with open(os.path.join(RAIZ, "demo", "textos", nid + ".json"), "w", encoding="utf-8") as f:
+                json.dump(t, f, ensure_ascii=False, indent=1)
     print("Escrito:", os.path.relpath(destino, RAIZ))

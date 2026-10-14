@@ -1,0 +1,157 @@
+{
+ "demo": true,
+ "paginas": 6,
+ "ocr": false,
+ "unidades": [
+  {
+   "t": "h1",
+   "txt": "REGLAMENTO DE ADQUISICIONES DEL FIAS (TEXTO DE EJEMPLO)"
+  },
+  {
+   "t": "p",
+   "txt": "Texto ficticio, escrito solo para mostrar cómo se lee una norma en Quórum."
+  },
+  {
+   "t": "h1",
+   "txt": "CAPÍTULO I · DISPOSICIONES GENERALES"
+  },
+  {
+   "t": "art",
+   "id": "p0-a1",
+   "n": "1",
+   "rub": "OBJETO",
+   "p": [
+    "El presente reglamento regula la adquisición de bienes, obras y servicios, incluidos los de consultoría, que realice el FIAS con recursos propios o administrados."
+   ]
+  },
+  {
+   "t": "art",
+   "id": "p0-a2",
+   "n": "2",
+   "rub": "ÁMBITO",
+   "p": [
+    "Se aplica a todas las direcciones, programas y proyectos administrados por el FIAS, salvo que el convenio de financiamiento establezca reglas propias."
+   ]
+  },
+  {
+   "t": "art",
+   "id": "p0-a3",
+   "n": "3",
+   "rub": "PRINCIPIOS",
+   "p": [
+    "Los procesos se rigen por los principios de:",
+    "a) Transparencia;",
+    "b) Economía y eficiencia;",
+    "c) Igualdad de trato a los oferentes;",
+    "d) Publicidad, cuando corresponda."
+   ]
+  },
+  {
+   "t": "art",
+   "id": "p0-a4",
+   "n": "4",
+   "rub": "CONFLICTO DE INTERESES",
+   "p": [
+    "Ninguna persona que intervenga en un proceso podrá tener relación de parentesco, hasta el cuarto grado de consanguinidad o segundo de afinidad, con los oferentes."
+   ]
+  },
+  {
+   "t": "h1",
+   "txt": "CAPÍTULO II · DE LOS PROCEDIMIENTOS"
+  },
+  {
+   "t": "art",
+   "id": "p0-a10",
+   "n": "10",
+   "rub": "PLANIFICACIÓN",
+   "p": [
+    "Toda adquisición debe constar en el plan anual aprobado, con su presupuesto referencial."
+   ]
+  },
+  {
+   "t": "art",
+   "id": "p0-a11",
+   "n": "11",
+   "rub": "TIPOS DE PROCEDIMIENTO",
+   "p": [
+    "Según el presupuesto referencial, los procedimientos son: contratación directa, comparación de precios y concurso."
+   ]
+  },
+  {
+   "t": "art",
+   "id": "p0-a12",
+   "n": "12",
+   "rub": "CONTRATACIÓN DIRECTA",
+   "p": [
+    "Procede la contratación directa cuando el presupuesto referencial no supere los montos que fije la Dirección Ejecutiva para cada ejercicio, con al menos una proforma."
+   ]
+  },
+  {
+   "t": "art",
+   "id": "p0-a13",
+   "n": "13",
+   "rub": "COMPARACIÓN DE PRECIOS",
+   "p": [
+    "Procede cuando el presupuesto referencial supere el monto de contratación directa, con al menos tres proformas comparables."
+   ]
+  },
+  {
+   "t": "art",
+   "id": "p0-a14",
+   "n": "14",
+   "rub": "CONCURSO",
+   "p": [
+    "Para montos superiores a los de comparación de precios se convocará a concurso, con bases aprobadas por la Dirección Ejecutiva."
+   ]
+  },
+  {
+   "t": "art",
+   "id": "p0-a15",
+   "n": "15",
+   "rub": "COMISIÓN TÉCNICA",
+   "p": [
+    "En los concursos, la calificación de las ofertas la realizará una comisión técnica de tres miembros designados por la Dirección Ejecutiva.",
+    "La comisión dejará constancia de su trabajo en un acta de calificación."
+   ]
+  },
+  {
+   "t": "h1",
+   "txt": "CAPÍTULO III · DE LOS CONTRATOS"
+  },
+  {
+   "t": "art",
+   "id": "p0-a20",
+   "n": "20",
+   "rub": "INSTRUMENTO",
+   "p": [
+    "Las adquisiciones se formalizan mediante orden de compra o de servicio, o mediante contrato cuando el plazo de ejecución supere treinta días."
+   ]
+  },
+  {
+   "t": "art",
+   "id": "p0-a21",
+   "n": "21",
+   "rub": "GARANTÍAS",
+   "p": [
+    "Los contratos de obra o de bienes con anticipo llevarán garantía de buen uso del anticipo y de fiel cumplimiento."
+   ]
+  },
+  {
+   "t": "art",
+   "id": "p0-a22",
+   "n": "22",
+   "rub": "ADMINISTRACIÓN DEL CONTRATO",
+   "p": [
+    "Cada contrato tendrá un administrador designado, responsable de velar por su cumplimiento y de suscribir el acta de entrega-recepción."
+   ]
+  },
+  {
+   "t": "h1",
+   "txt": "DISPOSICIONES GENERALES"
+  },
+  {
+   "t": "p",
+   "txt": "PRIMERA.- Los casos no previstos en este reglamento serán resueltos por la Dirección Ejecutiva."
+  }
+ ]
+}

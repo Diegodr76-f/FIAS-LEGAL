@@ -42,6 +42,13 @@ Lo esencial:
   Cambios**. El renglón viejo no se toca. Quórum calcula de ahí el estado a cualquier
   fecha, la línea de tiempo y qué versión del texto regía.
 
+**Leer una norma como en Lexis.** Con un enlace en la columna «PDF para leer en Quórum», el robot
+lee el PDF vigente y lo publica, cifrado, partido en capítulos y artículos: se lee con índice al
+costado, buscador dentro de la norma y en el buscador general, y cada artículo reformado en la
+hoja Cambios lo dice al pie. Solo el texto vigente, sin historia. Sirve el PDF digital y el
+escaneado (se lee con OCR, y Quórum avisa que puede tener alguna palabra mal leída). Tablas y
+flujogramas no se reproducen: para eso sigue el botón del PDF.
+
 Lo que no cuadra (una resolución sin su acta, un cambio que apunta a una norma que no
 existe) no frena la publicación: aparece en **Revisión de la matriz**, con hoja y renglón.
 

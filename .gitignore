@@ -7,3 +7,4 @@ _site/
 !plantilla/Quorum_matriz.xlsx
 !demo/matriz_demo.xlsx
 datos/
+.cache-textos/

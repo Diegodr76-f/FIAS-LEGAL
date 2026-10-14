@@ -16,6 +16,7 @@ import contextlib
 import io
 import json
 import os
+import re
 import sys
 import tempfile
 
@@ -91,10 +92,53 @@ def correr(args, env):
     return codigo, error, salida.getvalue()
 
 
+def pdf_prueba(escaneado=False):
+    """Un reglamento inventado de tres páginas, con encabezado repetido, número
+    de página, capítulos y artículos con rubro en negrita. Con `escaneado`, cada
+    página va como imagen, sin texto: lo tiene que leer el OCR."""
+    import pymupdf
+    doc = pymupdf.open()
+    arts = [(1, "OBJETO", "Este reglamento de prueba regula el uso de los vehículos de la institución."),
+            (2, "ÁMBITO", "Se aplica a todo el personal que conduzca un vehículo institucional."),
+            (3, "RESPONSABLE", "La Dirección Administrativa lleva el registro de los vehículos y sus conductores."),
+            (4, "SALIDAS", "Toda salida requiere una orden de movilización firmada por el jefe inmediato."),
+            (5, "COMBUSTIBLE", "El combustible se carga solo en las estaciones autorizadas, con factura a nombre de la institución."),
+            (6, "SANCIONES", "El incumplimiento de este reglamento se sanciona conforme el Reglamento Interno de Trabajo.")]
+    for k in range(3):
+        pg = doc.new_page()
+        pg.insert_text((60, 40), "FONDO DE PRUEBA · REGLAMENTO DE VEHÍCULOS", fontname="helv", fontsize=9)
+        pg.insert_text((540, 800), str(k + 1), fontname="helv", fontsize=9)
+        y = 90
+        pg.insert_text((230, y), ["CAPÍTULO I", "CAPÍTULO II", "CAPÍTULO III"][k], fontname="hebo", fontsize=12)
+        y += 18
+        pg.insert_text((190, y), ["DISPOSICIONES GENERALES", "DE LA OPERACIÓN", "DEL RÉGIMEN DISCIPLINARIO"][k], fontname="hebo", fontsize=12)
+        y += 40
+        for n, rub, txt in arts[2 * k:2 * k + 2]:
+            pg.insert_text((60, y), f"Art. {n}.- {rub}:", fontname="hebo", fontsize=11)
+            pg.insert_textbox(pymupdf.Rect(60, y + 6, 540, y + 80), txt, fontname="helv", fontsize=11)
+            y += 110
+    if not escaneado:
+        return doc.tobytes()
+    img = pymupdf.open()
+    for pg in doc:
+        pix = pg.get_pixmap(dpi=200)
+        p2 = img.new_page(width=pg.rect.width, height=pg.rect.height)
+        p2.insert_image(p2.rect, pixmap=pix)
+    return img.tobytes()
+
+
 def sitio(carpeta):
-    """Datos cifrados de dos grupos, para la prueba de la página."""
+    """Datos cifrados de dos grupos, para la prueba de la página. Una norma de
+    legal trae su «PDF para leer en Quórum»: la página prueba el lector con un
+    texto cifrado de verdad."""
+    wb = libro_dos_grupos()
+    wn = wb["Normativa"]
+    fila = next(i for i in range(2, wn.max_row + 1) if wn.cell(row=i, column=1).value == "Manual Operativo del Ciclo de Proyectos del FAP")
+    wn.cell(row=fila, column=col(wn, "pdf", "Normativa")).value = "https://ejemplo.invalid/manual.pdf"
+    pdf = pdf_prueba()
+    publicar.descargar_pdf = lambda url: pdf
     with tempfile.TemporaryDirectory() as t:
-        ruta = guardar(libro_dos_grupos(), t)
+        ruta = guardar(wb, t)
         codigo, error, _ = correr(["--excel", ruta, "--salida", carpeta, "--permitir-sin-clave"],
                                   {"CLAVES": f"legal = {FRASE_LEGAL}\ndirectorio = {FRASE_DIR}"})
     if error:
@@ -268,6 +312,94 @@ def main():
         ruta = guardar(libro_dos_grupos(), t, "fondos.xlsx")
         codigo, error, log = correr(["--excel", ruta, "--salida", os.path.join(t, "d3"), "--permitir-sin-clave"], claves)
         ok("fondos: 4" in log and "Pequeñas Donaciones" not in log, "el registro cuenta los fondos pero no nombra nada")
+
+        seccion("10. El texto vigente de una norma, por artículos")
+        import texto
+        pars = [{"t": x, "b": False} for x in ["CAPÍTULO lll", "DE LAS VACACIONES", "Art. 1.- VIGENCIA: Rige desde hoy.",
+                                                  "Cumpliendo las disposiciones de este Reglamento, se aplica.",
+                                                  "Art. 2.- Sin rubro, solo texto.", "a) un literal", "DISPOSICIONES GENERALES",
+                                                  "PRIMERA.- Lo no previsto lo resuelve la Dirección.",
+                                                  "REGLAMENTO", "Art. 1.- Otra numeración que vuelve a empezar."]]
+        u = texto.estructurar(pars, True)
+        ok(u[0] == {"t": "h1", "txt": "CAPÍTULO III · DE LAS VACACIONES"}, "capítulo con su título; «lll» del OCR se lee como III", u[0])
+        ok(u[1]["t"] == "art" and u[1]["rub"] == "VIGENCIA" and u[1]["p"] == ["Rige desde hoy.", "Cumpliendo las disposiciones de este Reglamento, se aplica."],
+           "artículo con rubro, y el párrafo siguiente es suyo (aunque diga «disposiciones de»)", u[1])
+        ok(u[2]["n"] == "2" and "rub" not in u[2] and u[2]["p"][-1] == "a) un literal", "artículo sin rubro, con su literal")
+        ok(u[3] == {"t": "h1", "txt": "DISPOSICIONES GENERALES"}, "«DISPOSICIONES GENERALES» sí es un título", u[3])
+        ok([x["id"] for x in u if x["t"] == "art"] == ["p0-a1", "p0-a2", "p1-a1"], "si la numeración vuelve a 1, es otra parte del documento")
+        r = texto.extraer(pdf_prueba())
+        ok(not r["ocr"] and r["articulos"] == 6 and r["paginas"] == 3, "un PDF digital: 6 artículos, sin OCR", (r["ocr"], r["articulos"]))
+        plano_t = json.dumps(r, ensure_ascii=False)
+        ok("FONDO DE PRUEBA" not in plano_t and not any(x.get("txt") in ("1", "2", "3") for x in r["unidades"]),
+           "fuera el encabezado que se repite y los números de página")
+        ok([x["txt"] for x in r["unidades"] if x["t"] == "h1"][1] == "CAPÍTULO II · DE LA OPERACIÓN", "capítulos con su título")
+        a5 = next(x for x in r["unidades"] if x.get("n") == "5")
+        ok(a5["rub"] == "COMBUSTIBLE" and a5["p"][0].startswith("El combustible se carga"), "rubro y texto de cada artículo", a5)
+        import shutil
+        if shutil.which("tesseract"):
+            r2 = texto.extraer(pdf_prueba(escaneado=True))
+            ok(r2["ocr"] and r2["articulos"] == 6, "un PDF escaneado se lee con OCR: los mismos 6 artículos", (r2["ocr"], r2["articulos"]))
+        else:
+            print("  · (sin Tesseract aquí: la prueba del escaneado corre en GitHub)")
+        ok(texto.calidad("El C6digo del Trabajo y el reglamento lnterno de la organizaci~n " * 10) > 0.01
+           and texto.calidad("El Código del Trabajo y el reglamento interno de la organización " * 10) == 0,
+           "una capa de OCR mala se reconoce («C6digo», «lnterno»)")
+
+        wb = libro_dos_grupos()
+        wn = wb["Normativa"]
+        fila = next(i for i in range(2, wn.max_row + 1) if wn.cell(row=i, column=1).value == "Manual Operativo del Ciclo de Proyectos del FAP")
+        fila2 = next(i for i in range(2, wn.max_row + 1) if wn.cell(row=i, column=1).value == "Manual de Operaciones del FEIG")
+        wn.cell(row=fila, column=col(wn, "pdf", "Normativa")).value = "https://ejemplo.invalid/bueno.pdf"
+        wn.cell(row=fila2, column=col(wn, "pdf", "Normativa")).value = "https://ejemplo.invalid/pide-sesion"
+        pdf = pdf_prueba()
+        bajadas, lecturas = [], []
+
+        def bajar(url):
+            bajadas.append(url)
+            if "pide-sesion" in url:
+                raise ValueError("no es un PDF")
+            return pdf
+
+        def leer(b):
+            lecturas.append(1)
+            return texto.extraer(b)
+        cache = os.path.join(t, "cache")
+        m = publicar.Matriz().leer(wb)
+        publicar.leer_textos(m, cache, "secreto-de-prueba", bajar, leer)
+        nm = m.normas["manual-operativo-del-ciclo-de-proyectos-del-fap"]
+        ok(nm.get("_texto", {}).get("articulos") == 6, "el robot baja el PDF y lo parte en artículos")
+        ok(("Normativa", fila2) in {(a["hoja"], a["fila"]) for a in m.avisos} and not m.normas["manual-de-operaciones-del-feig"].get("_texto"),
+           "un enlace que no entrega un PDF (pide iniciar sesión) se avisa")
+        cache_txt = "".join(open(os.path.join(cache, f), "rb").read().decode("latin-1") for f in os.listdir(cache))
+        ok(len(os.listdir(cache)) == 1 and "combustible" not in cache_txt.lower(), "lo leído se guarda en el caché, cifrado")
+        m2 = publicar.Matriz().leer(wb)
+        publicar.leer_textos(m2, cache, "secreto-de-prueba", bajar, leer)
+        ok(len(lecturas) == 1 and m2.normas["manual-operativo-del-ciclo-de-proyectos-del-fap"].get("_texto"), "la segunda vez sale del caché: el PDF no se vuelve a leer")
+        m3 = publicar.Matriz().leer(wb)
+        publicar.leer_textos(m3, cache, "otro-secreto", bajar, leer)
+        ok(len(lecturas) == 2, "con otro secreto el caché no se puede abrir, y se vuelve a leer")
+        sal = os.path.join(t, "t1")
+        archivos, clave = publicar.escribir_textos(m2, "legal", sal)
+        nombre = archivos.get("manual-operativo-del-ciclo-de-proyectos-del-fap", "")
+        ok(re.fullmatch(r"t-[0-9a-f]{24}\.json", nombre) and "manual" not in nombre, "el archivo del texto no dice qué norma es", nombre)
+        crudo = open(os.path.join(sal, nombre)).read()
+        ok("combustible" not in crudo.lower(), "y va cifrado")
+        from cryptography.hazmat.primitives.ciphers.aead import AESGCM
+        env = json.load(open(os.path.join(sal, nombre)))
+        claro = json.loads(AESGCM(clave).decrypt(base64.b64decode(env["iv"]), base64.b64decode(env["ct"]), b"manual-operativo-del-ciclo-de-proyectos-del-fap"))
+        ok(claro["articulos"] == 6, "con la llave del grupo y el id de la norma se abre")
+        pl = m2.payload("legal", "x", archivos, clave)
+        nm = next(n for n in pl["normas"] if n["id"] == "manual-operativo-del-ciclo-de-proyectos-del-fap")
+        ok(nm["texto"] == nombre and nm["textoInfo"]["articulos"] == 6 and "pdf" not in nm and pl.get("claveTextos"),
+           "el archivo del grupo trae el nombre, el resumen y la llave; el enlace del PDF no se publica")
+        ok(all("pdf" not in n and "_texto" not in n for n in pl["normas"]), "ninguna norma publica su enlace de descarga")
+        pd = m2.payload("directorio", "x", *publicar.escribir_textos(m2, "directorio", os.path.join(t, "t2")))
+        ok("claveTextos" not in pd, "un grupo sin textos no recibe llave")
+        publicar.descargar_pdf = bajar
+        codigo, error, log = correr(["--excel", guardar(wb, t, "tx.xlsx"), "--salida", os.path.join(t, "t3"), "--permitir-sin-clave",
+                                     "--cache", os.path.join(t, "cache3")], claves)
+        ok(codigo == 0 and "con texto: 1" in log and "combustible" not in log.lower() and "bueno.pdf" not in log,
+           "el registro cuenta las normas con texto, sin texto ni enlaces", error or log[-300:])
 
     print(f"\n{pruebas - fallos} de {pruebas} comprobaciones bien" + (f" · {fallos} FALLAN" if fallos else ""))
     sys.exit(1 if fallos else 0)
