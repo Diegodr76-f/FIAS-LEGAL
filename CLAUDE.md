@@ -3,10 +3,20 @@
 Actas, resoluciones y normativa de los cuerpos colegiados del FIAS. Es **la misma dinámica
 del CLM** (`diegodr76-f/fap-contratos`, `clm/index.html`) aplicada a otro tema: un Excel que
 se mantiene a mano, un robot que lo publica cifrado y una página estática que lo descifra.
-Sin build, sin framework: `index.html` se abre tal cual. Sigue el estilo del CLM: funciones
-sueltas, HTML como cadenas, el mismo CSS (letra Titillium Web, paleta navy). Si una pieza
-ya existe en el CLM (`coincide()`, `edadBase()`, `mientras()`, el router por id), se copia
-de allí en vez de rehacerla.
+Sin build, sin framework: `index.html` se abre tal cual. Sigue el estilo de código del CLM
+(funciones sueltas, HTML como cadenas) y reutiliza sus piezas (`coincide()`, `edadBase()`,
+`mientras()`, el router por id).
+
+**El diseño es de la familia del CLM, no una copia.** Comparte su azul, su letra (Titillium Web) y su
+fondo; la estructura es propia, porque Quórum es una biblioteca y no un tablero: pestañas arriba
+(no menú lateral), el fondo elegido siempre a la vista, el inicio es un buscador con resultados
+agrupados, los listados son renglones de documento con filtros al costado que dicen cuántos dejan,
+y cada norma tiene su página (migas de pan, título con serifa, pestañas «Texto vigente» y «Ficha»).
+Nada de gráficos ni tarjetas de indicadores: a quien busca una norma no le sirven.
+
+**Un anexo es una norma completa.** Va en su propio renglón del catálogo, con su nombre propio
+(`tituloNorma()` quita el «Anexo 8 al Manual Operativo:» del Excel) y una línea que dice de qué
+manual es (`etiquetaAnexo()`); el manual lista sus anexos como documentos, no como notas al pie.
 
 Todo en español: interfaz, comentarios, mensajes de commit y documentación.
 
