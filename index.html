@@ -15,306 +15,329 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <!-- La misma letra del CLM, pedida sin bloquear la primera pantalla. -->
-<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,400;8..60,600;8..60,700&family=Titillium+Web:wght@400;600;700&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+<link href="https://fonts.googleapis.com/css2?family=Titillium+Web:wght@400;600;700&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
 <style>
-    :root{
-    /* La familia del CLM (su azul, su letra, su fondo) con estructura propia:
-       Quórum es una biblioteca, no un tablero. Serifa solo en documentos. */
-    --paper:#F4F6FB; --card:#FFFFFF; --ink:#0B153F; --ink2:#3E4766; --muted:#6B7180; --muted2:#9AA0B2;
-    --line:#E3E6F0; --line2:#EDEFF5;
-    --accent:#00249C; --accent2:#2547C9; --accentbg:#EEF1FB; --accentln:#C9D3F2;
-    --gold:#A06C0A; --goldbg:#FCF3DD; --goldln:#F0DCA6;
-    --red:#C0352F; --redbg:#FBE7E7; --redln:#F3C0C0;
-    --green:#1E8A4F; --greenbg:#E7F6EE;
-    --blue:#2547C9; --bluebg:#EEF1FB;
-    --serif:'Source Serif 4',Georgia,'Times New Roman',serif;
-    --sans:'Titillium Web',system-ui,-apple-system,'Segoe UI',sans-serif;
-    --r:12px;
+  /* Las piezas del CLM, tal cual: su azul, su letra, su menú, sus tablas, sus
+     fichas. Quien usa el CLM ya sabe usar Quórum. Lo propio (el lector de
+     normas, las notas cifradas, las versiones) está al final. */
+  :root{
+    --navy:#00249C; --navy2:#2547C9; --ink:#0B153F; --ink2:#3E4766; --bg:#F4F6FB; --card:#fff;
+    --line:#E3E6F0; --line2:#EAEDF5; --muted:#6B7180; --muted2:#9AA0B2;
+    --green:#1E9E5A; --greenbg:#E7F6EE; --amber:#C98A08; --amberbg:#FCF3DD; --amberln:#F0DCA6;
+    --red:#D23A3A; --redbg:#FBE7E7; --redln:#F3C0C0; --tint:#EEF1FB; --tintln:#D7DEF6; --violet:#6A44C9;
   }
   *{box-sizing:border-box}
-  html,body{margin:0;padding:0}
-  body{font-family:var(--sans);background:var(--paper);color:var(--ink);-webkit-font-smoothing:antialiased;font-size:14.5px;line-height:1.45}
-  a{color:var(--accent)}
-  button{font-family:inherit;font-size:inherit;color:inherit}
-  input,select,textarea{font-family:inherit;font-size:14.5px;color:var(--ink)}
+  html,body{margin:0;padding:0;height:100%}
+  body{font-family:'Titillium Web',system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--ink);-webkit-font-smoothing:antialiased;font-size:14px}
+  a{color:var(--navy);text-decoration:none}
+  button{font-family:inherit}
+  input,select,textarea{font-family:inherit;font-size:14px;color:var(--ink)}
   ::placeholder{color:var(--muted2)}
-  .serif{font-family:var(--serif)}
-  @keyframes up{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
-  .up{animation:up .2s ease}
+  @keyframes up{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+  .up{animation:up .25s ease}
 
-  /* ===== cabecera ===== */
-  .top{background:var(--card);border-bottom:1px solid var(--line);position:sticky;top:0;z-index:30}
-  .top-in{max-width:1200px;margin:0 auto;display:flex;align-items:center;gap:18px;padding:0 22px;height:60px}
-  .marca{all:unset;cursor:pointer;display:flex;align-items:center;gap:10px;flex:0 0 auto}
-  .logo{width:34px;height:34px;border-radius:9px;background:var(--accent);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:11.5px;letter-spacing:.3px;overflow:hidden;flex:0 0 auto}
+  /* ===== armazón (el del CLM) ===== */
+  .shell{display:flex;min-height:100vh}
+  aside.side{width:230px;flex:0 0 230px;background:#fff;border-right:1px solid var(--line);display:flex;flex-direction:column;position:sticky;top:0;height:100vh;overflow-y:auto}
+  .side-brand{display:flex;align-items:center;gap:11px;padding:16px 16px 14px;border-bottom:1px solid var(--line2)}
+  .logo{width:40px;height:40px;border-radius:10px;background:var(--navy);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;flex:0 0 auto;overflow:hidden}
   .logo img{width:100%;height:100%;object-fit:contain;background:#fff}
-  .marca .mn{font-family:var(--serif);font-weight:700;font-size:19px;letter-spacing:-.2px}
-  .marca .ms{font-size:11px;color:var(--muted);display:block;margin-top:-2px}
-  .tabs{display:flex;gap:2px;height:100%;align-items:stretch}
-  .tab{all:unset;cursor:pointer;display:flex;align-items:center;gap:7px;padding:0 13px;font-weight:600;color:var(--muted);border-bottom:2.5px solid transparent;margin-bottom:-1px;white-space:nowrap}
-  .tab:hover{color:var(--ink)}
-  .tab.on{color:var(--accent);border-bottom-color:var(--accent)}
-  .top-der{margin-left:auto;display:flex;align-items:center;gap:8px}
-  .gsearch{position:relative;width:min(300px,30vw)}
-  .gsearch input{width:100%;padding:8px 11px 8px 32px;border:1px solid var(--line);border-radius:9px;background:var(--paper)}
-  .gsearch input:focus{outline:none;border-color:var(--accent);background:#fff}
-  .gsearch svg{position:absolute;left:10px;top:50%;transform:translateY(-50%)}
-  .gresults{position:absolute;top:42px;right:0;width:min(460px,92vw);background:#fff;border:1px solid var(--line);border-radius:12px;box-shadow:0 18px 44px rgba(29,34,38,.14);max-height:420px;overflow:auto;z-index:40}
-  .gres{display:block;padding:10px 13px;border-bottom:1px solid var(--line2);cursor:pointer}
-  .gres:hover,.gres.sel{background:var(--accentbg)}
-  .gres .a{font-size:13.5px;font-weight:600}
-  .gres .b{font-size:12px;color:var(--muted);margin-top:2px}
-  .ib{all:unset;cursor:pointer;position:relative;display:flex;align-items:center;justify-content:center;width:36px;height:36px;border-radius:9px;color:var(--ink2)}
-  .ib:hover{background:var(--paper)}
-  .ib .dotn{position:absolute;top:4px;right:3px;min-width:16px;height:16px;padding:0 4px;border-radius:99px;background:var(--gold);color:#fff;font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center}
-  .fondos{border-top:1px solid var(--line2);background:var(--card)}
-  .fondos-in{max-width:1200px;margin:0 auto;display:flex;align-items:center;gap:6px;padding:7px 22px;overflow-x:auto;scrollbar-width:none}
-  .fondos-in::-webkit-scrollbar{display:none}
-  .fondos .fl{font-size:11px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;color:var(--muted2);margin-right:4px}
-  .fchip{all:unset;cursor:pointer;font-size:12.5px;font-weight:600;padding:5px 11px;border-radius:99px;color:var(--ink2);white-space:nowrap}
-  .fchip:hover{background:var(--paper)}
-  .fchip.on{background:var(--accent);color:#fff}
-  .fondos .fbname{font-size:12.5px;color:var(--muted);margin-left:6px;white-space:nowrap}
-  .srcpill{display:inline-flex;align-items:center;gap:6px;font-size:11.5px;font-weight:600;color:var(--muted);white-space:nowrap}
-  .srcdot{width:7px;height:7px;border-radius:50%;background:var(--green)}
-  .srcdot.off{background:var(--gold)} .srcdot.old{background:var(--red)}
-  .srcpill.old,.srcpill.demo{color:var(--gold)}
-  .content{max-width:1200px;margin:0 auto;padding:22px 22px 80px}
+  .side-brand .t{font-weight:700;font-size:14px;line-height:1.15}
+  .side-brand .s{font-size:11px;color:var(--muted)}
+  .navgrp{font-size:10.5px;font-weight:700;letter-spacing:.7px;color:var(--muted2);text-transform:uppercase;padding:16px 18px 6px}
+  .navitem{all:unset;box-sizing:border-box;cursor:pointer;display:flex;align-items:center;gap:11px;padding:9px 14px;margin:1px 8px;border-radius:9px;font-size:13.5px;font-weight:600;color:var(--muted);width:calc(100% - 16px)}
+  .navitem:hover{background:var(--tint);color:var(--navy)}
+  .navitem.on{background:var(--navy);color:#fff}
+  .navitem .nbadge{margin-left:auto;font-size:11px;font-weight:700;background:var(--amberbg);color:var(--amber);padding:1px 8px;border-radius:99px}
+  .navitem.on .nbadge{background:rgba(255,255,255,.22);color:#fff}
+  .side-foot{margin-top:auto;border-top:1px solid var(--line2);padding:12px 14px;display:flex;align-items:center;gap:8px}
+  .avatar{width:34px;height:34px;border-radius:50%;background:var(--tint);color:var(--navy);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;flex:0 0 auto}
+  .side-foot .n{font-size:12.5px;font-weight:700;line-height:1.15;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .side-foot .r{font-size:11px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .iconbtn{all:unset;cursor:pointer;color:var(--muted);padding:6px;border-radius:8px;display:flex;flex:0 0 auto}
+  .iconbtn:hover{background:var(--tint);color:var(--navy)}
 
-  @media(max-width:900px){
-    .top-in{flex-wrap:wrap;height:auto;padding:8px 14px 0;gap:8px}
-    .marca .ms{display:none}
-    .top-der{margin-left:auto}
-    .gsearch{display:none}
-    .tabs{order:3;width:100%;overflow-x:auto;scrollbar-width:none;height:44px}
-    .tabs::-webkit-scrollbar{display:none}
-    .fondos-in{padding:6px 14px}
-    .content{padding:16px 14px 70px}
+  main.main{flex:1;min-width:0;display:flex;flex-direction:column}
+  .topbar{display:flex;align-items:center;gap:12px;background:#fff;border-bottom:1px solid var(--line);padding:0 22px;height:58px;position:sticky;top:0;z-index:15}
+  .topbar h1{font-size:16.5px;font-weight:700;margin:0;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .fondosel{margin-left:auto;padding:8px 10px;border:1.5px solid var(--line);border-radius:10px;background:#fff;font-size:13px;font-weight:600;color:var(--ink);cursor:pointer;max-width:240px}
+  .fondosel.on{border-color:var(--navy);background:var(--tint);color:var(--navy)}
+  .gsearch{margin-left:auto;position:relative;width:min(340px,34vw)}
+  .fondosel+.gsearch{margin-left:0}
+  .gsearch input{width:100%;padding:9px 12px 9px 34px;border:1.5px solid var(--line);border-radius:10px;background:var(--bg)}
+  .gsearch input:focus{outline:none;border-color:var(--navy);background:#fff}
+  .gsearch svg{position:absolute;left:10px;top:50%;transform:translateY(-50%)}
+  .gresults{position:absolute;top:44px;right:0;width:max(100%,420px);max-width:92vw;background:#fff;border:1px solid var(--line);border-radius:12px;box-shadow:0 18px 44px rgba(11,21,63,.14);max-height:400px;overflow:auto;z-index:40}
+  .gres{display:block;padding:10px 13px;border-bottom:1px solid var(--line2);cursor:pointer}
+  .gres:hover,.gres.sel{background:var(--tint)}
+  .gres .a{font-size:13px;font-weight:700;color:var(--ink)}
+  .gres .b{font-size:11.5px;color:var(--muted)}
+  .content{padding:22px 24px 70px;max-width:1220px;width:100%;margin:0 auto}
+
+  .srcpill{display:inline-flex;align-items:center;gap:7px;font-size:11px;font-weight:700;color:var(--muted);background:var(--bg);border:1px solid var(--line2);padding:5px 10px;border-radius:99px;white-space:nowrap}
+  .srcdot{width:8px;height:8px;border-radius:50%;background:var(--green)}
+  .srcdot.off{background:var(--amber)} .srcdot.old{background:var(--red)}
+  .srcpill.old,.srcpill.demo{color:#8A5E06;background:var(--amberbg);border-color:var(--amberln)}
+
+  /* Celular: el menú es UNA fila que se desliza y se queda arriba (como el CLM). */
+  @media(max-width:860px){
+    .shell{flex-direction:column}
+    aside.side{width:100%;flex:0 0 auto;height:auto;position:sticky;top:0;z-index:20;flex-direction:row;flex-wrap:nowrap;align-items:center;overflow-x:auto;overflow-y:hidden;border-right:0;border-bottom:1px solid var(--line);scrollbar-width:none;-webkit-overflow-scrolling:touch}
+    aside.side::-webkit-scrollbar{display:none}
+    .side-brand{border:0;padding:8px 6px 8px 10px;flex:0 0 auto}
+    .side-brand .logo{width:34px;height:34px;font-size:11px}
+    .side-brand>div:last-child{display:none}
+    .navgrp{display:none}
+    .navitem{width:auto;flex:0 0 auto;padding:8px 11px;margin:6px 2px;white-space:nowrap}
+    .side-foot{margin-left:0;border:0;padding:6px 10px;flex:0 0 auto}
+    .side-foot .avatar,.side-foot .n,.side-foot .r{display:none}
+    .topbar{position:static;height:auto;flex-wrap:wrap;padding:10px 14px;gap:8px}
+    .topbar h1{font-size:15.5px;flex:1;min-width:0}
+    .srcpill{display:none}
+    .fondosel{margin-left:0;max-width:none;min-width:0;width:100%;flex:1 1 100%;order:3}
+    .toolbar .sel,.toolbar .afi{flex:1 1 140px;min-width:0;max-width:none}
+    .afi input{min-width:0;width:100%;flex:1}
+    .gsearch{order:4;width:100%;margin-left:0}
+    .gresults{width:100%}
+    .content{padding:14px 12px 60px}
   }
 
-  /* ===== piezas ===== */
-  .btn{all:unset;box-sizing:border-box;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:7px;background:var(--accent);color:#fff;font-weight:600;padding:10px 16px;border-radius:9px;transition:background .15s;white-space:nowrap}
-  .btn:hover{background:var(--accent2)}
-  .btn.line{background:#fff;border:1px solid var(--line);color:var(--ink)}
-  .btn.line:hover{background:var(--paper)}
-  .btn.sm{padding:7px 12px;font-size:13px}
+  /* ===== piezas (las del CLM) ===== */
+  .btn{all:unset;box-sizing:border-box;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:8px;background:var(--navy);color:#fff;font-weight:700;font-size:13.5px;padding:11px 17px;border-radius:10px;transition:filter .15s;white-space:nowrap}
+  .btn:hover{filter:brightness(1.1)}
+  .btn.line{background:#fff;border:1.5px solid var(--line);color:var(--ink)}
+  .btn.line:hover{background:var(--bg);filter:none}
+  .btn.sm{padding:8px 13px;font-size:12.5px}
   .btn.block{width:100%}
-  .btn:disabled{opacity:.45;cursor:not-allowed}
-  .panel{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:18px 20px}
-  .panel+.panel{margin-top:14px}
-  .ptitle{font-family:var(--serif);font-size:17px;font-weight:700;margin:0 0 2px}
-  .psub{font-size:12.5px;color:var(--muted);margin:0 0 12px}
-  .badge{display:inline-block;font-size:11.5px;font-weight:600;padding:2px 9px;border-radius:99px;white-space:nowrap}
-  .b-g{background:var(--greenbg);color:var(--green)} .b-a{background:var(--goldbg);color:var(--gold)}
+  .btn:disabled{opacity:.45;cursor:not-allowed;filter:none}
+  .panel{background:#fff;border:1px solid var(--line2);border-radius:15px;padding:20px 22px}
+  .panel+.panel{margin-top:16px}
+  .detail>.panel+.panel{margin-top:0}
+  .ptitle{font-size:14.5px;font-weight:700;margin:0 0 3px}
+  .psub{font-size:12px;color:var(--muted);margin:0 0 14px}
+  .badge{display:inline-block;font-size:11px;font-weight:700;padding:3px 9px;border-radius:99px;white-space:nowrap}
+  .b-g{background:var(--greenbg);color:var(--green)} .b-a{background:var(--amberbg);color:var(--amber)}
   .b-r{background:var(--redbg);color:var(--red)} .b-d{background:#EEF0F5;color:var(--muted)}
-  .b-n{background:var(--bluebg);color:var(--blue)} .b-v{background:var(--accentbg);color:var(--accent)}
-  .catchip{display:inline-block;font-size:11px;font-weight:600;padding:2px 8px;border-radius:6px;background:#EEF0F5;color:var(--ink2);white-space:nowrap}
-  .note{font-size:13px;color:var(--ink2);line-height:1.5;background:var(--paper);border:1px solid var(--line2);border-radius:10px;padding:10px 13px}
-  .note.a{background:var(--goldbg);border-color:var(--goldln);color:#6E4C0E}
+  .b-n{background:var(--tint);color:var(--navy)} .b-v{background:#EFE6FA;color:var(--violet)}
+  .chip{all:unset;cursor:pointer;font-size:12.5px;font-weight:600;color:var(--muted);padding:8px 13px;border:1.5px solid var(--line);border-radius:99px;background:#fff;white-space:nowrap}
+  .chip:hover{border-color:var(--muted2)}
+  .chip.on{background:var(--ink);color:#fff;border-color:var(--ink)}
+  .chip .n{opacity:.7;margin-left:3px}
+  .chips{display:flex;gap:8px;flex-wrap:wrap}
+  .chips+.chips{margin-top:10px}
+  .catchip{display:inline-block;font-size:10.5px;font-weight:700;padding:3px 9px;border-radius:20px;white-space:nowrap;background:#ECEEF4;color:#5A6072}
+  .kpis{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:18px}
+  @media(max-width:1000px){.kpis{grid-template-columns:repeat(3,1fr)}}
+  @media(max-width:560px){.kpis{grid-template-columns:repeat(2,1fr)}}
+  .kpi{all:unset;box-sizing:border-box;background:#fff;border:1px solid var(--line2);border-radius:13px;padding:14px 16px;cursor:pointer;transition:box-shadow .15s}
+  .kpi:hover{box-shadow:0 10px 26px rgba(11,21,63,.08)}
+  .kpi-n{font-size:24px;font-weight:700;line-height:1}
+  .kpi-l{font-size:11.5px;color:var(--muted);margin-top:6px;font-weight:600}
+  .toolbar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:0 0 14px}
+  .search{flex:1 1 260px;min-width:0;position:relative}
+  .search input{width:100%;padding:10px 12px 10px 36px;border:1.5px solid var(--line);border-radius:10px;background:#fff}
+  .search input:focus{outline:none;border-color:var(--navy)}
+  .search svg{position:absolute;left:11px;top:50%;transform:translateY(-50%)}
+  .sel{padding:9px 11px;border:1.5px solid var(--line);border-radius:10px;background:#fff;font-size:13px;font-weight:600;color:var(--ink);cursor:pointer;max-width:240px}
+  .sel.on{border-color:var(--navy);color:var(--navy)}
+  .afi{display:inline-flex;align-items:center;gap:7px;padding:4px 4px 4px 11px;border:1.5px solid var(--line);border-radius:10px;background:#fff;font-size:12.5px;font-weight:600;color:var(--muted);white-space:nowrap}
+  .afi input{border:0;padding:5px 4px;font-size:13px;font-weight:600;background:transparent}
+  .afi.on{border-color:var(--amber);background:var(--amberbg);color:#8A5E06}
+  .countrow{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:14px 0 10px}
+  .countlbl{font-size:12.5px;color:var(--muted);font-weight:600}
+  .note{font-size:12.5px;color:var(--ink2);line-height:1.5;background:var(--bg);border:1px solid var(--line2);border-radius:10px;padding:11px 13px}
+  .note.a{background:var(--amberbg);border-color:var(--amberln);color:#6E4C0E}
   .note.r{background:var(--redbg);border-color:var(--redln);color:#7E2420}
-  .empty{text-align:center;padding:40px 20px;color:var(--muted);line-height:1.6}
-  .linkbtn{all:unset;cursor:pointer;color:var(--accent);font-weight:600;text-decoration:underline;text-underline-offset:2px}
-  .toast{position:fixed;bottom:22px;left:50%;transform:translateX(-50%);background:var(--ink);color:#fff;font-size:13px;font-weight:600;padding:11px 18px;border-radius:10px;width:max-content;max-width:calc(100vw - 30px);line-height:1.45;box-shadow:0 14px 40px rgba(0,0,0,.25);z-index:90;animation:up .2s ease}
-  .seccion{font-size:11px;font-weight:700;letter-spacing:.6px;text-transform:uppercase;color:var(--muted2);margin:22px 0 8px}
-  .seccion:first-child{margin-top:0}
-
-  /* ===== inicio ===== */
-  .hero{padding:26px 0 10px;max-width:780px;margin:0 auto;text-align:center}
-  .hero h1{font-family:var(--serif);font-size:30px;font-weight:700;letter-spacing:-.4px;margin:0 0 16px;line-height:1.2}
-  @media(max-width:560px){.hero h1{font-size:23px}}
-  .bigsearch{position:relative}
-  .bigsearch input{width:100%;padding:16px 18px 16px 50px;border:1.5px solid var(--line);border-radius:14px;background:#fff;font-size:16.5px;box-shadow:0 6px 24px rgba(29,34,38,.06)}
-  .bigsearch input:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 4px var(--accentbg)}
-  .bigsearch svg{position:absolute;left:18px;top:50%;transform:translateY(-50%)}
-  .statline{display:flex;justify-content:center;flex-wrap:wrap;gap:6px 16px;margin-top:12px;font-size:13px;color:var(--muted)}
-  .statline button{all:unset;cursor:pointer}
-  .statline button b{color:var(--ink);font-weight:700}
-  .statline button:hover b{color:var(--accent)}
-  .inicio{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(0,1fr);gap:16px;margin-top:22px;align-items:start}
-  @media(max-width:900px){.inicio{grid-template-columns:1fr}}
-  .estante{display:flex;flex-direction:column;gap:2px}
-  .estante-h{display:flex;align-items:baseline;gap:10px;margin:14px 0 4px}
-  .estante-h:first-child{margin-top:0}
-  .estante-h b{font-family:var(--serif);font-size:15.5px}
-  .estante-h span{font-size:12px;color:var(--muted)}
-  .estante-h .linkbtn{margin-left:auto;font-size:12.5px}
-  .bres{max-width:900px;margin:18px auto 0}
-  .bgrupo{margin-bottom:18px}
-  .bgrupo-h{display:flex;align-items:baseline;gap:8px;margin:0 0 6px}
-  .bgrupo-h b{font-family:var(--serif);font-size:16px}
-  .bgrupo-h span{font-size:12px;color:var(--muted)}
-  .bgrupo-h .linkbtn{margin-left:auto;font-size:12.5px}
-  .snip{font-family:var(--serif);font-size:14px;color:var(--ink2);line-height:1.5;margin-top:3px}
+  .empty{text-align:center;padding:46px 20px;color:var(--muted);line-height:1.6}
+  .empty b{display:block;color:var(--ink)}
+  .linkbtn{all:unset;cursor:pointer;font-weight:700;color:var(--navy);text-decoration:underline;text-underline-offset:2px}
+  .mut{color:var(--muted2)}
+  .toast{position:fixed;bottom:22px;left:50%;transform:translateX(-50%);background:var(--ink);color:#fff;font-size:13px;font-weight:600;padding:12px 19px;border-radius:11px;width:max-content;max-width:calc(100vw - 30px);line-height:1.45;box-shadow:0 14px 40px rgba(11,21,63,.3);z-index:90;animation:up .22s ease}
   mark{background:#FFE58A;color:inherit;border-radius:3px;padding:0 1px}
 
-  /* ===== renglones de documento (normas, actas, resoluciones) ===== */
-  .docs{background:var(--card);border:1px solid var(--line);border-radius:var(--r);overflow:hidden}
-  .doc{all:unset;box-sizing:border-box;cursor:pointer;display:flex;align-items:flex-start;gap:14px;width:100%;padding:13px 16px;border-bottom:1px solid var(--line2)}
-  .doc:last-child{border-bottom:0}
-  .doc:hover{background:#F9FAFD}
-  .doc:hover .doc-t{color:var(--accent)}
-  .doc-ic{flex:0 0 36px;height:44px;border-radius:6px;background:var(--accentbg);color:var(--accent);display:flex;align-items:center;justify-content:center;font-family:var(--serif);font-weight:700;font-size:14px;border:1px solid var(--accentln)}
-  .doc-ic.r{background:var(--redbg);color:var(--red);border-color:var(--redln)}
-  .doc-b{flex:1;min-width:0}
-  .doc-t{display:block;font-family:var(--serif);font-size:16px;font-weight:600;line-height:1.35;overflow-wrap:anywhere}
-  .doc-m{display:flex;flex-wrap:wrap;gap:4px 10px;margin-top:4px;font-size:12.5px;color:var(--muted)}
-  .doc-m .anx{color:var(--accent);font-weight:600}
-  .doc-r{flex:0 0 auto;display:flex;flex-direction:column;align-items:flex-end;gap:6px}
-  .doc-r .tx{font-size:11.5px;font-weight:600;color:var(--accent)}
-  .datebox{flex:0 0 52px;text-align:center;border:1px solid var(--line);border-radius:8px;padding:5px 0;background:var(--paper)}
-  .datebox b{display:block;font-family:var(--serif);font-size:19px;line-height:1.1}
-  .yr{display:flex;align-items:baseline;gap:10px;margin:18px 2px 8px}.yr:first-child{margin-top:0}
-  .yr b{font-family:var(--serif);font-size:20px}.yr span{font-size:12.5px;color:var(--muted)}
-  .nres{font-size:12.5px;font-weight:600;color:var(--ink2)}.nres.cero{font-weight:400;color:var(--muted)}
-  .datebox small{font-size:10.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.3px}
-  .pn{flex:0 0 auto;min-width:32px;height:32px;padding:0 6px;border-radius:8px;background:var(--accentbg);color:var(--accent);font-weight:700;font-size:13px;display:flex;align-items:center;justify-content:center}
-  @media(max-width:560px){.doc{padding:12px 12px;gap:10px}.doc-ic{flex-basis:30px;height:38px}.doc-r .badge{font-size:10.5px}}
+  /* ===== tablas (las del CLM) ===== */
+  .tablewrap{background:#fff;border:1px solid var(--line2);border-radius:14px;overflow-x:auto}
+  table.list{width:100%;border-collapse:collapse;min-width:720px}
+  table.list th{font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.4px;color:var(--muted2);text-align:left;padding:12px 10px;border-bottom:1.5px solid var(--line2);background:#FAFBFE;white-space:nowrap}
+  table.list th:first-child,table.list td:first-child{padding-left:16px}
+  table.list td{font-size:13px;padding:11px 10px;border-bottom:1px solid var(--line2);vertical-align:middle}
+  table.list tbody tr:last-child td{border-bottom:0}
+  table.list tbody tr{cursor:pointer}
+  table.list tbody tr:hover{background:var(--tint)}
+  table.list .nw{white-space:nowrap}
+  .td-nro{font-weight:700;color:var(--navy);white-space:nowrap}
+  .td-obj{font-weight:600;min-width:240px}
+  .td-obj .oc{margin-top:5px;font-weight:400;display:flex;gap:6px;flex-wrap:wrap;align-items:center;font-size:12px;color:var(--muted)}
+  .td-obj .anx{color:var(--navy);font-weight:600}
+  .td-txt{font-weight:400;min-width:300px;line-height:1.45}
+  .td-est{min-width:120px;white-space:nowrap}
+  .sub{font-size:11.5px;color:var(--muted);margin-top:2px}
+  .td-est .sub{margin-left:15px}
+  .pn{display:inline-flex;align-items:center;justify-content:center;min-width:28px;height:26px;padding:0 6px;border-radius:7px;background:var(--tint);color:var(--navy);font-weight:700;font-size:12.5px}
+  /* Abrir (o leer) es lo que más se hace desde la lista: la columna queda fija a
+     la derecha si la tabla no cabe. */
+  table.list .td-sig{position:sticky;right:0;background:#fff;box-shadow:-8px 0 8px -8px rgba(11,21,63,.22);white-space:nowrap;width:1%}
+  table.list th.td-sig{background:#FAFBFE}
+  table.list tbody tr:hover .td-sig{background:var(--tint)}
+  table.list.unfondo .td-fondo,table.list.uncuerpo .td-cuerpo{display:none}
+  @media(max-width:1180px){table.list .td-fondo{display:none}}
+  @media(max-width:1100px){
+    .topbar .srcpill{display:none}
+    .gsearch{width:min(280px,30vw)}
+    .td-obj{min-width:170px}.td-txt{min-width:220px}.td-est{min-width:0}
+    table.list .td-ult{display:none}
+  }
+  .dot{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:6px;vertical-align:middle;background:var(--muted2)}
+  .dot.g{background:var(--green)}.dot.a{background:var(--amber)}.dot.r{background:var(--red)}.dot.n{background:var(--navy2)}
+  .signed{all:unset;box-sizing:border-box;cursor:pointer;display:inline-flex;align-items:center;gap:5px;font-size:12px;font-weight:700;color:var(--navy);padding:5px 9px;border-radius:8px;border:1.5px solid var(--tintln);background:var(--tint);white-space:nowrap}
+  .signed:hover{background:#E1E7FA}
+  .signed+.signed{margin-left:4px}
+  .solo-movil{display:none}
+  .yrrow td{background:#FAFBFE;font-size:11px;font-weight:700;letter-spacing:.4px;color:var(--muted);text-transform:uppercase;padding:8px 16px;cursor:default}
+  table.list tbody tr.yrrow:hover{background:#FAFBFE}
+  /* En el celular cada fila es una tarjeta (como la vista «Tarjetas» del CLM):
+     sin encabezados, cada dato con su rótulo, y el botón a la derecha. */
+  @media(max-width:900px){
+    .tablewrap{overflow:visible}
+    table.list{min-width:0}
+    table.list thead{display:none}
+    table.list tbody tr{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:3px 12px;padding:12px 14px;border-bottom:1px solid var(--line2)}
+    table.list tbody tr:last-child{border-bottom:0}
+    table.list td,table.list th:first-child,table.list td:first-child{display:block;grid-column:1;padding:0;border:0;min-width:0;font-size:12.5px}
+    table.list td[data-l]::before{content:attr(data-l) " ";color:var(--muted2);font-weight:600}
+    table.list td .sub{display:inline;margin:0 0 0 4px}
+    table.list .td-obj,table.list .td-txt{font-size:13.5px;min-width:0}
+    table.list .td-sig{position:static;box-shadow:none;background:none;grid-column:2;grid-row:1/span 6;align-self:center;width:auto}
+    table.list tbody tr:hover .td-sig{background:none}
+    table.list .td-fondo,table.list .td-pn{display:none}
+    .solo-movil{display:inline!important}
+    table.list tbody tr.yrrow{display:block;padding:7px 14px;background:#FAFBFE}
+    table.list tbody tr.yrrow td{padding:0;background:none}
+  }
 
-  /* ===== biblioteca: filtros al costado ===== */
-  .lib{display:grid;grid-template-columns:250px minmax(0,1fr);gap:20px;align-items:start}
-  @media(max-width:900px){.lib{grid-template-columns:1fr;gap:12px}}
-  .facetas{position:sticky;top:118px}
-  @media(max-width:900px){.facetas{position:static}}
-  .facetas summary{display:none;cursor:pointer;font-weight:600;padding:10px 14px;border:1px solid var(--line);border-radius:10px;background:#fff;list-style:none}
-  .facetas summary::-webkit-details-marker{display:none}
-  @media(max-width:900px){.facetas summary{display:block}.facetas[open] summary{margin-bottom:10px}}
-  .fbox{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:14px}
-  .search{position:relative}
-  .search input{width:100%;padding:9px 11px 9px 32px;border:1px solid var(--line);border-radius:9px;background:var(--paper)}
-  .search input:focus{outline:none;border-color:var(--accent);background:#fff}
-  .search svg{position:absolute;left:10px;top:50%;transform:translateY(-50%)}
-  .ftit{font-size:11px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;color:var(--muted2);margin:16px 0 6px}
-  .fopt{all:unset;box-sizing:border-box;cursor:pointer;display:flex;align-items:center;gap:8px;width:100%;padding:5px 8px;border-radius:7px;font-size:13.5px;color:var(--ink2)}
-  .fopt:hover{background:var(--paper)}
-  .fopt.on{background:var(--accentbg);color:var(--accent);font-weight:600}
-  .fopt .n{margin-left:auto;font-size:12px;color:var(--muted2)}
-  .fopt.on .n{color:var(--accent)}
-  .fbox select,.fbox input[type=date]{width:100%;padding:8px 9px;border:1px solid var(--line);border-radius:8px;background:#fff}
-  .fcheck{display:flex;align-items:center;gap:8px;font-size:13.5px;color:var(--ink2);cursor:pointer;margin-top:4px}
-  .fcheck input{accent-color:var(--accent)}
-  .listhead{display:flex;align-items:center;gap:12px;margin:0 0 10px;flex-wrap:wrap}
-  .countlbl{font-size:13px;color:var(--muted);font-weight:600}
-  .listhead select{margin-left:auto;padding:7px 9px;border:1px solid var(--line);border-radius:8px;background:#fff;font-size:13px}
-  .afecha{display:flex;align-items:center;gap:10px;flex-wrap:wrap;background:var(--goldbg);border:1px solid var(--goldln);color:#6E4C0E;border-radius:10px;padding:8px 12px;margin:0 0 10px;font-size:13px}
-  .afecha .linkbtn{color:#6E4C0E}
-
-  /* ===== página de un documento ===== */
-  .crumbs{display:flex;align-items:center;flex-wrap:wrap;gap:6px;font-size:13px;color:var(--muted);margin:0 0 12px}
-  .crumbs button{all:unset;cursor:pointer;color:var(--accent);font-weight:600}
-  .crumbs button:hover{text-decoration:underline}
-  .dochead{padding:4px 0 16px;border-bottom:1px solid var(--line);margin-bottom:16px}
-  .kicker{font-size:12px;font-weight:700;letter-spacing:.4px;text-transform:uppercase;color:var(--accent)}
-  .dochead h1{font-family:var(--serif);font-size:30px;line-height:1.2;font-weight:700;letter-spacing:-.4px;margin:6px 0 8px}
-  .dochead h1.largo{font-size:22px;font-weight:600;letter-spacing:0}
-  @media(max-width:560px){.dochead h1{font-size:23px}.dochead h1.largo{font-size:18px}}
-  .docmeta{display:flex;flex-wrap:wrap;align-items:center;gap:6px 12px;font-size:13.5px;color:var(--ink2)}
-  .docact{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
-  .tabs2{display:flex;gap:4px;border-bottom:1px solid var(--line);margin:0 0 16px}
-  .tab2{all:unset;cursor:pointer;padding:10px 14px;font-weight:600;color:var(--muted);border-bottom:2.5px solid transparent;margin-bottom:-1px}
-  .tab2 small{font-weight:500;color:var(--muted2);margin-left:4px}
-  .tab2.on{color:var(--accent);border-bottom-color:var(--accent)}
-  .detail{display:grid;grid-template-columns:minmax(0,1.6fr) minmax(0,1fr);gap:16px;align-items:start}
+  /* ===== ficha (el detalle del contrato del CLM) ===== */
+  .back{all:unset;cursor:pointer;display:inline-flex;align-items:center;gap:7px;font-size:13px;font-weight:600;color:var(--navy);margin-bottom:14px}
+  .back:hover{text-decoration:underline}
+  .detail{display:grid;grid-template-columns:1.6fr 1fr;gap:18px;align-items:start}
+  .detail>*{min-width:0}
   @media(max-width:920px){.detail{grid-template-columns:1fr}}
-  .dl{display:grid;grid-template-columns:1fr 1fr;gap:12px 20px}
+  .kick{font-size:11.5px;font-weight:700;color:var(--navy);margin-bottom:3px}
+  .h-title{font-size:19px;font-weight:700;margin:0 0 3px;line-height:1.3;overflow-wrap:anywhere}
+  .h-title.largo{font-size:16px;font-weight:600;line-height:1.5}
+  .h-sub{font-size:12.5px;color:var(--muted);line-height:1.5}
+  .dl{display:grid;grid-template-columns:1fr 1fr;gap:13px 20px;margin-top:16px}
   .dl>div{min-width:0}
-  .dl .k{font-size:11px;font-weight:700;color:var(--muted2);text-transform:uppercase;letter-spacing:.4px;margin-bottom:2px}
-  .dl .v{font-size:14.5px;font-weight:600;overflow-wrap:anywhere}
+  .dl .k{font-size:10.5px;font-weight:700;color:var(--muted2);text-transform:uppercase;letter-spacing:.4px;margin-bottom:2px}
+  .dl .v{font-size:14px;font-weight:600;overflow-wrap:anywhere}
+  .dl .v.none{color:var(--muted2);font-weight:600}
   .dl .full{grid-column:1/-1}
-  .expbox{border:1px solid var(--line2);border-radius:10px;padding:10px 13px;background:var(--paper)}
-  .expbox .exprow{display:flex;align-items:baseline;gap:10px;padding:3px 0;font-size:14px}
-  .expbox .exprow .k{flex:0 0 120px;color:var(--muted)}
-  .expbox .exprow .v{font-weight:600;min-width:0;overflow-wrap:anywhere}
-  .expbox .exprow .v.none{font-weight:400;color:var(--muted2)}
-  .tl{list-style:none;margin:4px 0 0;padding:0}
-  .tl li{position:relative;padding:0 0 14px 22px;border-left:2px solid var(--line2);margin-left:6px}
+  .linkbar{display:flex;align-items:center;gap:10px;background:var(--tint);border:1px solid var(--tintln);border-radius:11px;padding:11px 13px;margin:14px 0 4px}
+  .linkbar .lt{font-size:12.5px;font-weight:700}
+  .linkbar .ld{font-size:11.5px;color:var(--muted)}
+  .act{display:flex;flex-direction:column;gap:9px}
+  .actbtn{all:unset;box-sizing:border-box;cursor:pointer;display:flex;align-items:center;gap:11px;padding:12px 13px;border:1.5px solid var(--line);border-radius:11px;background:#fff;transition:border-color .14s,background .14s}
+  .actbtn:hover{border-color:var(--navy);background:var(--tint)}
+  .actbtn.prim{border-color:var(--navy);background:var(--tint)}
+  .actbtn .ic{width:32px;height:32px;border-radius:8px;background:var(--tint);color:var(--navy);display:flex;align-items:center;justify-content:center;flex:0 0 auto;font-size:15px}
+  .actbtn.prim .ic{background:var(--navy);color:#fff}
+  .actbtn .at{font-size:13.5px;font-weight:700;display:block}
+  .actbtn .ad{font-size:11.5px;color:var(--muted);display:block;margin-top:1px}
+  .tl{list-style:none;margin:6px 0 0;padding:0}
+  .tl li{position:relative;padding:0 0 14px 22px;border-left:2px solid var(--line2);margin-left:7px}
   .tl li:last-child{padding-bottom:2px}
-  .tl li::before{content:"";position:absolute;left:-6px;top:4px;width:10px;height:10px;border-radius:50%;background:var(--blue);border:2px solid #fff}
+  .tl li::before{content:"";position:absolute;left:-6px;top:3px;width:10px;height:10px;border-radius:50%;background:var(--navy2);border:2px solid #fff}
   .tl li.ok::before{background:var(--green)} .tl li.fin::before{background:var(--red)}
-  .tl li.fut::before{background:#fff;border:2px dashed var(--gold);width:8px;height:8px}
-  .tl li.fut .t{color:var(--gold)}
-  .tl .t{font-size:13.5px;font-weight:600}
-  .tl .s{font-size:12.5px;color:var(--muted);line-height:1.45}
-  .tl .lk{all:unset;cursor:pointer;color:var(--accent);font-weight:600}
+  .tl li.fut::before{background:#fff;border:2px dashed var(--amber);width:8px;height:8px}
+  .tl li.fut .t{color:var(--amber)}
+  .tl .t{font-size:12.5px;font-weight:700}
+  .tl .s{font-size:11.5px;color:var(--muted);line-height:1.45}
+  .tl .lk{all:unset;cursor:pointer;color:var(--navy);font-weight:700}
   .tl .lk:hover{text-decoration:underline}
-  .rowlist{display:flex;flex-direction:column;gap:8px}
-  .rowitem{all:unset;box-sizing:border-box;cursor:pointer;display:flex;gap:12px;align-items:flex-start;border:1px solid var(--line2);border-radius:10px;padding:11px 13px;background:#fff;width:100%}
-  .rowitem:hover{border-color:var(--accentln);background:#F9FAFD}
-  .rowitem .rt{display:block;font-family:var(--serif);font-size:15px;line-height:1.45}
+  .rowitem{all:unset;box-sizing:border-box;cursor:pointer;display:flex;gap:12px;align-items:flex-start;border:1px solid var(--line2);border-radius:11px;padding:11px 13px;background:#fff;width:100%}
+  .rowitem+.rowitem{margin-top:8px}
+  .rowitem:hover{border-color:var(--navy);background:var(--tint)}
+  .rowitem .rt{display:block;font-size:13.5px;line-height:1.5}
   .rowitem .rs{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:5px}
+  .alert-row{display:flex;align-items:center;gap:12px;background:#fff;border:1px solid var(--line2);border-radius:12px;padding:12px 15px;margin-bottom:9px}
+  .alert-row:last-child{margin-bottom:0}
+  .alert-row .aic{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;flex:0 0 auto;background:var(--tint);font-size:16px}
+  .alert-row .at{font-size:13px;font-weight:700}
+  .alert-row .ad{font-size:11.5px;color:var(--muted);line-height:1.4}
+  .alert-row .go{margin-left:auto;flex:0 0 auto}
+  @media(max-width:560px){.alert-row{flex-wrap:wrap}.alert-row>div:nth-child(2){flex:1 1 200px}.alert-row .go{margin-left:48px}}
   .vers{display:flex;flex-direction:column;gap:7px}
   .ver{display:flex;align-items:center;gap:10px;font-size:13px;border:1px solid var(--line2);border-radius:10px;padding:9px 11px}
-  .ver.on{border-color:var(--accentln);background:var(--accentbg)}
+  .ver.on{border-color:var(--tintln);background:var(--tint)}
   .ver .vd{flex:1;min-width:0}
   .ver .vd b{display:block}
   .ver .vd span{color:var(--muted);font-size:12px}
   .quedia{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
-  .quedia input{padding:8px 10px;border:1px solid var(--line);border-radius:9px}
-  .resq{margin-top:12px;border-radius:10px;padding:10px 13px;font-size:13.5px;line-height:1.5;border:1px solid var(--line2);background:var(--paper)}
-  .nota{border:1px solid var(--line2);border-radius:10px;padding:9px 11px;margin-top:8px;font-size:13.5px;line-height:1.45;display:flex;gap:8px}
+  .quedia input{padding:8px 10px;border:1.5px solid var(--line);border-radius:10px}
+  .resq{margin-top:12px;border-radius:10px;padding:10px 13px;font-size:13px;line-height:1.5;border:1px solid var(--line2);background:var(--bg)}
+  .nota{border:1px solid var(--line2);border-radius:10px;padding:9px 11px;margin-top:8px;font-size:13px;line-height:1.45;display:flex;gap:8px}
   .nota .nt{flex:1;white-space:pre-wrap;overflow-wrap:anywhere}
   .nota .nm{font-size:11.5px;color:var(--muted);margin-top:4px}
-  textarea.notatx{width:100%;min-height:62px;padding:9px 11px;border:1px solid var(--line);border-radius:10px;resize:vertical}
-  textarea.notatx:focus{outline:none;border-color:var(--accent)}
-  .alert-row{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--line2)}
-  .alert-row:last-child{border-bottom:0}
-  .alert-row .aic{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;flex:0 0 auto;background:var(--paper)}
-  .alert-row .at{font-size:13.5px;font-weight:600}
-  .alert-row .ad{font-size:12.5px;color:var(--muted);line-height:1.4}
-  .alert-row .go{margin-left:auto;flex:0 0 auto}
+  textarea.notatx{width:100%;min-height:62px;padding:10px 12px;border:1.5px solid var(--line);border-radius:10px;resize:vertical}
+  textarea.notatx:focus{outline:none;border-color:var(--navy)}
 
-  /* ===== lector (como en Lexis) ===== */
-  .lector{display:grid;grid-template-columns:290px minmax(0,1fr);gap:18px;align-items:start}
-  .lindice{position:sticky;top:118px;max-height:calc(100vh - 136px);overflow:auto;padding:12px}
-  .lindice .search{margin-bottom:8px}
+  /* ===== lector: el texto vigente de una norma ===== */
+  .lhead{display:flex;align-items:flex-start;gap:14px;justify-content:space-between;flex-wrap:wrap;margin-bottom:14px}
+  .lhead .acts{display:flex;gap:8px;flex-wrap:wrap}
+  .lector{display:grid;grid-template-columns:280px minmax(0,1fr);gap:16px;align-items:start}
+  .lindice{position:sticky;top:72px;max-height:calc(100vh - 90px);overflow:auto;padding:12px}
+  .lindice .search{margin-bottom:8px;min-width:0}
   .lindice .lcnt{font-size:12px;color:var(--muted);margin:0 4px 6px}
-  .lix{all:unset;box-sizing:border-box;cursor:pointer;display:block;width:100%;padding:4px 8px;border-radius:6px;font-size:13px;line-height:1.35;color:var(--ink2)}
-  .lix:hover{background:var(--accentbg);color:var(--accent)}
-  .lix.h1{font-weight:700;margin-top:8px;font-size:11.5px;text-transform:uppercase;letter-spacing:.3px;color:var(--accent)}
-  .lix.h2{font-weight:600;padding-left:14px;color:var(--ink)}
+  .lix{all:unset;box-sizing:border-box;cursor:pointer;display:block;width:100%;padding:5px 8px;border-radius:7px;font-size:12.5px;line-height:1.35;color:var(--ink2)}
+  .lix:hover{background:var(--tint);color:var(--navy)}
+  .lix.h1{font-weight:700;margin-top:8px;font-size:11px;text-transform:uppercase;letter-spacing:.3px;color:var(--navy)}
+  .lix.h2{font-weight:700;padding-left:14px;color:var(--ink)}
   .lix.art{padding-left:14px}
-  .lix.art b{color:var(--ink);font-weight:600}
-  .lix .ref{color:var(--gold);font-weight:700}
-  .ltexto{padding:34px 46px 44px;font-family:var(--serif);font-size:16.5px;line-height:1.75;color:#24292E}
-  @media(max-width:560px){.ltexto{padding:20px 16px 26px;font-size:16px}}
-  .ltexto .lh1{font-family:var(--serif);font-size:17px;font-weight:700;text-align:center;letter-spacing:.2px;margin:34px 0 14px;scroll-margin-top:130px;line-height:1.4}
+  .lix.art b{color:var(--ink);font-weight:700}
+  .lix .ref{color:var(--amber);font-weight:700}
+  .ltexto{padding:28px 36px 40px;font-size:15px;line-height:1.75;color:var(--ink)}
+  .ltexto>*{max-width:820px}
+  @media(max-width:560px){.ltexto{padding:18px 16px 24px}}
+  .ltexto .lh1{font-size:13px;font-weight:700;letter-spacing:.4px;text-transform:uppercase;color:var(--navy);margin:30px 0 12px;padding-bottom:6px;border-bottom:1px solid var(--line2);scroll-margin-top:80px;line-height:1.45}
   .ltexto .lh1:first-child{margin-top:0}
-  .ltexto .lh2{font-size:16px;font-weight:700;margin:24px 0 8px;scroll-margin-top:130px}
+  .ltexto .lh2{font-size:14.5px;font-weight:700;margin:22px 0 8px;scroll-margin-top:80px}
   .ltexto p{margin:0 0 10px}
-  .ltexto p.lli{padding-left:26px;margin-bottom:6px}
-  .lart{position:relative;margin:0 0 16px;scroll-margin-top:130px;border-radius:8px;transition:background .6s}
+  .ltexto p.lli{padding-left:24px;margin-bottom:6px}
+  .lart{position:relative;margin:0 0 16px;scroll-margin-top:80px;border-radius:8px;transition:background .6s}
   .lart.flash{background:#FFF4D6}
-  .lart .lnum{font-weight:700}
-  .lart .lk2{all:unset;cursor:pointer;position:absolute;right:-32px;top:2px;font-size:13px;opacity:0;transition:opacity .15s}
+  .lart .lnum{font-weight:700;color:var(--navy)}
+  .lart .lk2{all:unset;cursor:pointer;position:absolute;right:-30px;top:2px;font-size:13px;opacity:0;transition:opacity .15s}
   @media(max-width:560px){.lart .lk2{right:-14px}}
   .lart:hover .lk2,.lart .lk2:focus-visible{opacity:.8}
-  .lref{font-family:var(--sans);font-size:12.5px;line-height:1.45;background:var(--goldbg);color:#6E4C0E;border-radius:8px;padding:6px 10px;margin:4px 0 8px}
+  .lref{font-size:12px;line-height:1.45;background:var(--amberbg);color:#6E4C0E;border-radius:8px;padding:6px 10px;margin:4px 0 8px}
   .lref button{all:unset;cursor:pointer;text-decoration:underline;font-weight:700}
   .lmovil{display:none}
   @media(max-width:920px){.lector{grid-template-columns:1fr}.lindice{display:none}.lmovil{display:block;margin-bottom:12px}}
-  .lmovil select{width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:#fff}
+  .lmovil select{width:100%;padding:10px 12px;border:1.5px solid var(--line);border-radius:10px;background:#fff}
 
-  /* ===== modales y entrada ===== */
-  .overlay{position:fixed;inset:0;background:rgba(29,34,38,.42);display:flex;align-items:flex-start;justify-content:center;padding:40px 16px;overflow:auto;z-index:60}
-  .modal{background:#fff;border-radius:14px;max-width:520px;width:100%;padding:24px 24px 20px;box-shadow:0 30px 80px rgba(0,0,0,.3);animation:up .2s ease}
-  .modal h2{font-family:var(--serif);font-size:21px;margin:0 0 4px}
-  .modal .sub{font-size:13.5px;color:var(--muted);margin:0 0 14px;line-height:1.5}
-  .modal-foot{display:flex;gap:10px;justify-content:flex-end;margin-top:16px;flex-wrap:wrap}
-  .frase{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:17px;font-weight:700;background:var(--accentbg);color:var(--accent);border-radius:10px;padding:14px;text-align:center;word-break:break-word;user-select:all}
-  .login{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:30px 16px}
-  .login-card{background:#fff;border:1px solid var(--line);border-radius:16px;padding:34px 32px 26px;max-width:460px;width:100%;box-shadow:0 20px 60px rgba(29,34,38,.08)}
+  /* ===== ventanas y entrada (las del CLM) ===== */
+  .overlay{position:fixed;inset:0;background:rgba(11,21,63,.44);display:flex;align-items:flex-start;justify-content:center;padding:36px 18px;overflow:auto;z-index:60}
+  .modal{background:#fff;border-radius:16px;max-width:560px;width:100%;padding:24px 26px 22px;box-shadow:0 30px 80px rgba(11,21,63,.3);animation:up .2s ease}
+  .modal h2{font-size:19px;font-weight:700;margin:0 0 3px}
+  .modal .sub{font-size:13px;color:var(--muted);margin:0 0 16px;line-height:1.5}
+  .modal-foot{display:flex;gap:10px;justify-content:flex-end;margin-top:18px;flex-wrap:wrap}
+  .frase{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:17px;font-weight:700;background:var(--tint);color:var(--navy);border-radius:10px;padding:14px;text-align:center;word-break:break-word;user-select:all}
+  .login-shell{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:30px 16px;background:linear-gradient(160deg,#F4F6FB 0%,#E8EDFB 100%)}
+  .login-card{background:#fff;border:1px solid var(--line);border-radius:18px;padding:32px 32px 26px;max-width:470px;width:100%;box-shadow:0 18px 50px rgba(11,21,63,.09)}
   @media(max-width:560px){.login-card{padding:24px 20px 20px}}
-  .login-card .marca{margin-bottom:22px;cursor:default}
-  .login-card h1{font-family:var(--serif);font-size:26px;line-height:1.2;letter-spacing:-.3px;margin:0 0 8px}
-  .lead{font-size:14px;color:var(--muted);margin:0 0 18px;line-height:1.55}
-  input.big{width:100%;padding:12px 14px;border:1px solid var(--line);border-radius:10px;background:#fff;font-size:15.5px}
-  input.big:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px var(--accentbg)}
+  .eyebrow{display:inline-block;font-size:11px;font-weight:700;letter-spacing:.6px;color:var(--navy);background:var(--tint);padding:5px 11px;border-radius:99px;text-transform:uppercase}
+  .login-card h1{font-size:24px;font-weight:700;margin:13px 0 5px;letter-spacing:-.3px;line-height:1.25}
+  .lead{font-size:14px;color:var(--muted);margin:0 0 20px;line-height:1.55}
+  .frow label{display:block;font-size:12px;font-weight:700;margin-bottom:5px}
+  input.big{width:100%;padding:12px;border:1.5px solid var(--line);border-radius:11px;background:#fff;font-size:15px}
+  input.big:focus{outline:none;border-color:var(--navy)}
   .errbox{background:var(--redbg);color:#7E2420;border-radius:10px;padding:9px 12px;font-size:13px;margin-bottom:12px;line-height:1.45}
-  .login-links{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-top:14px;font-size:13px}
-  .bootmsg{min-height:100vh;display:flex;align-items:center;justify-content:center;color:var(--muted)}
+  .login-links{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-top:14px;font-size:12.5px}
+  .bootmsg{min-height:100vh;display:flex;align-items:center;justify-content:center;gap:10px;color:var(--muted)}
   #tip{display:none}
 
-  .tab:focus-visible,.btn:focus-visible,.fchip:focus-visible,.ib:focus-visible,.doc:focus-visible,.fopt:focus-visible,.tab2:focus-visible,
-  .linkbtn:focus-visible,.rowitem:focus-visible,.lix:focus-visible,.tl .lk:focus-visible,.crumbs button:focus-visible,.marca:focus-visible{outline:2.5px solid var(--accent2);outline-offset:2px}
+  .navitem:focus-visible,.btn:focus-visible,.chip:focus-visible,.actbtn:focus-visible,.kpi:focus-visible,.iconbtn:focus-visible,.back:focus-visible,
+  .linkbtn:focus-visible,.rowitem:focus-visible,.lix:focus-visible,.tl .lk:focus-visible,.signed:focus-visible{outline:2.5px solid var(--navy2);outline-offset:2px}
+  table.list tbody tr:focus-visible{outline:2.5px solid var(--navy2);outline-offset:-2px}
 </style>
 </head>
 <body>
@@ -597,7 +620,7 @@ async function entrarDemo(){
 /* ================= RUTAS =================
    Los enlaces llevan el id de la cosa (norma, acta, resolución), nunca su
    posición en una lista: la lista cambia cada vez que se publica. */
-const VIEWS={panel:"Inicio",normativa:"Normativa interna",norma:"Norma",texto:"Texto vigente",actas:"Actas de sesión",acta:"Acta",resoluciones:"Resoluciones",resolucion:"Resolución",notas:"Mis notas",revision:"Revisión de la matriz"};
+const VIEWS={panel:"Panel",normativa:"Normativa interna",norma:"Ficha de la norma",texto:"Texto vigente",actas:"Actas de sesión",acta:"Acta de sesión",resoluciones:"Resoluciones",resolucion:"Resolución",notas:"Mis notas",revision:"Revisión de la matriz"};
 const DETALLE={norma:"normativa",texto:"normativa",acta:"actas",resolucion:"resoluciones"};
 function hashDe(){return "#/"+ST.view+(DETALLE[ST.view]&&ST.id?"/"+encodeURIComponent(ST.id)+(ST.view==="texto"&&ST.art?"~"+encodeURIComponent(ST.art):""):"");}
 function leerHash(){
@@ -629,7 +652,10 @@ window.addEventListener("popstate",()=>{if(!ABIERTOS.length)return;aplicarHash()
 window.addEventListener("hashchange",()=>{if(!ABIERTOS.length)return;const h=leerHash();if(h&&(h.view!==ST.view||h.id!==ST.id)){aplicarHash();render();}
   else if(h&&h.view==="texto"&&h.art&&h.art!==ST.art){ST.art=h.art;irArticulo(h.art);}});
 
-/* ================= PINTAR ================= */
+/* ================= PINTAR =================
+   El armazón del CLM: menú a la izquierda, barra arriba con el título, el fondo
+   y el buscador, y la pantalla debajo. Quien ya usa el CLM no tiene que
+   aprender nada. */
 const I={
   panel:'<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg>',
   libro:'<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20V3H6.5A2.5 2.5 0 0 0 4 5.5z"/><path d="M4 19.5A2.5 2.5 0 0 0 6.5 22H20v-5"/></svg>',
@@ -637,8 +663,8 @@ const I={
   mazo:'<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m14 13-7.5 7.5a2.1 2.1 0 0 1-3-3L11 10"/><path d="m16 16 6-6M8 8l6-6M9 7l8 8M21 11l-8-8"/></svg>',
   nota:'<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>',
   check:'<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>',
-  candado:'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>',
   llave:'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="7.5" cy="15.5" r="4.5"/><path d="m10.7 12.3 9.8-9.8M17 6l3 3M14.5 8.5l2 2"/></svg>',
+  salir:'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="m16 17 5-5-5-5M21 12H9"/></svg>',
   enlace:'<svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 0 0 7 0l3-3a5 5 0 0 0-7-7l-1 1"/><path d="M14 11a5 5 0 0 0-7 0l-3 3a5 5 0 0 0 7 7l1-1"/></svg>',
   lupa:'<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#9AA0B2" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>'
 };
@@ -648,37 +674,48 @@ function render(){
   if(!ABIERTOS.length){renderLogin();return;}
   tocar();
   const activo=id=>ST.view===id||DETALLE[ST.view]===id;
-  const tab=(id,label)=>`<button class="tab ${activo(id)?"on":""}" data-go="${id}">${label}</button>`;
+  const nav=(id,label,icon,badge)=>`<button class="navitem ${activo(id)?"on":""}" data-go="${id}">${icon}<span>${label}</span>${badge?`<span class="nbadge">${badge}</span>`:""}</button>`;
   const pend=revisionLista().length,nn=todasNotas().length;
   const cerrados=(INDICE&&INDICE.grupos||[]).filter(g=>!ABIERTOS.includes(g.id)).length;
   const fs=FONDOS();
   $("#app").innerHTML=`
-  <header class="top">
-    <div class="top-in">
-      <button class="marca" data-go="panel" title="Inicio">${logoHTML()}<span><span class="mn">${esc(MARCA.nombre)}</span><span class="ms">Actas · resoluciones · normativa</span></span></button>
-      <nav class="tabs" aria-label="Secciones">${tab("panel","Inicio")}${tab("normativa","Normativa")}${tab("actas","Actas")}${tab("resoluciones","Resoluciones")}</nav>
-      <div class="top-der">
-        ${ST.view!=="panel"?`<div class="gsearch">${I.lupa}<input id="gq" placeholder="Buscar en todo…" autocomplete="off"><div class="gresults" id="gres" style="display:none"></div></div>`:""}
-        <button class="ib" data-go="notas" title="Mis notas" aria-label="Mis notas">${I.nota}${nn?`<span class="dotn">${nn}</span>`:""}</button>
-        <button class="ib" data-go="revision" title="Revisión de la matriz" aria-label="Revisión de la matriz">${I.check}${pend?`<span class="dotn">${pend}</span>`:""}</button>
-        ${cerrados&&!DEMO?`<button class="ib" id="masgrupos" title="Abrir otro grupo con otra frase" aria-label="Abrir otro grupo">${I.llave}</button>`:""}
-        <button class="ib" id="logout" title="Cerrar (olvida lo descifrado)" aria-label="Cerrar sesión">${I.candado}</button>
+  <div class="shell">
+    <aside class="side">
+      <div class="side-brand">${logoHTML()}<div><div class="t">${esc(MARCA.nombre)} · ${esc(MARCA.sigla)}</div><div class="s">Actas, resoluciones y normativa</div></div></div>
+      <div class="navgrp">Consulta</div>
+      ${nav("panel","Panel",I.panel)}
+      ${nav("normativa","Normativa",I.libro)}
+      ${nav("actas","Actas",I.acta)}
+      ${nav("resoluciones","Resoluciones",I.mazo)}
+      <div class="navgrp">Seguimiento</div>
+      ${nav("revision","Revisión de la matriz",I.check,pend||"")}
+      ${nav("notas","Mis notas",I.nota,nn||"")}
+      <div class="side-foot">
+        <div class="avatar">${esc(DEMO?"DE":String(ABIERTOS[0]||"").slice(0,2).toUpperCase())}</div>
+        <div style="min-width:0;flex:1"><div class="n">${DEMO?"Demostración":"Grupo "+esc(ABIERTOS.join(", "))}</div><div class="r">Se cierra sola tras ${BLOQUEO_MIN} min</div></div>
+        ${cerrados&&!DEMO?`<button class="iconbtn" id="masgrupos" title="Abrir otro grupo con otra frase" aria-label="Abrir otro grupo">${I.llave}</button>`:""}
+        <button class="iconbtn" id="logout" title="Cerrar (olvida lo descifrado)" aria-label="Cerrar sesión">${I.salir}</button>
       </div>
-    </div>
-    <div class="fondos"><div class="fondos-in fondobar">
-      ${fs.length>1?`<span class="fl">Fondo</span>${[{sigla:"all",nombre:"Todos los fondos"}].concat(fs).map(f=>`<button class="fchip ${ST.fondo===f.sigla?"on":""}" data-fd="${esc(f.sigla)}" title="${esc(f.nombre)}">${f.sigla==="all"?"Todos":esc(f.sigla)}</button>`).join("")}${ST.fondo!=="all"?`<span class="fbname">${esc(fondoNombre(ST.fondo))}</span>`:""}`:""}
-      <span style="margin-left:auto;padding-left:12px">${srcPillHTML()}</span>
-    </div></div>
-  </header>
-  <main class="content" id="view"></main>`;
+    </aside>
+    <main class="main">
+      <div class="topbar">
+        <h1>${esc(VIEWS[ST.view]||"")}</h1>
+        ${srcPillHTML()}
+        ${fs.length>1?`<select class="fondosel${ST.fondo!=="all"?" on":""}" id="fondoSel" title="Ver un solo fondo, programa o proyecto" aria-label="Fondo">${[{sigla:"all",nombre:""}].concat(fs).map(f=>`<option value="${esc(f.sigla)}"${ST.fondo===f.sigla?" selected":""}>${f.sigla==="all"?"🏛️ Todos los fondos":esc(f.sigla+" · "+f.nombre)}</option>`).join("")}</select>`:""}
+        <div class="gsearch">${I.lupa}<input id="gq" placeholder="Buscar norma, artículo, acta…" autocomplete="off"><div class="gresults" id="gres" style="display:none"></div></div>
+      </div>
+      <div class="content" id="view"></div>
+    </main>
+  </div>`;
   const app=$("#app");
   app.querySelectorAll("[data-go]").forEach(b=>b.onclick=()=>go(b.dataset.go));
-  app.querySelectorAll(".fondobar [data-fd]").forEach(b=>b.onclick=()=>{elegirFondo(b.dataset.fd);render();});
   $("#logout").onclick=()=>cerrarSesion("Sesión cerrada. Lo descifrado se olvidó en este navegador.");
   if($("#masgrupos"))$("#masgrupos").onclick=modalOtraFrase;
-  const tabs=$(".tabs",app),on=$(".tab.on",app);
-  if(tabs&&on&&tabs.scrollWidth>tabs.clientWidth)tabs.scrollLeft=Math.max(0,on.offsetLeft-40);
-  if($("#gq"))bindGlobalSearch();
+  if($("#fondoSel"))$("#fondoSel").onchange=e=>{elegirFondo(e.target.value);render();};
+  // En el celular el menú es una fila que se desliza: la sección abierta, a la vista.
+  const side=$("aside.side",app),on=$(".navitem.on",app);
+  if(side&&on&&side.scrollWidth>side.clientWidth)side.scrollLeft=Math.max(0,on.offsetLeft-70);
+  bindGlobalSearch();
   const V={panel:vPanel,normativa:vNormativa,norma:vNorma,texto:vTexto,actas:vActas,acta:vActa,resoluciones:vResoluciones,resolucion:vResolucion,notas:vNotas,revision:vRevision};
   (V[ST.view]||vPanel)();
 }
@@ -686,29 +723,29 @@ function srcPillHTML(){
   if(DEMO)return `<span class="srcpill demo" title="Datos inventados para conocer la herramienta. Nada de esto es real."><span class="srcdot off"></span>Demostración · datos ficticios</span>`;
   const e=edadBase(INDICE&&INDICE.generado);
   const vieja=!!(e&&e.vieja);
-  const tip=vieja?`No se publica desde el ${fdate(e.fecha)}: el robot diario pudo fallar. Revisa la pestaña Actions del repositorio.`:"Publicado por el robot desde el Excel de la matriz";
+  const tip=vieja?`No se publica desde el ${fdate(e.fecha)}: el robot pudo fallar. Revisa la pestaña Actions del repositorio.`:"Publicado por el robot desde el Excel de la matriz";
   return `<span class="srcpill${vieja?" old":""}" title="${esc(tip)}"><span class="srcdot ${vieja?"old":""}"></span>${e?esc(vieja?"Sin publicar desde el "+fdate(e.fecha):"Publicado "+e.txt):"Matriz"}</span>`;
 }
 
-/* ================= BUSCADOR GLOBAL ================= */
+/* ================= BUSCADOR DE ARRIBA ================= */
 function buscarTodo(q,max){
   const out=[];
   NORMAS().filter(n=>coincide(pajaNorma(n),q)).forEach(n=>out.push({t:"norma",id:n.id,a:"📘 "+tituloNorma(n),b:`${n.tipo||"Norma"} · ${cuerpo(n.organo).nombre} · ${estadoNorma(n).label}`,o:0}));
   RESOL().filter(r=>coincide(pajaRes(r),q)).sort((x,y)=>y.fecha.localeCompare(x.fecha)).forEach(r=>out.push({t:"resolucion",id:r.id,a:"📄 "+trunc(r.texto,80),b:`${resRef(r)} · ${estadoRes(r).label}`,o:1}));
   NORMAS().forEach(n=>{const t=textoCargado(n);if(!t)return;let k=0;
     t.unidades.forEach(u=>{if(u.t!=="art"||k>=3)return;const txt=[u.rub||"",...u.p].join(" ");if(coincide("art "+u.n+" "+txt,q)){k++;
-      out.push({t:"texto",id:n.id,art:u.id,a:`📖 Art. ${u.n}${u.rub?" · "+trunc(u.rub,40):""} — ${trunc(n.nombre,46)}`,b:trunc(u.p.join(" "),110),o:1});}});});
+      out.push({t:"texto",id:n.id,art:u.id,a:`📖 Art. ${u.n}${u.rub?" · "+trunc(u.rub,40):""} — ${trunc(tituloNorma(n),46)}`,b:trunc(u.p.join(" "),110),o:1});}});});
   ACTAS().filter(a=>coincide(pajaActa(a),q)).sort((x,y)=>y.fecha.localeCompare(x.fecha)).forEach(a=>out.push({t:"acta",id:a.id,a:"🗂️ "+actaRef(a),b:`${resDeActa(a.id).length} resoluciones · ${estadoActa(a).label}`,o:2}));
-  return out.slice(0,max||10);
+  return out.slice(0,max||12);
 }
 function bindGlobalSearch(){
-  const inp=$("#gq"),box=$("#gres");let hits=[],sel=0;
+  const inp=$("#gq"),box=$("#gres");if(!inp)return;let hits=[],sel=0;
   const abrir=h=>{box.style.display="none";inp.value="";go(h.t,h.id,h.art);};
   const pinta=()=>{box.innerHTML=hits.map((h,k)=>`<div class="gres${k===sel?" sel":""}" data-k="${k}"><div class="a">${esc(h.a)}</div><div class="b">${esc(h.b)}</div></div>`).join("");
     box.querySelectorAll("[data-k]").forEach(el=>el.onmousedown=e=>{e.preventDefault();abrir(hits[+el.dataset.k]);});};
   inp.oninput=()=>{const q=inp.value.trim();if(q.length<2){box.style.display="none";hits=[];return;}
     hits=buscarTodo(q);sel=0;
-    if(!hits.length){box.innerHTML=`<div class="gres"><span class="b">Sin resultados. Prueba con menos palabras.</span></div>`;box.style.display="";return;}
+    if(!hits.length){box.innerHTML=`<div class="gres"><span class="b">Sin resultados. Prueba con menos palabras, o sin tildes.</span></div>`;box.style.display="";return;}
     pinta();box.style.display="";};
   inp.onkeydown=e=>{if(e.key==="Escape"){box.style.display="none";inp.blur();return;}if(!hits.length)return;
     if(e.key==="ArrowDown"||e.key==="ArrowUp"){e.preventDefault();sel=(sel+(e.key==="ArrowDown"?1:hits.length-1))%hits.length;pinta();}
@@ -716,47 +753,75 @@ function bindGlobalSearch(){
   inp.onblur=()=>setTimeout(()=>{box.style.display="none";},200);
 }
 
-/* ================= RENGLONES DE DOCUMENTO =================
-   Normas, actas y resoluciones se listan igual en todas partes (inicio,
-   búsqueda, listados, anexos): un renglón por documento, con lo que hace falta
-   para decidir si abrirlo. Un anexo es una norma completa: va en su propio
-   renglón, con una línea que dice de qué manual es. */
-const SIGLA_TIPO={Estatuto:"Es",Reglamento:"Rg",Manual:"Ma",Política:"Po",Procedimiento:"Pr",Instructivo:"In",Lineamiento:"Li",Código:"Có",Escritura:"Ec",Plan:"Pl",Lista:"Ls"};
+/* ================= TABLAS =================
+   Como el repositorio de contratos del CLM: una fila por documento, un clic en
+   la fila abre su ficha, y la última columna abre el documento mismo (el PDF
+   del acta, o el texto de la norma para leerlo aquí). Un anexo es una norma
+   completa: va en su propia fila, con una línea que dice de qué manual es. */
 function ultimoCambio(n,ref){const cs=cambiosA(n.id).filter(c=>c.fecha<=(ref||hoyRef()));return cs[cs.length-1]||null;}
-function filaNorma(n,ref,q){
-  const e=estadoNorma(n,ref||todayISO()),u=ultimoCambio(n,ref),padre=n.anexo&&DB.normas[n.anexo],nax=anexosDe(n.id).length;
-  return `<button class="doc" data-n="${esc(n.id)}"><span class="doc-ic${e.key==="baja"?" r":""}">${esc(SIGLA_TIPO[n.tipo]||"§")}</span>
-    <span class="doc-b"><span class="doc-t">${marcar(tituloNorma(n),q)}</span><span class="doc-m"><span>${esc(n.tipo||"Norma")}</span>${fondoNorma(n)?`<span>${esc(fondoNorma(n))}</span>`:""}<span>aprobada ${fdate(n.fecha)}</span>${u?`<span>${esc(u.tipo.toLowerCase())} ${fdate(u.fecha)}</span>`:""}${padre?`<span class="anx">${esc(trunc(etiquetaAnexo(n),70))}</span>`:""}${nax?`<span>${nax} anexo${nax===1?"":"s"}</span>`:""}</span></span>
-    <span class="doc-r"><span class="badge ${e.b}">${esc(e.label)}</span>${n.texto?`<span class="tx">📖 Texto</span>`:""}</span></button>`;
+function pdfVigente(n,ref){const v=versionA(n,ref||todayISO());return v&&v.conTexto?v.conTexto.enlace:"";}
+function sinDato(){return `<span class="mut">—</span>`;}
+function abrirDoc(u,txt){u=seguro(u);return u?`<a class="signed" href="${esc(u)}" target="_blank" rel="noopener noreferrer">📄 ${esc(txt||"Abrir")}</a>`:"";}
+function filaNorma(n,ref,q,attr){
+  const e=estadoNorma(n,ref||todayISO()),u=ultimoCambio(n,ref),padre=n.anexo&&DB.normas[n.anexo],nax=anexosDe(n.id).length,pdf=pdfVigente(n,ref);
+  return `<tr ${attr||"data-n"}="${esc(n.id)}" tabindex="0">
+    <td class="td-obj">${marcar(tituloNorma(n),q)}<div class="oc">${n.tipo?`<span class="catchip">${esc(n.tipo)}</span>`:""}${padre?`<span class="anx">${esc(trunc(etiquetaAnexo(n),70))}</span>`:""}${nax?`<span>${nax} anexo${nax===1?"":"s"}</span>`:""}</div></td>
+    <td class="td-fondo nw">${esc(fondoNorma(n))||sinDato()}</td>
+    <td class="nw" data-l="Aprobada">${fdate(n.fecha)}</td>
+    <td class="nw td-ult" data-l="Último cambio">${u?`${esc(u.tipo)}<div class="sub">${fdate(u.fecha)}</div>`:sinDato()}</td>
+    <td class="td-est"><span class="dot ${e.cc}"></span>${esc(e.label)}</td>
+    <td class="td-sig">${n.texto?`<button class="signed" data-leer="${esc(n.id)}" title="Leer el texto vigente aquí, por artículos">📖 Leer</button>`:abrirDoc(pdf,"PDF")||sinDato()}</td></tr>`;
 }
-/* El renglón dice lo que distingue a un acta: qué sesión fue y cuánto resolvió.
-   El cuerpo y el fondo solo se repiten si hay más de uno a la vista, y «Definitiva»
-   no se rotula —es lo normal—: solo lo que pide atención (provisional, sin registrar). */
-function filaActa(a,ctx){
-  ctx=ctx||{};
-  const e=estadoActa(a),[y,m,d]=a.fecha.split("-"),nr=resDeActa(a.id).length;
-  const titulo=a.numero?`Sesión ${a.tipo?esc(a.tipo.toLowerCase())+" ":""}n.º ${esc(a.numero)}`:`Sesión ${a.tipo?esc(a.tipo.toLowerCase()):""} del ${esc(fdate(a.fecha))}`;
-  return `<button class="doc" data-a="${esc(a.id)}"><span class="datebox"><b>${+d}</b><small>${MESES[+m-1].slice(0,3)}</small></span>
-    <span class="doc-b"><span class="doc-t">${titulo}</span>${ctx.multi||ctx.multiF?`<span class="doc-m">${ctx.multi?`<span>${esc(cuerpo(a.cuerpo).nombre)}</span>`:""}${ctx.multiF&&fondoActa(a)&&!(" "+cuerpo(a.cuerpo).nombre+" ").includes(" "+fondoActa(a)+" ")?`<span>${esc(fondoActa(a))}</span>`:""}</span>`:""}</span>
-    <span class="doc-r">${e.key==="def"?"":`<span class="badge ${e.b}">${esc(e.label)}</span>`}${e.key==="prov"?`<span class="doc-m" style="margin:0">hace ${e.dias} días</span>`:""}<span class="nres${nr?"":" cero"}">${nr?nr+" resolucion"+(nr===1?"":"es"):"sin resoluciones"}</span></span></button>`;
+function tablaNormas(l,ref,q,attr){
+  return `<div class="tablewrap"><table class="list${ST.fondo!=="all"?" unfondo":""}"><thead><tr><th>Norma</th><th class="td-fondo">Fondo</th><th>Aprobada</th><th class="td-ult">Último cambio</th><th>Estado</th><th class="td-sig">Texto</th></tr></thead>
+    <tbody>${l.map(n=>filaNorma(n,ref,q,attr)).join("")}</tbody></table></div>`;
+}
+function sesionTxt(a){return (a.tipo?"Sesión "+a.tipo.toLowerCase():"Sesión")+(a.numero?" n.º "+a.numero:"");}
+function filaActa(a){
+  const e=estadoActa(a),nr=resDeActa(a.id).length;
+  return `<tr data-a="${esc(a.id)}" tabindex="0">
+    <td class="td-nro">${fdate(a.fecha)}</td>
+    <td class="td-cuerpo">${esc(cuerpo(a.cuerpo).nombre)}</td>
+    <td class="td-obj">${esc(sesionTxt(a))}${a.obs?`<div class="oc">${esc(trunc(a.obs,90))}</div>`:""}</td>
+    <td class="nw">${nr?`<b>${nr}</b> resolucion${nr===1?"":"es"}`:sinDato()}</td>
+    <td class="td-est"><span class="dot ${e.cc}"></span>${esc(e.label)}${e.key==="prov"?`<div class="sub">hace ${e.dias} días</div>`:""}</td>
+    <td class="td-sig">${abrirDoc(a.definitiva,"Abrir")||abrirDoc(a.provisional,"Provisional")||sinDato()}</td></tr>`;
+}
+function tablaActas(l,variosCuerpos){
+  let y="";
+  return `<div class="tablewrap"><table class="list${variosCuerpos?"":" uncuerpo"}"><thead><tr><th>Fecha</th><th class="td-cuerpo">Cuerpo colegiado</th><th>Sesión</th><th>Resoluciones</th><th>Acta</th><th class="td-sig">Documento</th></tr></thead>
+    <tbody>${l.map(a=>{const ya=anio(a.fecha),cab=ya!==y?`<tr class="yrrow"><td colspan="6">${esc(ya)}</td></tr>`:"";y=ya;return cab+filaActa(a);}).join("")}</tbody></table></div>`;
 }
 function filaRes(r,ref,q){
-  const e=estadoRes(r,ref||todayISO());
-  return `<button class="doc" data-r="${esc(r.id)}"><span class="pn" title="Punto del orden del día">${esc(r.punto)}</span>
-    <span class="doc-b"><span class="doc-t" style="font-weight:400;font-size:15.5px">${marcar(trunc(r.texto,240),q)}</span><span class="doc-m"><span>${esc(cuerpo(r.cuerpo).nombre)}</span><span>${fdate(r.fecha)}</span>${r.materia?`<span>${esc(r.materia)}</span>`:""}</span></span>
-    <span class="doc-r"><span class="badge ${e.b}">${esc(e.label)}</span></span></button>`;
+  const e=estadoRes(r,ref||todayISO()),a=DB.actas[r.acta];
+  return `<tr data-r="${esc(r.id)}" tabindex="0">
+    <td class="nw"><b>${fdate(r.fecha)}</b><div class="sub">${esc(cuerpo(r.cuerpo).sigla||r.cuerpo)}<span class="solo-movil"> · punto ${esc(r.punto)}</span></div></td>
+    <td class="td-pn"><span class="pn" title="Punto del orden del día">${esc(r.punto)}</span></td>
+    <td class="td-txt">${marcar(trunc(r.texto,230),q)}${r.materia?`<div class="oc" style="margin-top:5px"><span class="catchip">${esc(r.materia)}</span></div>`:""}</td>
+    <td class="td-est"><span class="dot ${e.cc}"></span>${esc(e.label)}</td>
+    <td class="td-sig">${abrirDoc(r.enlace,"Abrir")||(a&&!a.stub?`<button class="signed" data-acta="${esc(a.id)}" title="Ver el acta de la sesión">🗂️ Acta</button>`:sinDato())}</td></tr>`;
 }
-/* Una norma con texto se abre leyéndola; sin texto, en su ficha. */
-function abrirNorma(id){const n=DB.normas[id];go(n&&n.texto?"texto":"norma",id);}
+function tablaRes(l,ref,q){
+  return `<div class="tablewrap"><table class="list"><thead><tr><th>Sesión</th><th>Punto</th><th>Lo resuelto</th><th>Estado</th><th class="td-sig">Documento</th></tr></thead>
+    <tbody>${l.map(r=>filaRes(r,ref,q)).join("")}</tbody></table></div>`;
+}
+function abrirNorma(id){go("norma",id);}
 function bindFilas(cont){
-  (cont||$("#view")).querySelectorAll("[data-n]").forEach(b=>b.onclick=()=>abrirNorma(b.dataset.n));
-  (cont||$("#view")).querySelectorAll("[data-a]").forEach(b=>b.onclick=()=>go("acta",b.dataset.a));
-  (cont||$("#view")).querySelectorAll("[data-r]").forEach(b=>b.onclick=()=>go("resolucion",b.dataset.r));
+  cont=cont||$("#view");
+  const fila=(sel,fn)=>cont.querySelectorAll(sel).forEach(tr=>{
+    tr.onclick=ev=>{if(ev.target.closest("a,button"))return;fn(tr);};
+    tr.onkeydown=ev=>{if(ev.key==="Enter"&&ev.target===tr)fn(tr);};});
+  fila("tr[data-n]",tr=>go("norma",tr.dataset.n));
+  fila("tr[data-anx]",tr=>go("norma",tr.dataset.anx));
+  fila("tr[data-a]",tr=>go("acta",tr.dataset.a));
+  fila("tr[data-r]",tr=>go("resolucion",tr.dataset.r));
+  cont.querySelectorAll("[data-leer]").forEach(b=>b.onclick=()=>go("texto",b.dataset.leer));
+  cont.querySelectorAll("[data-acta]").forEach(b=>b.onclick=()=>go("acta",b.dataset.acta));
 }
 
-/* ================= INICIO =================
-   Se viene a buscar algo: el buscador es lo primero, y los resultados salen
-   agrupados (normas, artículos, resoluciones, actas) mientras se escribe. */
+/* ================= PANEL =================
+   Como el del CLM: cuántos hay (cada número lleva a su lista), lo que requiere
+   atención y lo último que pasó. Abajo, la normativa vigente para abrirla. */
 function alertList(){
   const out=[], hoy=todayISO();
   const fondoCambio=c=>c.a.t==="norma"?(DB.normas[c.a.id]?fondoNorma(DB.normas[c.a.id]):""):fondoDeCuerpo(c.a.cuerpo);
@@ -766,7 +831,7 @@ function alertList(){
     const nom=c.a.t==="norma"?(DB.normas[c.a.id]?DB.normas[c.a.id].nombre:c.a.nombre):(DB.res[c.a.id]?"Resolución "+resCorta(DB.res[c.a.id]):"una resolución");
     out.push({sev:2,icon:ICONO[c.tipo]||"📅",t:`Próximo: ${c.tipo.toLowerCase()} el ${fdate(c.fecha)}`,d:nom,act:"Ver",go:[c.a.t==="norma"?"norma":"resolucion",c.a.id]});});
   const r=revisionLista().length;
-  if(r)out.push({sev:3,icon:"🧾",t:`${r} cosa${r===1?"":"s"} por completar en la matriz`,d:"Renglones con algo que no cuadra o sin enlace al documento",act:"Revisar",go:["revision"]});
+  if(r)out.push({sev:3,icon:"🧾",t:`${r} cosa${r===1?"":"s"} por completar en la matriz`,d:"Renglones del Excel con algo que no cuadra o sin enlace al documento",act:"Revisar",go:["revision"]});
   return out.sort((a,b)=>a.sev-b.sev);
 }
 function alertRowHTML(a,k){return `<div class="alert-row"><div class="aic">${a.icon}</div><div style="min-width:0"><div class="at">${esc(a.t)}</div><div class="ad">${esc(a.d)}</div></div><button class="btn sm line go" data-al="${k}">${esc(a.act)}</button></div>`;}
@@ -777,88 +842,59 @@ function movimientos(){
     ev.push({d:c.fecha,t:`${c.tipo}: ${n}`,s:longDate(c.fecha)+(c.por?" · "+resCorta(c.por):""),go:[c.a.t==="norma"?"norma":"resolucion",c.a.id],cls:TERMINAN.includes(c.tipo)?"fin":""});});
   return ev.sort((a,b)=>b.d.localeCompare(a.d));
 }
-function buscarGrupos(q){
-  const ns=NORMAS().filter(n=>enFondo(fondoNorma(n))&&coincide(pajaNorma(n),q)).sort((a,b)=>a.nombre.localeCompare(b.nombre,"es",{numeric:true}));
-  const arts=[];
-  NORMAS().filter(n=>enFondo(fondoNorma(n))).forEach(n=>{const t=textoCargado(n);if(!t)return;let k=0;
-    t.unidades.forEach(u=>{if(u.t!=="art"||k>=4)return;if(coincide("art "+u.n+" "+[u.rub||"",...u.p].join(" "),q)){k++;arts.push({n,u});}});});
-  const rs=RESOL().filter(r=>enFondo(fondoDeCuerpo(r.cuerpo))&&coincide(pajaRes(r),q)).sort((x,y)=>y.fecha.localeCompare(x.fecha));
-  const as=ACTAS().filter(a=>enFondo(fondoActa(a))&&coincide(pajaActa(a),q)).sort((x,y)=>y.fecha.localeCompare(x.fecha));
-  return {ns,arts,rs,as};
-}
-function fragmento(texto,q){
-  const p=plano(texto),w=plano(q).split(/\s+/).find(x=>x.length>1&&p.includes(x));
-  const i=w?p.indexOf(w):0,ini=Math.max(0,i-90);
-  return (ini?"…":"")+texto.slice(ini,ini+260)+(ini+260<texto.length?"…":"");
-}
 function vPanel(){
   const ref=todayISO();
   const ns=NORMAS().filter(n=>enFondo(fondoNorma(n))),rs=RESOL().filter(r=>enFondo(fondoDeCuerpo(r.cuerpo))),as=ACTAS().filter(a=>!a.stub&&enFondo(fondoActa(a)));
-  const nVig=ns.filter(n=>vigenteGrupo(estadoNorma(n,ref))).length;
-  const alerts=alertList(),mov=movimientos().slice(0,6);
-  const fs=ST.fondo==="all"?FONDOS():FONDOS().filter(f=>f.sigla===ST.fondo);
-  const estante=f=>{const l=ns.filter(n=>fondoNorma(n)===f.sigla).sort((a,b)=>(!!b.texto-!!a.texto)||(!!a.anexo-!!b.anexo)||tituloNorma(a).localeCompare(tituloNorma(b),"es",{numeric:true}));
-    if(!l.length)return "";
-    return `<div class="estante-h"><b>${esc(f.nombre)}</b><span>${l.length} norma${l.length===1?"":"s"}</span><button class="linkbtn" data-est="${esc(f.sigla)}">ver todas</button></div>
-      <div class="docs">${l.slice(0,4).map(n=>filaNorma(n,ref)).join("")}</div>`;};
+  const nVig=ns.filter(n=>vigenteGrupo(estadoNorma(n,ref))),rVig=rs.filter(r=>vigenteGrupo(estadoRes(r,ref))).length;
+  const prov=as.filter(a=>estadoActa(a).key==="prov").length,conTexto=ns.filter(n=>n.texto).length;
+  const alerts=alertList(),mov=movimientos().slice(0,7);
+  const vista=nVig.slice().sort((a,b)=>(!!b.texto-!!a.texto)||(!!a.anexo-!!b.anexo)||tituloNorma(a).localeCompare(tituloNorma(b),"es",{numeric:true}));
+  const kpi=(st,n,l,col)=>`<button class="kpi" data-st="${st}"><div class="kpi-n" style="color:${col}">${n}</div><div class="kpi-l">${l}</div></button>`;
   $("#view").innerHTML=`<div class="up">
-    <section class="hero">
-      <h1>¿Qué necesitas encontrar?</h1>
-      <div class="bigsearch"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#9AA0B2" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
-        <input id="bq" placeholder="Una palabra, un artículo o una fecha: «vacaciones», «art. 28», «agosto 2026»" autocomplete="off" value="${esc(ST.bq||"")}"></div>
-      <div class="statline"><button data-st="normativa"><b>${ns.length}</b> normas</button><button data-st="vig"><b>${nVig}</b> vigentes</button><button data-st="actas"><b>${as.length}</b> actas</button><button data-st="resoluciones"><b>${rs.length}</b> resoluciones</button></div>
-    </section>
-    <div id="bres" class="bres"></div>
-    <div class="inicio" id="inicio">
-      <div class="panel"><p class="ptitle">Normativa</p><p class="psub">Primero las que se pueden leer en Quórum</p>
-        ${fs.map(estante).join("")||`<div class="empty">Todavía no hay normas en la matriz.</div>`}</div>
-      <div>
-        <div class="panel"><p class="ptitle">Requiere atención</p>
-          ${alerts.length?alerts.slice(0,6).map(alertRowHTML).join(""):`<div class="empty" style="padding:18px">Nada pendiente.</div>`}</div>
-        <div class="panel"><p class="ptitle">Últimos movimientos</p>
-          ${mov.length?`<ul class="tl">${mov.map((e,k)=>`<li class="${e.cls||""}"><div class="t"><button class="lk" data-mv="${k}">${esc(e.t)}</button></div><div class="s">${esc(e.s)}</div></li>`).join("")}</ul>`:`<div class="empty" style="padding:18px">Aún no hay sesiones ni cambios.</div>`}</div>
-      </div>
-    </div></div>`;
+    <div class="kpis">
+      ${kpi("vig",nVig.length,"Normas vigentes","var(--green)")}
+      ${kpi("leer",conTexto,"Para leer aquí, por artículos","var(--navy)")}
+      ${kpi("actas",as.length,"Actas de sesión","var(--ink)")}
+      ${kpi("resvig",rVig,"Resoluciones vigentes","var(--green)")}
+      ${kpi("prov",prov,"Actas provisionales",prov?"var(--amber)":"var(--ink)")}
+    </div>
+    <div class="detail">
+      <div class="panel"><p class="ptitle">Requiere atención</p><p class="psub">Actas sin definitiva, lo que está por cambiar y lo que falta en el Excel</p>
+        ${alerts.length?alerts.slice(0,6).map(alertRowHTML).join(""):`<div class="empty" style="padding:22px">Nada pendiente.</div>`}</div>
+      <div class="panel"><p class="ptitle">Últimos movimientos</p><p class="psub">Sesiones y cambios a la normativa</p>
+        ${mov.length?`<ul class="tl">${mov.map((e,k)=>`<li class="${e.cls||""}"><div class="t"><button class="lk" data-mv="${k}">${esc(e.t)}</button></div><div class="s">${esc(e.s)}</div></li>`).join("")}</ul>`:`<div class="empty" style="padding:22px">Aún no hay sesiones ni cambios registrados.</div>`}</div>
+    </div>
+    <div style="display:flex;align-items:baseline;gap:10px;margin:22px 0 10px"><p class="ptitle" style="margin:0">Normativa vigente${ST.fondo!=="all"?" · "+esc(fondoNombre(ST.fondo)):""}</p>
+      <span class="countlbl">${vista.length?`primero las que se leen aquí`:""}</span>${vista.length>8?`<button class="linkbtn" id="vertodas" style="margin-left:auto;font-size:12.5px">Ver las ${vista.length}</button>`:""}</div>
+    <div id="pnormas">${vista.length?tablaNormas(vista.slice(0,8),ref):`<div class="panel"><div class="empty">Todavía no hay normas en la matriz${ST.fondo!=="all"?" para este fondo":""}.</div></div>`}</div>
+  </div>`;
   const V=$("#view");
-  bindFilas($("#inicio"));
+  bindFilas($("#pnormas"));
   V.querySelectorAll("[data-al]").forEach(b=>b.onclick=()=>{const a=alerts[+b.dataset.al];go(...a.go);});
   V.querySelectorAll("[data-mv]").forEach(b=>b.onclick=()=>{const e=mov[+b.dataset.mv];go(...e.go);});
-  V.querySelectorAll("[data-est]").forEach(b=>b.onclick=()=>{elegirFondo(b.dataset.est);ST.nf=Object.assign({},ST.nf,{q:"",estado:"all",tipo:"all"});go("normativa");});
+  if($("#vertodas"))$("#vertodas").onclick=()=>{ST.nf=Object.assign({},ST.nf,{estado:"vig",q:"",tipo:"all",texto:false});go("normativa");};
   V.querySelectorAll("[data-st]").forEach(b=>b.onclick=()=>{const t=b.dataset.st;ST.aFecha=null;
-    if(t==="vig"){ST.nf=Object.assign({},ST.nf,{estado:"vig",q:""});go("normativa");}else go(t);});
-  const inp=$("#bq");let reloj=null;
-  const busca=()=>{const q=inp.value.trim();ST.bq=q;const box=$("#bres");
-    if(q.length<2){box.innerHTML="";$("#inicio").style.display="";return;}
-    $("#inicio").style.display="none";
-    const g=buscarGrupos(q),tot=g.ns.length+g.arts.length+g.rs.length+g.as.length;
-    const grupo=(tit,n,html,mas)=>n?`<div class="bgrupo"><div class="bgrupo-h"><b>${tit}</b><span>${n}</span>${mas?`<button class="linkbtn" data-mas="${mas}">ver todas</button>`:""}</div><div class="docs">${html}</div></div>`:"";
-    box.innerHTML=tot?grupo("Normas",g.ns.length,g.ns.slice(0,6).map(n=>filaNorma(n,ref,q)).join(""),g.ns.length>6?"normativa":"")
-      +grupo("En el texto de las normas",g.arts.length,g.arts.slice(0,8).map(({n,u})=>`<button class="doc" data-tx="${esc(n.id)}" data-art="${esc(u.id)}"><span class="pn">${esc(u.n)}</span><span class="doc-b"><span class="doc-t" style="font-size:15px">Art. ${esc(u.n)}${u.rub?" · "+marcar(u.rub,q):""} <span style="font-weight:400;color:var(--muted)">— ${esc(trunc(n.nombre,70))}</span></span><span class="snip">${marcar(fragmento(u.p.join(" "),q),q)}</span></span></button>`).join(""),"")
-      +grupo("Resoluciones",g.rs.length,g.rs.slice(0,6).map(r=>filaRes(r,ref,q)).join(""),g.rs.length>6?"resoluciones":"")
-      +grupo("Actas",g.as.length,g.as.slice(0,4).map(filaActa).join(""),g.as.length>4?"actas":"")
-      :`<div class="empty">Nada coincide con «${esc(q)}». Prueba con menos palabras, o sin tildes.</div>`;
-    bindFilas(box);
-    box.querySelectorAll("[data-tx]").forEach(b=>b.onclick=()=>go("texto",b.dataset.tx,b.dataset.art));
-    box.querySelectorAll("[data-mas]").forEach(b=>b.onclick=()=>{const v=b.dataset.mas;if(v==="normativa")ST.nf.q=q;if(v==="resoluciones")ST.rf.q=q;if(v==="actas")ST.af.q=q;go(v);});};
-  inp.oninput=()=>{clearTimeout(reloj);reloj=setTimeout(busca,120);};
-  if(ST.bq)busca();
-  if(window.matchMedia&&window.matchMedia("(pointer:fine)").matches)setTimeout(()=>{try{inp.focus();}catch(e){}},30);
+    if(t==="vig"||t==="leer"){ST.nf=Object.assign({},ST.nf,{estado:t==="vig"?"vig":"all",texto:t==="leer",q:"",tipo:"all"});go("normativa");}
+    else if(t==="resvig"){ST.rf=Object.assign({},ST.rf,{estado:"vig",q:""});go("resoluciones");}
+    else if(t==="prov"){ST.af=Object.assign({},ST.af,{estado:"prov",q:""});go("actas");}
+    else{ST.af=Object.assign({},ST.af,{estado:"all"});go("actas");}});
 }
 
-/* ================= FILTROS AL COSTADO =================
-   Como en una base de datos jurídica: cada filtro dice cuántos documentos
-   deja, y se combinan. En el celular van plegados, sobre la lista. */
+/* ================= FILTROS =================
+   Los del CLM: buscador y listas arriba, chips de estado debajo (cada uno dice
+   cuántos deja), y si no sale nada, decir por qué y cómo salir del atasco. */
 function aFechaBarra(){
-  return ST.aFecha?`<div class="afecha">🕰️ Viendo la vigencia al ${longDate(ST.aFecha)}: lo aprobado después no aparece y los estados son los de ese día. <button class="linkbtn" id="ahoy">Volver a hoy</button></div>`:"";
+  return ST.aFecha?`<div class="note a" style="margin-bottom:12px;display:flex;align-items:center;gap:10px;flex-wrap:wrap">🕰️ Viendo la vigencia al ${longDate(ST.aFecha)}: lo aprobado después no aparece y los estados son los de ese día. <button class="linkbtn" id="ahoy" style="color:#6E4C0E">Volver a hoy</button></div>`:"";
 }
+function afiHTML(){return `<label class="afi${ST.aFecha?" on":""}" title="Ver qué regía en otra fecha">Vigencia al <input type="date" id="afi" value="${esc(ST.aFecha||"")}" max="2100-12-31"></label>`;}
 function bindAFecha(re){
   const i=$("#afi");if(i)i.onchange=()=>{ST.aFecha=i.value&&i.value!==todayISO()?i.value:null;re();};
   const h=$("#ahoy");if(h)h.onclick=()=>{ST.aFecha=null;re();};
 }
 function opciones(lista,sel,todos){return `<option value="all">${esc(todos)}</option>`+lista.map(([v,l])=>`<option value="${esc(v)}"${String(sel)===String(v)?" selected":""}>${esc(l)}</option>`).join("");}
+function selF(f,lista,sel,todos,label){return lista.length>1?`<select class="sel${sel!=="all"?" on":""}" data-f="${f}" aria-label="${esc(label)}">${opciones(lista,sel,todos)}</select>`:"";}
 function buscadorFiltro(id,ph,val){return `<div class="search">${I.lupa}<input id="${id}" placeholder="${esc(ph)}" value="${esc(val)}" autocomplete="off"></div>`;}
-function fopts(attr,sel,opts){return opts.map(([v,l,n])=>`<button class="fopt ${sel===v?"on":""}" ${attr}="${esc(v)}">${esc(l)}<span class="n">${n}</span></button>`).join("");}
-function facetas(html){return `<details class="facetas"${window.innerWidth>900?" open":""}><summary>Filtros y búsqueda</summary><div class="fbox">${html}</div></details>`;}
+function chips(attr,sel,opts){return opts.map(([v,l,n])=>`<button class="chip ${sel===v?"on":""}" ${attr}="${esc(v)}">${esc(l)}${v!=="all"&&n!=null?`<span class="n">· ${n}</span>`:""}</button>`).join("");}
 let pintaFilas=()=>{};
 function bindLista(re,fkey,qid){
   const q=$("#"+qid);if(q){q.oninput=()=>{ST[fkey].q=q.value;pintaFilas();};}
@@ -866,7 +902,16 @@ function bindLista(re,fkey,qid){
   $("#view").querySelectorAll("select[data-f]").forEach(s=>s.onchange=()=>{ST[fkey][s.dataset.f]=s.value;re();});
   bindAFecha(re);
 }
-function vacioHTML(hay){return `<div class="empty">${hay?"Nada coincide con la búsqueda o los filtros.<br>Prueba con menos palabras, o quita un filtro.":"Todavía no hay nada aquí.<br>Se llena desde el Excel de la matriz."}</div>`;}
+function vacioHTML(hay,fkey,re){
+  const f=fkey?ST[fkey]:{},quien=[];
+  if(f.q)quien.push(`la búsqueda «${esc(f.q)}»`);
+  ["estado","tipo","organo","cuerpo","anio","materia"].forEach(k=>{if(f[k]&&f[k]!=="all")quien.push({estado:"el estado",tipo:"el tipo",organo:"el órgano",cuerpo:"el cuerpo colegiado",anio:"el año",materia:"la materia"}[k]);});
+  if(f.texto)quien.push("«para leer aquí»");
+  if(ST.fondo!=="all")quien.push("el fondo "+esc(ST.fondo));
+  if(ST.aFecha)quien.push("la fecha de vigencia");
+  setTimeout(()=>{const b=$("#limpiar");if(b)b.onclick=()=>{Object.assign(ST[fkey],{q:"",estado:"all",tipo:"all",organo:"all",cuerpo:"all",anio:"all",materia:"all",texto:false});ST.aFecha=null;elegirFondo("all");render();};},0);
+  return `<div class="tablewrap"><div class="empty">${hay?`<b>Sin resultados</b>${quien.length?`Estás filtrando por ${quien.join(", ")}.`:"Ajusta la búsqueda."}${quien.length&&fkey?`<div><button class="btn sm line" id="limpiar" style="margin-top:12px">Quitar filtros y ver todo</button></div>`:""}`:"<b>Todavía no hay nada aquí</b>Se llena desde el Excel de la matriz."}</div></div>`;
+}
 
 /* ================= NORMATIVA ================= */
 function normasFiltradas(){
@@ -885,33 +930,38 @@ function vNormativa(){
   const tipos=[...new Set(base.map(n=>n.tipo).filter(Boolean))].sort();
   const organos=[...new Set(base.map(n=>n.organo).filter(Boolean))].sort().map(s=>[s,cuerpo(s).nombre]);
   const conTexto=base.filter(n=>n.texto).length;
-  $("#view").innerHTML=`<div class="up lib">
-    ${facetas(`${buscadorFiltro("nq","Buscar en la normativa…",f.q)}
-      <div class="ftit">Estado</div>${fopts("data-ch",f.estado,[["all","Todas",ecount("all")],["vig","Vigentes",ecount("vig")],["reformada","Con reformas",ecount("reformada")],["vence","Por derogarse",ecount("vence")],["baja","Derogadas",ecount("baja")]].filter(x=>x[0]==="all"||x[2]||f.estado===x[0]))}
-      ${tipos.length>1?`<div class="ftit">Tipo</div>${fopts("data-tp",f.tipo,[["all","Todos",base.length]].concat(tipos.map(t=>[t,t,base.filter(n=>n.tipo===t).length])))}`:""}
-      ${organos.length>1?`<div class="ftit">Órgano que la aprueba</div><select data-f="organo" aria-label="Órgano">${opciones(organos,f.organo,"Todos")}</select>`:""}
-      ${conTexto?`<div class="ftit">Lectura</div><label class="fcheck"><input type="checkbox" id="soloTexto"${f.texto?" checked":""}> Solo las que se leen aquí (${conTexto})</label>`:""}
-      <div class="ftit">Vigencia al</div><input type="date" id="afi" value="${esc(ST.aFecha||"")}" max="2100-12-31" aria-label="Vigencia al">`)}
-    <div>${aFechaBarra()}
-      <div class="listhead"><span class="countlbl" id="cnt"></span>
-        <select id="orden" aria-label="Orden"><option value="az"${f.orden==="az"?" selected":""}>Por nombre</option><option value="rec"${f.orden==="rec"?" selected":""}>Cambios más recientes</option><option value="fondo"${f.orden==="fondo"?" selected":""}>Por fondo</option></select></div>
-      <div id="filas"></div></div>
-  </div>`;
+  const ords=[["az","Por nombre"],["rec","Cambios recientes"],["fondo","Por fondo"]];
+  $("#view").innerHTML=`<div class="up">${aFechaBarra()}
+    <div class="toolbar">
+      ${buscadorFiltro("nq","Buscar por nombre, tipo, órgano o fecha…",f.q)}
+      ${selF("organo",organos,f.organo,"🏛️ Todos los órganos","Órgano que la aprueba")}
+      <select class="sel" id="orden" aria-label="Orden">${ords.map(([k,l])=>`<option value="${k}"${f.orden===k?" selected":""}>↕ ${l}</option>`).join("")}</select>
+      ${afiHTML()}
+    </div>
+    <div class="chips">${chips("data-ch",f.estado,[["all","Todas"],["vig","Vigentes",ecount("vig")],["reformada","Con reformas",ecount("reformada")],["vence","Por derogarse",ecount("vence")],["baja","Derogadas",ecount("baja")]].filter(x=>x[0]==="all"||x[2]||f.estado===x[0]))}
+      ${conTexto?`<button class="chip ${f.texto?"on":""}" id="soloTexto" title="Las que tienen su texto en Quórum, para leer por artículos">📖 Para leer aquí<span class="n">· ${conTexto}</span></button>`:""}</div>
+    ${tipos.length>1?`<div class="chips">${chips("data-tp",f.tipo,[["all","Todos los tipos"]].concat(tipos.map(t=>[t,t,base.filter(n=>n.tipo===t).length])))}</div>`:""}
+    <div class="countrow"><span class="countlbl" id="cnt"></span></div>
+    <div id="filas"></div></div>`;
   pintaFilas=()=>{
     const l=normasFiltradas(),hay=NORMAS().filter(n=>enFondo(fondoNorma(n))).length;
     $("#cnt").textContent=`${l.length} de ${hay} norma${hay===1?"":"s"}`;
-    $("#filas").innerHTML=l.length?`<div class="docs">${l.map(({n})=>filaNorma(n,hoyRef(),f.q)).join("")}</div>`:vacioHTML(hay);
+    $("#filas").innerHTML=l.length?tablaNormas(l.map(x=>x.n),hoyRef(),f.q):vacioHTML(hay,"nf");
     bindFilas($("#filas"));
   };
   pintaFilas();bindLista(vNormativa,"nf","nq");
   $("#view").querySelectorAll("[data-tp]").forEach(b=>b.onclick=()=>{ST.nf.tipo=b.dataset.tp;vNormativa();});
-  if($("#soloTexto"))$("#soloTexto").onchange=e=>{ST.nf.texto=e.target.checked;vNormativa();};
+  if($("#soloTexto"))$("#soloTexto").onclick=()=>{ST.nf.texto=!ST.nf.texto;vNormativa();};
   $("#orden").onchange=e=>{ST.nf.orden=e.target.value;pintaFilas();};
 }
 
-/* ================= UNA NORMA =================
-   Su página: migas de pan (y el manual del que es anexo), el título, su
-   estado, y dos pestañas si hay texto: leerla, o su ficha. */
+/* ================= FICHA DE UNA NORMA =================
+   Como el detalle del contrato del CLM: a la izquierda qué es y su historia;
+   a la derecha lo que se hace con ella (leerla, abrir el PDF, preguntar qué
+   regía un día, anotar). */
+const VOLVER_A={panel:"al panel",normativa:"a la normativa",actas:"a las actas",resoluciones:"a las resoluciones",notas:"a mis notas",revision:"a la revisión"};
+function backHTML(){const d=ST.from&&VOLVER_A[ST.from]?ST.from:DETALLE[ST.view];return `<button class="back" id="back" data-back="${esc(d)}">← Volver ${VOLVER_A[d]||""}</button>`;}
+function bindBack(){const b=$("#back");if(b)b.onclick=()=>go(b.dataset.back);}
 function lineaNorma(n){
   const hoy=todayISO(),ev=[];
   const r=n.res&&DB.res[n.res];
@@ -928,61 +978,57 @@ function eventoCambio(c,hoy){
 function timelineHTML(ev){return `<ul class="tl">${ev.map((e,k)=>`<li class="${e.cls||""}"><div class="t">${e.go?`<button class="lk" data-tl="${k}">${esc(e.t)}</button>`:esc(e.t)}</div><div class="s">${esc(e.s)}</div></li>`).join("")}</ul>`;}
 function bindTimeline(ev){$("#view").querySelectorAll("[data-tl]").forEach(b=>b.onclick=()=>go(...ev[+b.dataset.tl].go));}
 function copiarEnlace(msg){const url=location.href;(navigator.clipboard?navigator.clipboard.writeText(url):Promise.reject()).then(()=>toast(msg||"Enlace copiado. Solo lo abre quien tenga la frase."),()=>toast("No se pudo copiar el enlace."));}
-function cabNorma(n,tab){
-  const e=estadoNorma(n,todayISO()),v=versionA(n,todayISO()),padre=n.anexo&&DB.normas[n.anexo];
-  const pdf=v&&v.conTexto&&v.conTexto.enlace,ncs=cambiosA(n.id).length,nax=anexosDe(n.id).length,ti=textoInfo(n);
-  const na=ti.articulos!=null?ti.articulos:(ti.unidades||[]).filter(u=>u.t==="art").length;
-  return `<nav class="crumbs"><button data-go="normativa">Normativa</button><span>›</span>${padre?`<button id="a-padre">${esc(trunc(padre.nombre,60))}</button><span>›</span>`:""}<span>${esc(trunc(tituloNorma(n),80))}</span></nav>
-  <header class="dochead">
-    <div class="kicker">${padre?esc(etiquetaAnexo(n)):esc(n.tipo||"Norma")+(fondoNorma(n)?" · "+esc(fondoNombre(fondoNorma(n))):"")}</div>
-    <h1>${esc(tituloNorma(n))}</h1>
-    <div class="docmeta"><span class="badge ${e.b}">${esc(e.label)}</span>
-      <span>${n.organo?`Aprobada por ${esc(cuerpo(n.organo).nombre)} el ${esc(longDate(n.fecha))}${n.punto?", punto "+esc(n.punto):""}`:`Aprobada el ${esc(longDate(n.fecha))}`}</span>
-      ${ncs?`<span>· ${ncs} cambio${ncs===1?"":"s"} registrado${ncs===1?"":"s"}</span>`:""}
-      ${padre?`<span>· ${esc(n.tipo||"Norma")}${fondoNorma(n)?" · "+esc(fondoNombre(fondoNorma(n))):""}</span><span>· Anexo de ${esc(padre.nombre)}</span>`:""}
-      ${nax?`<span>· ${nax} anexo${nax===1?"":"s"}</span>`:""}</div>
-    <div class="docact">${pdf?`<a class="btn sm line" href="${esc(pdf)}" target="_blank" rel="noopener noreferrer">📄 PDF ${e.key==="baja"?"del último texto":"vigente"}</a>`:""}<button class="btn sm line" id="a-link">🔗 Copiar enlace</button></div>
-  </header>
-  ${n.texto?`<div class="tabs2" role="tablist"><button class="tab2 ${tab==="texto"?"on":""}" id="a-leer" role="tab">Texto vigente<small>${na?na+" artículos":resumenTexto(n).split(" · ")[0]}</small></button><button class="tab2 ${tab==="ficha"?"on":""}" id="a-ficha" role="tab">Ficha${nax?`<small>${nax} anexos</small>`:""}</button></div>`:""}`;
-}
-function bindCabNorma(n){
-  const V=$("#view");
-  V.querySelectorAll(".crumbs [data-go]").forEach(b=>b.onclick=()=>go(b.dataset.go));
-  if($("#a-padre"))$("#a-padre").onclick=()=>abrirNorma(n.anexo);
-  if($("#a-leer"))$("#a-leer").onclick=()=>go("texto",n.id);
-  if($("#a-ficha"))$("#a-ficha").onclick=()=>go("norma",n.id);
-  $("#a-link").onclick=()=>copiarEnlace();
+function actBtn(id,ic,t,d,prim){return `<button class="actbtn${prim?" prim":""}" id="${id}"><span class="ic">${ic}</span><span><span class="at">${t}</span><span class="ad">${d}</span></span></button>`;}
+function actLink(u,ic,t,d){u=seguro(u);return u?`<a class="actbtn" href="${esc(u)}" target="_blank" rel="noopener noreferrer"><span class="ic">${ic}</span><span><span class="at">${t}</span><span class="ad">${d}</span></span></a>`:"";}
+function cabFicha(kick,titulo,sub,badge,largo){
+  return `<div style="display:flex;align-items:flex-start;gap:12px;justify-content:space-between"><div style="min-width:0">
+    <div class="kick">${kick}</div><div class="h-title${largo?" largo":""}">${titulo}</div>${sub?`<div class="h-sub">${sub}</div>`:""}</div>${badge}</div>`;
 }
 function vNorma(){
   const n=DB.normas[ST.id];if(!n){go("normativa");return;}
-  const e=estadoNorma(n,todayISO()),v=versionA(n,todayISO()),r=n.res&&DB.res[n.res],a=n.acta&&DB.actas[n.acta];
-  const ev=lineaNorma(n),vs=versiones(n),anx=anexosDe(n.id);
-  $("#view").innerHTML=`<div class="up">${cabNorma(n,"ficha")}
+  const e=estadoNorma(n,todayISO()),v=versionA(n,todayISO()),r=n.res&&DB.res[n.res],a=n.acta&&DB.actas[n.acta],padre=n.anexo&&DB.normas[n.anexo];
+  const ev=lineaNorma(n),vs=versiones(n),anx=anexosDe(n.id),pdf=pdfVigente(n),u=ultimoCambio(n,todayISO()),fondo=fondoNorma(n);
+  $("#view").innerHTML=`<div class="up">${backHTML()}
     ${e.cambio&&e.key==="baja"?`<div class="note r" style="margin-bottom:14px">⛔ ${esc(e.cambio.tipo)} el ${esc(longDate(e.cambio.fecha))}${e.cambio.por?` por ${esc(cuerpo(e.cambio.por.cuerpo).nombre)}, sesión del ${esc(longDate(e.cambio.por.fecha))}, punto ${esc(e.cambio.por.punto)}`:""}.</div>`:""}
     ${e.key==="vence"?`<div class="note a" style="margin-bottom:14px">📅 Deja de regir el ${esc(longDate(e.cambio.fecha))}: ${esc(e.cambio.tipo.toLowerCase())} aprobada por ${esc(e.cambio.por?cuerpo(e.cambio.por.cuerpo).nombre+", sesión del "+longDate(e.cambio.por.fecha):"la matriz")}.</div>`:""}
     <div class="detail"><div>
-      ${anx.length?`<div class="panel"><p class="ptitle">Anexos</p><p class="psub">${anx.length} documento${anx.length===1?"":"s"} que forman parte de esta norma. Cada uno es una norma completa, con su propio texto y su propia vigencia.</p>
-        <div class="docs">${anx.map(x=>filaNorma(x).replace('data-n=','data-anx=')).join("")}</div></div>`:""}
-      <div class="panel"><p class="ptitle">Aprobación</p>
-        <div class="expbox">
-          <div class="exprow"><span class="k">Órgano</span><span class="v">${esc(cuerpo(n.organo).nombre)}</span></div>
-          <div class="exprow"><span class="k">Sesión</span>${a&&!a.stub?`<span class="v"><button class="linkbtn" id="a-acta">${esc(longDate(n.fecha))}</button></span>`:`<span class="v">${esc(longDate(n.fecha))}</span>`}</div>
-          <div class="exprow"><span class="k">Resolución</span>${r?`<span class="v"><button class="linkbtn" id="a-res">Punto ${esc(r.punto)}</button></span>`:`<span class="v none">${n.punto?"punto "+esc(n.punto)+" (la sesión aún no está cargada)":"sin registrar"}</span>`}</div>
+      <div class="panel">
+        ${cabFicha(esc(n.tipo||"Norma")+(fondo?" · "+esc(fondoNombre(fondo)):""),esc(tituloNorma(n)),
+          padre?`Anexo de <button class="linkbtn" id="a-padre">${esc(padre.nombre)}</button>${numAnexo(n)<999?" · anexo "+numAnexo(n):""}`:"",
+          `<span class="badge ${e.b}">${esc(e.label)}</span>`)}
+        <div class="linkbar"><span style="color:var(--navy)">${I.enlace}</span>
+          <div style="flex:1;min-width:0"><div class="lt">Texto vigente</div><div class="ld">${pdf?(e.key==="baja"?"PDF del último texto que rigió":"PDF de la versión que rige hoy"):"Sin enlace al PDF en la matriz"}</div></div>
+          ${pdf?`<a class="btn sm" href="${esc(pdf)}" target="_blank" rel="noopener noreferrer">Abrir PDF</a>`:`<button class="btn sm line" disabled>No disponible</button>`}</div>
+        <div class="dl">
+          <div><div class="k">Aprobada por</div><div class="v">${esc(cuerpo(n.organo).nombre)}</div></div>
+          <div><div class="k">Fecha de aprobación</div><div class="v">${a&&!a.stub?`<button class="linkbtn" id="a-acta" style="font-size:inherit" title="Ver el acta de esa sesión">${esc(longDate(n.fecha))}</button>`:esc(longDate(n.fecha))}</div></div>
+          <div><div class="k">Resolución</div>${r?`<div class="v"><button class="linkbtn" id="a-res" style="font-size:inherit">Punto ${esc(r.punto)}</button></div>`:`<div class="v none">${n.punto?"punto "+esc(n.punto)+" · sesión sin cargar":"sin registrar"}</div>`}</div>
+          <div><div class="k">Último cambio</div>${u?`<div class="v">${esc(u.tipo)} · ${fdate(u.fecha)}</div>`:`<div class="v none">ninguno</div>`}</div>
+          <div><div class="k">Tipo</div><div class="v">${esc(n.tipo||"—")}</div></div>
+          <div><div class="k">Fondo</div><div class="v">${fondo?esc(fondoNombre(fondo)):"—"}</div></div>
+          ${n.obs?`<div class="full"><div class="k">Observaciones</div><div class="v" style="font-weight:400;font-size:13px;line-height:1.5">${esc(n.obs)}</div></div>`:""}
         </div>
-        ${n.obs?`<div class="note" style="margin-top:12px">${esc(n.obs)}</div>`:""}
       </div>
-      <div class="panel"><p class="ptitle">Línea de tiempo</p><p class="psub">Aprobación y cada cambio, con la sesión que lo resolvió</p>${timelineHTML(ev)}</div>
+      ${anx.length?`<div class="panel"><p class="ptitle">Anexos · ${anx.length}</p><p class="psub">Cada anexo es una norma completa, con su propio texto y su propia vigencia.</p>${tablaNormas(anx,todayISO(),"","data-anx")}</div>`:""}
+      <div class="panel"><p class="ptitle">Línea de tiempo</p><p class="psub">La aprobación y cada cambio, con la sesión que lo resolvió</p>${timelineHTML(ev)}</div>
     </div><div>
+      <div class="panel"><p class="ptitle">Acciones</p><p class="psub">Lo que se hace con esta norma</p><div class="act">
+        ${n.texto?actBtn("a-leer","📖","Leer el texto vigente",esc(resumenTexto(n)),true):""}
+        ${actLink(pdf,"📄","Abrir el PDF",e.key==="baja"?"El último texto que rigió":"La versión que rige hoy")}
+        ${actBtn("a-link","🔗","Copiar el enlace","Solo lo abre quien tenga la frase")}
+      </div></div>
       <div class="panel"><p class="ptitle">¿Qué regía en una fecha?</p><p class="psub">Por ejemplo, el día que se firmó algo.</p>
         <div class="quedia"><input type="date" id="qd" value="${esc(ST.aFecha||todayISO())}" aria-label="Fecha"><button class="btn sm" id="qdb">Consultar</button></div><div id="qdr"></div></div>
       <div class="panel"><p class="ptitle">Versiones del texto</p><p class="psub">${vs.length} versión${vs.length===1?"":"es"}</p>
-        <div class="vers">${vs.map(x=>{const on=!!(v&&v.conTexto&&v.conTexto.desde===x.desde&&v.conTexto.tipo===x.tipo)&&e.key!=="baja";return `<div class="ver ${on?"on":""}"><div class="vd"><b>${esc(x.tipo)}</b><span>desde el ${fdate(x.desde)}${on?" · la que rige":""}</span></div>${x.enlace?`<a class="btn sm line" href="${esc(x.enlace)}" target="_blank" rel="noopener noreferrer">PDF</a>`:`<span class="badge b-d">sin enlace</span>`}</div>`;}).join("")}</div></div>
+        <div class="vers">${vs.map(x=>{const on=!!(v&&v.conTexto&&v.conTexto.desde===x.desde&&v.conTexto.tipo===x.tipo)&&e.key!=="baja";return `<div class="ver ${on?"on":""}"><div class="vd"><b>${esc(x.tipo)}</b><span>desde el ${fdate(x.desde)}${on?" · la que rige":""}</span></div>${x.enlace?`<a class="signed" href="${esc(x.enlace)}" target="_blank" rel="noopener noreferrer">📄 PDF</a>`:`<span class="badge b-d">sin enlace</span>`}</div>`;}).join("")}</div></div>
       ${notasPanelHTML()}
     </div></div></div>`;
-  bindCabNorma(n);bindTimeline(ev);bindNotas("norma",n.id,n._g,vNorma);
+  bindBack();bindTimeline(ev);bindNotas("norma",n.id,n._g,vNorma);bindFilas($("#view"));
+  if($("#a-padre"))$("#a-padre").onclick=()=>go("norma",n.anexo);
+  if($("#a-leer"))$("#a-leer").onclick=()=>go("texto",n.id);
   if($("#a-acta"))$("#a-acta").onclick=()=>go("acta",n.acta);
   if($("#a-res"))$("#a-res").onclick=()=>go("resolucion",r.id);
-  $("#view").querySelectorAll("[data-anx]").forEach(b=>b.onclick=()=>abrirNorma(b.dataset.anx));
+  $("#a-link").onclick=()=>copiarEnlace();
   const consulta=()=>{const d=$("#qd").value;if(!d)return;const out=$("#qdr");
     if(d<n.fecha){out.innerHTML=`<div class="resq">El ${esc(longDate(d))} esta norma <b>todavía no existía</b>: se aprobó el ${esc(longDate(n.fecha))}.</div>`;return;}
     const es=estadoNorma(n,d),vv=versionA(n,d);
@@ -990,7 +1036,7 @@ function vNorma(){
   $("#qdb").onclick=consulta;$("#qd").onkeydown=ev2=>{if(ev2.key==="Enter")consulta();};
 }
 
-/* ================= TEXTO VIGENTE (como en Lexis) =================
+/* ================= TEXTO VIGENTE =================
    Solo el texto que rige hoy: el robot lo saca del PDF vigente y lo parte en
    títulos y artículos (scripts/texto.py). Las reformas registradas en la hoja
    Cambios con sus artículos se anotan al pie de cada uno. */
@@ -1038,8 +1084,15 @@ const ES_LISTA=/^(?:[a-zñ]\)|[a-zñ]\.\s|\d+(?:\.\d+)+\.?\s|•|-\s|\((?:\d{1,2
 function vTexto(){
   const n=DB.normas[ST.id];if(!n){go("normativa");return;}
   if(!n.texto){go("norma",n.id);return;}
-  $("#view").innerHTML=`<div class="up">${cabNorma(n,"texto")}<div id="tabc"><div class="panel"><div class="empty">Abriendo el texto…</div></div></div></div>`;
-  bindCabNorma(n);
+  const e=estadoNorma(n,todayISO()),pdf=pdfVigente(n),fondo=fondoNorma(n);
+  $("#view").innerHTML=`<div class="up"><button class="back" id="back" data-back="norma">← Ficha de la norma</button>
+    <div class="panel" style="margin-bottom:14px"><div class="lhead">
+      <div style="min-width:0;flex:1"><div class="kick">${esc(n.tipo||"Norma")}${fondo?" · "+esc(fondoNombre(fondo)):""} · texto vigente</div><div class="h-title">${esc(tituloNorma(n))}</div><div class="h-sub">${esc(resumenTexto(n))}</div></div>
+      <div class="acts"><span class="badge ${e.b}" style="align-self:center">${esc(e.label)}</span>${pdf?`<a class="btn sm line" href="${esc(pdf)}" target="_blank" rel="noopener noreferrer">📄 PDF</a>`:""}<button class="btn sm line" id="a-link">🔗 Copiar enlace</button></div>
+    </div></div>
+    <div id="tabc"><div class="panel"><div class="empty">Abriendo el texto…</div></div></div></div>`;
+  $("#back").onclick=()=>go("norma",n.id);
+  $("#a-link").onclick=()=>copiarEnlace();
   textoDe(n).then(t=>{if(ST.view==="texto"&&ST.id===n.id)pintaTexto(n,t);})
     .catch(()=>{if(ST.view!=="texto"||!$("#tabc"))return;$("#tabc").innerHTML=`<div class="panel"><div class="empty">No se pudo abrir el texto de esta norma (¿sin conexión?).<br>Prueba de nuevo, o abre el PDF.</div></div>`;});
 }
@@ -1106,20 +1159,20 @@ function vActas(){
   const base=ACTAS().filter(a=>enFondo(fondoActa(a)));
   const cs=cuerposDelFondo().map(c=>[c.sigla,c.nombre]);
   const ys=[...new Set(base.map(a=>anio(a.fecha)))].sort().reverse().map(y=>[y,y]);
-  const n=k=>k==="all"?base.length:base.filter(a=>estadoActa(a).key===k).length;
-  $("#view").innerHTML=`<div class="up lib">
-    ${facetas(`${buscadorFiltro("aq","Buscar por cuerpo, fecha o lo resuelto…",f.q)}
-      <div class="ftit">Acta</div>${fopts("data-ch",f.estado,[["all","Todas",n("all")],["def","Definitivas",n("def")],["prov","Provisionales",n("prov")],["stub","Sin registrar",n("stub")]].filter(x=>x[0]==="all"||x[2]||f.estado===x[0]))}
-      <div class="ftit">Cuerpo colegiado</div><select data-f="cuerpo" aria-label="Cuerpo colegiado">${opciones(cs,f.cuerpo,"Todos")}</select>
-      <div class="ftit">Año</div><select data-f="anio" aria-label="Año">${opciones(ys,f.anio,"Todos")}</select>`)}
-    <div><div class="listhead"><span class="countlbl" id="cnt"></span></div><div id="filas"></div></div>
-  </div>`;
+  const n=k=>base.filter(a=>estadoActa(a).key===k).length;
+  $("#view").innerHTML=`<div class="up">
+    <div class="toolbar">
+      ${buscadorFiltro("aq","Buscar por cuerpo, fecha, n.º de sesión o lo resuelto…",f.q)}
+      ${selF("cuerpo",cs,f.cuerpo,"👥 Todos los cuerpos","Cuerpo colegiado")}
+      ${selF("anio",ys,f.anio,"📅 Todos los años","Año")}
+    </div>
+    <div class="chips">${chips("data-ch",f.estado,[["all","Todas"],["def","Definitivas",n("def")],["prov","Provisionales",n("prov")],["stub","Sin registrar",n("stub")]].filter(x=>x[0]==="all"||x[2]||f.estado===x[0]))}</div>
+    <div class="countrow"><span class="countlbl" id="cnt"></span></div>
+    <div id="filas"></div></div>`;
   pintaFilas=()=>{
     const l=actasFiltradas(),hay=base.length;
     $("#cnt").textContent=`${l.length} de ${hay} acta${hay===1?"":"s"}`;
-    const ctx={multi:new Set(base.map(a=>a.cuerpo)).size>1,multiF:new Set(base.map(a=>fondoActa(a))).size>1},porAnio={};
-    l.forEach(({a})=>(porAnio[anio(a.fecha)]=porAnio[anio(a.fecha)]||[]).push(a));
-    $("#filas").innerHTML=l.length?Object.keys(porAnio).sort().reverse().map(y=>`<div class="yr"><b>${esc(y)}</b><span>${porAnio[y].length} acta${porAnio[y].length===1?"":"s"} · ${porAnio[y].reduce((t,a)=>t+resDeActa(a.id).length,0)} resoluciones</span></div><div class="docs">${porAnio[y].map(a=>filaActa(a,ctx)).join("")}</div>`).join(""):vacioHTML(hay);
+    $("#filas").innerHTML=l.length?tablaActas(l.map(x=>x.a),new Set(l.map(x=>x.a.cuerpo)).size>1):vacioHTML(hay,"af");
     bindFilas($("#filas"));
   };
   pintaFilas();bindLista(vActas,"af","aq");
@@ -1131,29 +1184,36 @@ function efectosHTML(efectos){
     :`<div class="empty" style="padding:18px">Ninguno registrado.</div>`;
 }
 function bindEfectos(efectos){$("#view").querySelectorAll("[data-ef]").forEach(b=>b.onclick=()=>{const x=efectos[+b.dataset.ef];if(x.n)abrirNorma(x.n.id);else if(x.c.a.t==="norma"?DB.normas[x.c.a.id]:DB.res[x.c.a.id])go(x.c.a.t==="norma"?"norma":"resolucion",x.c.a.id);else toast("Eso es de otro grupo de acceso.");});}
-function docBtn(u,txt){u=seguro(u);return u?`<a class="btn sm line" href="${esc(u)}" target="_blank" rel="noopener noreferrer">📄 ${esc(txt)}</a>`:"";}
+function linkbarDoc(u,titulo,desc){u=seguro(u);return `<div class="linkbar"><span style="color:var(--navy)">${I.enlace}</span><div style="flex:1;min-width:0"><div class="lt">${titulo}</div><div class="ld">${u?desc:"Sin enlace en la matriz"}</div></div>${u?`<a class="btn sm" href="${esc(u)}" target="_blank" rel="noopener noreferrer">Abrir</a>`:`<button class="btn sm line" disabled>No disponible</button>`}</div>`;}
 function vActa(){
   const a=DB.actas[ST.id];if(!a){go("actas");return;}
-  const e=estadoActa(a),rs=resDeActa(a.id);
+  const e=estadoActa(a),rs=resDeActa(a.id),fondo=fondoActa(a);
   const efectos=rs.flatMap(r=>normasDeRes(r.id).map(n=>({r,n}))).concat(rs.flatMap(r=>cambiosPor(r.id).map(c=>({r,c}))));
-  $("#view").innerHTML=`<div class="up">
-    <nav class="crumbs"><button data-go="actas">Actas</button><span>›</span><span>${esc(cuerpo(a.cuerpo).sigla||a.cuerpo)} · ${esc(fdate(a.fecha))}</span></nav>
-    <header class="dochead">
-      <div class="kicker">${esc(cuerpo(a.cuerpo).nombre)}${fondoActa(a)?" · "+esc(fondoNombre(fondoActa(a))):""}</div>
-      <h1>${a.tipo?"Sesión "+esc(a.tipo.toLowerCase())+" del ":"Sesión del "}${esc(longDate(a.fecha))}</h1>
-      <div class="docmeta"><span class="badge ${e.b}">${esc(e.label)}</span>${a.numero?`<span>Sesión n.º ${esc(a.numero)}</span>`:""}${a.aprobacion?`<span>Acta aprobada el ${esc(longDate(a.aprobacion))}</span>`:""}<span>${rs.length} resoluci${rs.length===1?"ón":"ones"}</span></div>
-      <div class="docact">${docBtn(a.definitiva,"Acta definitiva")}${docBtn(a.provisional,"Acta provisional")}${!a.definitiva&&!a.provisional?`<span class="psub" style="margin:0">Sin enlaces al acta en la matriz</span>`:""}<button class="btn sm line" id="a-link">🔗 Copiar enlace</button></div>
-    </header>
+  $("#view").innerHTML=`<div class="up">${backHTML()}
     ${a.stub?`<div class="note" style="margin-bottom:14px">Esta sesión no está en la hoja <b>Actas</b> del Excel: aparece porque tiene resoluciones registradas. Al añadir su renglón se completan el tipo de sesión y los enlaces.</div>`:""}
     <div class="detail"><div>
+      <div class="panel">
+        ${cabFicha(esc(cuerpo(a.cuerpo).nombre)+(fondo&&!cuerpo(a.cuerpo).nombre.includes(fondo)?" · "+esc(fondo):""),esc(sesionTxt(a))+(a.numero?"":" del "+esc(longDate(a.fecha))),a.numero?esc(longDate(a.fecha)):"",`<span class="badge ${e.b}">${esc(e.label)}</span>`)}
+        ${a.definitiva||!a.provisional?linkbarDoc(a.definitiva,"Acta definitiva","El acta aprobada y firmada"):""}
+        ${a.provisional?linkbarDoc(a.provisional,"Acta provisional",a.definitiva?"La versión previa a su aprobación":"Todavía sin acta definitiva"):""}
+        <div class="dl">
+          <div><div class="k">Cuerpo colegiado</div><div class="v">${esc(cuerpo(a.cuerpo).nombre)}</div></div>
+          <div><div class="k">Fondo</div><div class="v">${fondo?esc(fondoNombre(fondo)):"—"}</div></div>
+          <div><div class="k">Fecha de la sesión</div><div class="v">${esc(longDate(a.fecha))}</div></div>
+          <div><div class="k">Sesión</div><div class="v">${esc(a.tipo||"—")}${a.numero?" · n.º "+esc(a.numero):""}</div></div>
+          <div><div class="k">Acta aprobada</div>${a.aprobacion?`<div class="v">${esc(longDate(a.aprobacion))}</div>`:`<div class="v none">${e.key==="prov"?"todavía no":"sin fecha registrada"}</div>`}</div>
+          <div><div class="k">Resoluciones</div><div class="v">${rs.length}</div></div>
+          ${a.obs?`<div class="full"><div class="k">Observaciones</div><div class="v" style="font-weight:400;font-size:13px;line-height:1.5">${esc(a.obs)}</div></div>`:""}
+        </div>
+      </div>
       <div class="panel"><p class="ptitle">Lo que se resolvió</p><p class="psub">Punto por punto, con su estado de hoy</p>
-        ${rs.length?`<div class="rowlist">${rs.map(r=>filaResHTML(r,todayISO())).join("")}</div>`:`<div class="empty">No hay resoluciones de esta sesión en la matriz.</div>`}</div>
-      ${a.obs?`<div class="panel"><p class="ptitle">Observaciones</p><div class="note">${esc(a.obs)}</div></div>`:""}
+        ${rs.length?rs.map(r=>filaResHTML(r,todayISO())).join(""):`<div class="empty">No hay resoluciones de esta sesión en la matriz.</div>`}</div>
     </div><div>
+      <div class="panel"><p class="ptitle">Acciones</p><div class="act">${actBtn("a-link","🔗","Copiar el enlace","Solo lo abre quien tenga la frase")}</div></div>
       <div class="panel"><p class="ptitle">Efectos de esta sesión</p><p class="psub">Normas que aprobó y cambios que hizo</p>${efectosHTML(efectos)}</div>
       ${notasPanelHTML()}
     </div></div></div>`;
-  $("#view").querySelectorAll(".crumbs [data-go]").forEach(b=>b.onclick=()=>go(b.dataset.go));
+  bindBack();
   $("#a-link").onclick=()=>copiarEnlace();
   bindNotas("acta",a.id,a._g,vActa);bindEfectos(efectos);
   $("#view").querySelectorAll(".rowitem[data-r]").forEach(b=>b.onclick=()=>go("resolucion",b.dataset.r));
@@ -1172,47 +1232,58 @@ function vResoluciones(){
   const cs=cuerposDelFondo().map(c=>[c.sigla,c.nombre]);
   const ms=[...new Set(base.map(r=>r.materia).filter(Boolean))].sort().map(m=>[m,m]);
   const ys=[...new Set(base.map(r=>anio(r.fecha)))].sort().reverse().map(y=>[y,y]);
-  const n=k=>k==="all"?base.length:base.filter(r=>{const e=estadoRes(r,ref);return k==="vig"?vigenteGrupo(e):e.key===k;}).length;
-  $("#view").innerHTML=`<div class="up lib">
-    ${facetas(`${buscadorFiltro("rq","Buscar en lo resuelto…",f.q)}
-      <div class="ftit">Estado</div>${fopts("data-ch",f.estado,[["all","Todas",n("all")],["vig","Vigentes",n("vig")],["reformada","Reformadas",n("reformada")],["baja","Sin efecto o derogadas",n("baja")]].filter(x=>x[0]==="all"||x[2]||f.estado===x[0]))}
-      <div class="ftit">Cuerpo colegiado</div><select data-f="cuerpo" aria-label="Cuerpo colegiado">${opciones(cs,f.cuerpo,"Todos")}</select>
-      ${ms.length?`<div class="ftit">Materia</div><select data-f="materia" aria-label="Materia">${opciones(ms,f.materia,"Todas")}</select>`:""}
-      <div class="ftit">Año</div><select data-f="anio" aria-label="Año">${opciones(ys,f.anio,"Todos")}</select>
-      <div class="ftit">Vigencia al</div><input type="date" id="afi" value="${esc(ST.aFecha||"")}" max="2100-12-31" aria-label="Vigencia al">`)}
-    <div>${aFechaBarra()}<div class="listhead"><span class="countlbl" id="cnt"></span></div><div id="filas"></div></div>
-  </div>`;
+  const n=k=>base.filter(r=>{const e=estadoRes(r,ref);return k==="vig"?vigenteGrupo(e):e.key===k;}).length;
+  $("#view").innerHTML=`<div class="up">${aFechaBarra()}
+    <div class="toolbar">
+      ${buscadorFiltro("rq","Buscar en lo resuelto…",f.q)}
+      ${selF("cuerpo",cs,f.cuerpo,"👥 Todos los cuerpos","Cuerpo colegiado")}
+      ${selF("materia",ms,f.materia,"🏷️ Todas las materias","Materia")}
+      ${selF("anio",ys,f.anio,"📅 Todos los años","Año")}
+      ${afiHTML()}
+    </div>
+    <div class="chips">${chips("data-ch",f.estado,[["all","Todas"],["vig","Vigentes",n("vig")],["reformada","Reformadas",n("reformada")],["baja","Sin efecto o derogadas",n("baja")]].filter(x=>x[0]==="all"||x[2]||f.estado===x[0]))}</div>
+    <div class="countrow"><span class="countlbl" id="cnt"></span></div>
+    <div id="filas"></div></div>`;
   pintaFilas=()=>{
     const l=resFiltradas(),hay=RESOL().filter(r=>enFondo(fondoDeCuerpo(r.cuerpo))).length;
     $("#cnt").textContent=`${l.length} de ${hay} resolucion${hay===1?"":"es"}`;
-    $("#filas").innerHTML=l.length?`<div class="docs">${l.map(({r})=>filaRes(r,hoyRef(),f.q)).join("")}</div>`:vacioHTML(hay);
+    $("#filas").innerHTML=l.length?tablaRes(l.map(x=>x.r),hoyRef(),f.q):vacioHTML(hay,"rf");
     bindFilas($("#filas"));
   };
   pintaFilas();bindLista(vResoluciones,"rf","rq");
 }
 function vResolucion(){
   const r=DB.res[ST.id];if(!r){go("resoluciones");return;}
-  const e=estadoRes(r,todayISO()),a=DB.actas[r.acta];
+  const e=estadoRes(r,todayISO()),a=DB.actas[r.acta],fondo=fondoDeCuerpo(r.cuerpo);
   const ev=[{d:r.fecha,cls:"ok",t:"Adoptada",s:`${cuerpo(r.cuerpo).nombre} · sesión del ${longDate(r.fecha)} · punto ${r.punto}`,go:a?["acta",a.id]:null}].concat(cambiosA(r.id).map(c=>eventoCambio(c)));
   const efectos=normasDeRes(r.id).map(n=>({n})).concat(cambiosPor(r.id).map(c=>({c})));
-  $("#view").innerHTML=`<div class="up">
-    <nav class="crumbs"><button data-go="resoluciones">Resoluciones</button><span>›</span>${a?`<button id="a-acta2">${esc(cuerpo(r.cuerpo).sigla||r.cuerpo)} · ${esc(fdate(r.fecha))}</button><span>›</span>`:""}<span>Punto ${esc(r.punto)}</span></nav>
-    <header class="dochead">
-      <div class="kicker">Punto ${esc(r.punto)} · ${esc(cuerpo(r.cuerpo).nombre)} · ${esc(longDate(r.fecha))}</div>
-      <h1 class="largo">${esc(r.texto)}</h1>
-      <div class="docmeta"><span class="badge ${e.b}">${esc(e.label)}</span>${r.materia?`<span>${esc(r.materia)}</span>`:""}${fondoDeCuerpo(r.cuerpo)?`<span>· ${esc(fondoNombre(fondoDeCuerpo(r.cuerpo)))}</span>`:""}</div>
-      <div class="docact">${a?`<button class="btn sm" id="a-acta">Ver el acta de la sesión</button>`:""}${docBtn(r.enlace,"Documento de la resolución")}<button class="btn sm line" id="a-link">🔗 Copiar enlace</button></div>
-    </header>
+  $("#view").innerHTML=`<div class="up">${backHTML()}
     ${e.key==="baja"?`<div class="note r" style="margin-bottom:14px">⛔ ${esc(e.cambio.tipo)} el ${esc(longDate(e.cambio.fecha))}${e.cambio.por?` por ${esc(cuerpo(e.cambio.por.cuerpo).nombre)}, sesión del ${esc(longDate(e.cambio.por.fecha))}, punto ${esc(e.cambio.por.punto)}`:""}.</div>`:""}
     ${e.key==="reformada"?`<div class="note" style="margin-bottom:14px">✏️ Se lee junto con su reforma: ${e.reformas.map(c=>esc(c.por?`${cuerpo(c.por.cuerpo).nombre}, sesión del ${longDate(c.por.fecha)}, punto ${c.por.punto}`:longDate(c.fecha))).join("; ")}.</div>`:""}
     <div class="detail"><div>
+      <div class="panel">
+        ${cabFicha(`Punto ${esc(r.punto)} · ${esc(cuerpo(r.cuerpo).nombre)} · ${esc(longDate(r.fecha))}`,esc(r.texto),"",`<span class="badge ${e.b}">${esc(e.label)}</span>`,true)}
+        ${seguro(r.enlace)?linkbarDoc(r.enlace,"Documento de la resolución","El texto firmado"):""}
+        <div class="dl">
+          <div><div class="k">Cuerpo colegiado</div><div class="v">${esc(cuerpo(r.cuerpo).nombre)}</div></div>
+          <div><div class="k">Sesión</div><div class="v">${a&&!a.stub?`<button class="linkbtn" id="a-acta2" style="font-size:inherit">${esc(longDate(r.fecha))}</button>`:esc(longDate(r.fecha))}</div></div>
+          <div><div class="k">Punto del orden del día</div><div class="v">${esc(r.punto)}</div></div>
+          <div><div class="k">Materia</div><div class="v${r.materia?"":" none"}">${r.materia?esc(r.materia):"sin registrar"}</div></div>
+          <div><div class="k">Fondo</div><div class="v">${fondo?esc(fondoNombre(fondo)):"—"}</div></div>
+          ${r.obs?`<div class="full"><div class="k">Observaciones</div><div class="v" style="font-weight:400;font-size:13px;line-height:1.5">${esc(r.obs)}</div></div>`:""}
+        </div>
+      </div>
       <div class="panel"><p class="ptitle">Línea de tiempo</p><p class="psub">Desde que se adoptó, y lo que otras sesiones resolvieron sobre ella</p>${timelineHTML(ev)}</div>
-      ${r.obs?`<div class="panel"><p class="ptitle">Observaciones</p><div class="note">${esc(r.obs)}</div></div>`:""}
     </div><div>
+      <div class="panel"><p class="ptitle">Acciones</p><div class="act">
+        ${a?actBtn("a-acta","🗂️","Ver el acta de la sesión",esc(sesionTxt(a))+" · "+resDeActa(a.id).length+" resoluciones",true):""}
+        ${actLink(r.enlace,"📄","Abrir el documento","El texto firmado de la resolución")}
+        ${actBtn("a-link","🔗","Copiar el enlace","Solo lo abre quien tenga la frase")}
+      </div></div>
       <div class="panel"><p class="ptitle">Efectos de esta resolución</p><p class="psub">Lo que aprobó o cambió</p>${efectosHTML(efectos)}</div>
       ${notasPanelHTML()}
     </div></div></div>`;
-  $("#view").querySelectorAll(".crumbs [data-go]").forEach(b=>b.onclick=()=>go(b.dataset.go));
+  bindBack();
   if($("#a-acta"))$("#a-acta").onclick=()=>go("acta",a.id);
   if($("#a-acta2"))$("#a-acta2").onclick=()=>go("acta",a.id);
   $("#a-link").onclick=()=>copiarEnlace();
@@ -1227,7 +1298,7 @@ function bindNotas(t,id,grupo,re){
   box.innerHTML=`<p class="ptitle">Notas</p><p class="psub">${DEMO?"En la demostración las notas no se guardan.":"Solo en este navegador, cifradas con la frase. No se comparten."}</p>
     <textarea class="notatx" id="ntx" placeholder="Ej.: confirmar con la Secretaría si el anexo 2 se aprobó en la misma sesión…"></textarea>
     <div style="display:flex;justify-content:flex-end;margin-top:8px"><button class="btn sm" id="nok">Guardar nota</button></div>
-    ${lista.map(n=>`<div class="nota"><div class="nt">${esc(n.txt)}<div class="nm">${esc(new Date(n.ts).toLocaleString("es-EC",{day:"numeric",month:"short",year:"numeric",hour:"2-digit",minute:"2-digit"}))}</div></div><button class="ib" data-del="${esc(n.id)}" title="Borrar nota" aria-label="Borrar nota">✕</button></div>`).join("")}`;
+    ${lista.map(n=>`<div class="nota"><div class="nt">${esc(n.txt)}<div class="nm">${esc(new Date(n.ts).toLocaleString("es-EC",{day:"numeric",month:"short",year:"numeric",hour:"2-digit",minute:"2-digit"}))}</div></div><button class="iconbtn" data-del="${esc(n.id)}" title="Borrar nota" aria-label="Borrar nota">✕</button></div>`).join("")}`;
   $("#nok").onclick=async()=>{const txt=$("#ntx").value.trim();if(!txt)return;
     const g=grupo||ABIERTOS[0];(NOTAS[g]=NOTAS[g]||[]).push({id:Date.now().toString(36)+Math.random().toString(36).slice(2,6),ref:{t,id},txt,ts:new Date().toISOString()});
     if(await guardarNotas(g))toast(DEMO?"Nota añadida (no se guarda en la demostración)":"Nota guardada, cifrada");re();};
@@ -1237,9 +1308,8 @@ function bindNotas(t,id,grupo,re){
 function vNotas(){
   const l=todasNotas();
   const titulo=n=>n.ref.t==="norma"?(DB.normas[n.ref.id]?DB.normas[n.ref.id].nombre:null):n.ref.t==="acta"?(DB.actas[n.ref.id]?actaRef(DB.actas[n.ref.id]):null):(DB.res[n.ref.id]?resRef(DB.res[n.ref.id]):null);
-  $("#view").innerHTML=`<div class="up"><header class="dochead"><div class="kicker">Solo en este navegador</div><h1>Mis notas</h1>
-    <div class="docmeta">Lo que anotaste, de lo más nuevo a lo más viejo. Se guardan cifradas con la frase de cada grupo y no se comparten con nadie.</div></header>
-    <div class="panel">${l.length?`<ul class="tl">${l.map((n,k)=>{const t=titulo(n);return `<li><div class="t">${t?`<button class="lk" data-nt="${k}">${esc(t)}</button>`:"(ya no está en la matriz)"}</div><div class="s" style="white-space:pre-wrap;color:var(--ink);font-size:13.5px;margin:3px 0">${esc(n.txt)}</div><div class="s">${esc(new Date(n.ts).toLocaleString("es-EC",{day:"numeric",month:"short",year:"numeric",hour:"2-digit",minute:"2-digit"}))}</div></li>`;}).join("")}</ul>`
+  $("#view").innerHTML=`<div class="up"><div class="panel"><p class="ptitle">Lo que anotaste</p><p class="psub">De lo más nuevo a lo más viejo. Solo en este navegador, cifradas con la frase de cada grupo: no se comparten con nadie.</p>
+    ${l.length?`<ul class="tl">${l.map((n,k)=>{const t=titulo(n);return `<li><div class="t">${t?`<button class="lk" data-nt="${k}">${esc(t)}</button>`:"(ya no está en la matriz)"}</div><div class="s" style="white-space:pre-wrap;color:var(--ink);font-size:13px;margin:3px 0">${esc(n.txt)}</div><div class="s">${esc(new Date(n.ts).toLocaleString("es-EC",{day:"numeric",month:"short",year:"numeric",hour:"2-digit",minute:"2-digit"}))}</div></li>`;}).join("")}</ul>`
       :`<div class="empty">Aún no hay notas.<br>Se añaden desde cualquier norma, acta o resolución.</div>`}</div></div>`;
   $("#view").querySelectorAll("[data-nt]").forEach(b=>b.onclick=()=>{const n=l[+b.dataset.nt];go(n.ref.t==="res"?"resolucion":n.ref.t,n.ref.id);});
 }
@@ -1257,9 +1327,8 @@ function revisionLista(){
 }
 function vRevision(){
   const l=revisionLista();
-  $("#view").innerHTML=`<div class="up"><header class="dochead"><div class="kicker">Para quien mantiene el Excel</div><h1>Revisión de la matriz</h1>
-    <div class="docmeta">Lo que conviene completar o corregir. Lo marcado con 🤖 lo encontró el robot al leer el Excel, con la hoja y el renglón; el resto se ve desde aquí. Al corregirlo, desaparece en la siguiente publicación.</div></header>
-    <div class="panel">${l.length?l.map((x,k)=>`<div class="alert-row"><div class="aic">${x.origen==="robot"?"🤖":"🧾"}</div><div style="min-width:0"><div class="at">${esc(x.hoja)}${x.fila?", renglón "+esc(x.fila):""}</div><div class="ad">${esc(x.texto)}</div></div>${x.go?`<button class="btn sm line go" data-rv="${k}">Ver</button>`:""}</div>`).join("")
+  $("#view").innerHTML=`<div class="up"><div class="panel"><p class="ptitle">Para quien mantiene el Excel</p><p class="psub">Lo que conviene completar o corregir. Lo marcado con 🤖 lo encontró el robot al leer el Excel, con la hoja y el renglón; el resto se ve desde aquí. Al corregirlo, desaparece en la siguiente publicación.</p>
+    ${l.length?l.map((x,k)=>`<div class="alert-row"><div class="aic">${x.origen==="robot"?"🤖":"🧾"}</div><div style="min-width:0"><div class="at">${esc(x.hoja)}${x.fila?", renglón "+esc(x.fila):""}</div><div class="ad">${esc(x.texto)}</div></div>${x.go?`<button class="btn sm line go" data-rv="${k}">Ver</button>`:""}</div>`).join("")
       :`<div class="empty">Todo en orden: la matriz no tiene nada pendiente.</div>`}</div></div>`;
   $("#view").querySelectorAll("[data-rv]").forEach(b=>b.onclick=()=>go(...l[+b.dataset.rv].go));
 }
@@ -1317,17 +1386,17 @@ function modalGenerarFrase(){
 function renderLogin(){
   const e=INDICE&&edadBase(INDICE.generado),nG=INDICE&&INDICE.grupos?INDICE.grupos.length:0;
   const sinDatos=!INDICE||!nG;
-  $("#app").innerHTML=`<div class="login"><div class="login-card up">
-    <div class="marca">${logoHTML()}<span><span class="mn">${esc(MARCA.nombre)}</span><span class="ms">${esc(MARCA.sigla)} · actas · resoluciones · normativa</span></span></div>
-    <h1>La normativa y las decisiones del FIAS, con su vigencia al día</h1>
-    <p class="lead">Lo que resolvió cada cuerpo colegiado y qué norma rige hoy —o regía cualquier día—, para el FIAS y cada fondo, programa o proyecto que administra.</p>
+  $("#app").innerHTML=`<div class="login-shell"><div class="login-card up">
+    <span class="eyebrow">${esc(MARCA.nombre)} · ${esc(MARCA.sigla)}</span>
+    <h1>Actas, resoluciones y normativa del FIAS</h1>
+    <p class="lead">Lo que resolvió cada cuerpo colegiado y qué norma rige hoy, del FIAS y de cada fondo, programa o proyecto que administra.</p>
     ${MSG_LOGIN?`<div class="note" style="margin-bottom:12px">${esc(MSG_LOGIN)}</div>`:""}
     <div id="lerr"></div>
     ${sinDatos?`<div class="note" style="margin-bottom:14px">${FALLA_CARGA?esc(FALLA_CARGA):INDICE&&INDICE.pendiente?"Todavía no hay datos publicados: falta configurar el robot (ver el README del repositorio). Mientras tanto, puedes recorrer la demostración.":"No se pudieron cargar los datos. Revisa la conexión y vuelve a abrir la página."}</div>`
-      :`<form id="lf"><label for="lp" style="display:block;font-size:13px;font-weight:600;margin-bottom:6px">Frase de acceso</label>
-        <input class="big" type="password" id="lp" autocomplete="off" autocapitalize="none" spellcheck="false" placeholder="palabra-palabra-palabra…">
-        <button class="btn block" id="lok" style="margin-top:12px;padding:12px">Entrar</button></form>`}
-    <p class="psub" style="margin:14px 0 0;line-height:1.5">🔒 Se descifra en este navegador y no se guarda en él. Se cierra sola tras ${BLOQUEO_MIN} minutos sin uso.${e?` Última publicación: ${esc(e.txt)}${e.vieja?" — <b style='color:var(--gold)'>revisa el robot</b>":""}.`:""}</p>
+      :`<form id="lf"><div class="frow"><label for="lp">Frase de acceso</label>
+        <input class="big" type="password" id="lp" autocomplete="off" autocapitalize="none" spellcheck="false" placeholder="palabra-palabra-palabra…"></div>
+        <button class="btn block" id="lok" style="margin-top:12px">Entrar</button></form>`}
+    <div class="note" style="margin-top:14px">🔒 Se descifra en este navegador y no se guarda en él. Se cierra sola tras ${BLOQUEO_MIN} minutos sin uso.${e?` Última publicación: <b${e.vieja?' style="color:var(--amber)"':""}>${esc(e.txt)}</b>${e.vieja?" — revisa el robot":""}.`:""}</div>
     <div class="login-links"><button class="linkbtn" id="ldemo">Ver con datos de ejemplo</button><button class="linkbtn" id="lgen" style="color:var(--muted)">Generar una frase nueva</button></div>
   </div></div>`;
   $("#lgen").onclick=modalGenerarFrase;

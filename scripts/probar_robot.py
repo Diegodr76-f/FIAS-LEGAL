@@ -333,6 +333,11 @@ def main():
         ok(u[2]["n"] == "2" and "rub" not in u[2] and u[2]["p"][-1] == "a) un literal", "artículo sin rubro, con su literal")
         ok(u[3] == {"t": "h1", "txt": "DISPOSICIONES GENERALES"}, "«DISPOSICIONES GENERALES» sí es un título", u[3])
         ok([x["id"] for x in u if x["t"] == "art"] == ["p0-a1", "p0-a2", "p1-a1"], "si la numeración vuelve a 1, es otra parte del documento")
+        indice = [{"t": x, "b": True} for x in ["i", "ÍNDICE", "1 EL PROGRAMA DE ÁREAS PROTEGIDAS ............................ 1",
+                                                 "1.1 Conceptos y objetivos generales .................1", "2 CAPITALIZACIÓN DEL FAP ..... 4",
+                                                 "1 EL PROGRAMA DE ÁREAS PROTEGIDAS", "En 1998 se crearon las áreas.... y los guardaparques."]]
+        ok([p["t"] for p in texto._sin_indice(indice)] == ["1 EL PROGRAMA DE ÁREAS PROTEGIDAS", "En 1998 se crearon las áreas.... y los guardaparques."],
+           "el índice del PDF (puntos guía y número de página, «ÍNDICE», la «i» de la página) no pasa al texto")
         r = texto.extraer(pdf_prueba())
         ok(not r["ocr"] and r["articulos"] == 6 and r["paginas"] == 3, "un PDF digital: 6 artículos, sin OCR", (r["ocr"], r["articulos"]))
         plano_t = json.dumps(r, ensure_ascii=False)
@@ -384,6 +389,10 @@ def main():
         m3 = publicar.Matriz().leer(wb)
         publicar.leer_textos(m3, cache, "otro-secreto", bajar, leer)
         ok(len(lecturas) == 2, "con otro secreto el caché no se puede abrir, y se vuelve a leer")
+        texto.VERSION, antes = "otra", texto.VERSION
+        publicar.leer_textos(publicar.Matriz().leer(wb), cache, "secreto-de-prueba", bajar, leer)
+        texto.VERSION = antes
+        ok(len(lecturas) == 3, "si cambia la versión del extractor, lo ya leído se vuelve a leer")
         sal = os.path.join(t, "t1")
         archivos, clave = publicar.escribir_textos(m2, "legal", sal)
         nombre = archivos.get("manual-operativo-del-ciclo-de-proyectos-del-fap", "")

@@ -560,6 +560,8 @@ def leer_textos(m, cache=None, secreto=None, bajar=None, extraer=None):
         import texto
         extraer = texto.extraer
     k = _llave_cache(secreto) if cache and secreto else None
+    import texto as _texto   # liviano: PyMuPDF se importa recién al leer
+    version = getattr(_texto, "VERSION", "1").encode()
     usados, hechos = set(), 0
     for n in pend:
         try:
@@ -569,7 +571,8 @@ def leer_textos(m, cache=None, secreto=None, bajar=None, extraer=None):
                     f"«{n['nombre']}»: el enlace de «PDF para leer en Quórum» no entrega un PDF. Tiene que ser un enlace "
                     "«cualquier persona con el vínculo», de descarga.", n["grupos"])
             continue
-        h = hashlib.sha256(pdf).hexdigest()
+        # La huella lleva la versión del extractor: si cambió, lo ya leído se relee.
+        h = hashlib.sha256(version + b"|" + pdf).hexdigest()
         usados.add(h)
         ruta = os.path.join(cache, h + ".bin") if k else None
         t = None

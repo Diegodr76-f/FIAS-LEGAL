@@ -27,6 +27,10 @@ import subprocess
 import sys
 from collections import Counter
 
+# Súbela cada vez que cambie lo que sale de `extraer()`: el robot guarda lo ya
+# leído por la huella del PDF Y esta versión, así que con otra versión lo relee.
+VERSION = "2"
+
 ART = re.compile(r"^Art(?:[íi]culo|\.)?\s*(\d+)\s*(?:[.ºo°]\s*)?(?:[.\-–—:]+\s*)?", re.I)
 # Una división lleva su número («CAPÍTULO IV»), o es una de las disposiciones con
 # nombre, en mayúsculas. «las disposiciones de este Reglamento» no es un título.
@@ -173,9 +177,25 @@ def _vinetas(pars):
     return out
 
 
+# El índice del documento no es texto de la norma. Una entrada se reconoce por
+# los puntos guía que llevan al número de página («2.1 Contribuciones ......... 4»);
+# también se van el título «ÍNDICE» y los números de página romanos en minúscula
+# («i», «iv») de las páginas preliminares.
+_GUIA = re.compile(r"(?:\.\s?){4,}\s*\d{1,3}\s*$|…{2,}\s*\d{1,3}\s*$|_{4,}\s*\d{1,3}\s*$")
+_TITULO_INDICE = re.compile(r"^(?:[ÍI]NDICE|CONTENIDOS?|TABLA DE CONTENIDOS?)(?:\s+GENERAL)?\s*:?$", re.I)
+_PAGINA_ROMANA = re.compile(r"^[ivxlc]{1,6}$")
+
+
+def _es_indice(t):
+    t = t.strip()
+    return bool(_TITULO_INDICE.match(t) or _PAGINA_ROMANA.match(t) or _GUIA.search(t)
+                or len(re.findall(r"\.{4,}\s*\d{1,3}", t)) >= 2
+                or (re.search(r"\bP[áa]gina\b", t) and len(re.findall(r"\s\d{1,3}(?=\s|$)", t)) >= 4))
+
+
 def _sin_indice(pars):
-    """Fuera la tabla de contenido: un párrafo con «Página» y muchos números sueltos."""
-    return [p for p in pars if not (re.search(r"\bP[áa]gina\b", p["t"]) and len(re.findall(r"\s\d{1,3}(?=\s|$)", p["t"])) >= 4)]
+    """Fuera la tabla de contenido (ver `_es_indice`)."""
+    return [p for p in pars if not _es_indice(p["t"])]
 
 
 def _unir(a, b):

@@ -55,7 +55,7 @@ async function entrar(w,frase){
   const err=w.document.querySelector('#lerr');if(err)err.innerHTML='';
   w.document.querySelector('#lp').value=frase;
   w.document.querySelector('#lf').dispatchEvent(new w.Event('submit',{cancelable:true}));
-  return hasta(()=>w.document.querySelector('.top')||w.document.querySelector('#lerr .errbox'));
+  return hasta(()=>w.document.querySelector('.shell')||w.document.querySelector('#lerr .errbox'));
 }
 const ev=(w,s)=>w.eval(s);
 const texto=w=>[...w.document.body.children].filter(e=>e.tagName!=='SCRIPT').map(e=>e.textContent).join(' ');
@@ -68,11 +68,11 @@ const texto=w=>[...w.document.body.children].filter(e=>e.tagName!=='SCRIPT').map
   ok(ev(w,'Object.keys(SOBRES).sort().join()')==='directorio,legal','bajó los dos sobres cifrados');
   ok(!/Manual|Reglamento|Junta Administrativa del FAP ·/.test(texto(w).replace(/la Junta Administrativa del FAP y/,'')),'y no muestra nada de lo que hay dentro');
   await entrar(w,'una-frase-que-no-es');
-  ok(w.document.querySelector('#lerr .errbox')&&!w.document.querySelector('.top'),'una frase equivocada no abre nada y lo dice');
+  ok(w.document.querySelector('#lerr .errbox')&&!w.document.querySelector('.shell'),'una frase equivocada no abre nada y lo dice');
 
   seccion('2. Cada frase abre su grupo, y solo el suyo');
   await entrar(w,FRASES.legal);
-  ok(w.document.querySelector('.top'),'la frase de legal entra');
+  ok(w.document.querySelector('.shell'),'la frase de legal entra');
   ok(ev(w,'ABIERTOS.join()')==='legal','abre solo legal');
   ok(ev(w,'ACTAS().every(a=>a.cuerpo!=="DIR-FIAS")'),'sin actas del Directorio del FIAS');
   ok(w.document.querySelector('#masgrupos'),'y ofrece abrir el grupo que queda cerrado, con otra frase');
@@ -121,29 +121,37 @@ const texto=w=>[...w.document.body.children].filter(e=>e.tagName!=='SCRIPT').map
   ok(ev(w,'buscarTodo("08/08/2026").some(h=>h.t==="acta"&&h.id==="ja-fap_2026-08-08")'),'y sesiones por la fecha como se escribe');
   ok(ev(w,'buscarTodo("junta agosto 2026").length>0')&&ev(w,'buscarTodo("codificacion").length>0'),'sin tildes y en cualquier orden');
   ev(w,'go("panel")');
-  ok(w.document.querySelector('#bq')&&w.document.querySelectorAll('.statline button').length===4&&/Próximo: derogación/.test(texto(w)),'el inicio: el buscador primero, los totales y lo que viene');
-  const bq=w.document.querySelector('#bq');bq.value='teletrabajo';bq.dispatchEvent(new w.Event('input'));
-  ok(await hasta(()=>w.document.querySelector('#bres .bgrupo'))&&w.document.querySelector('#inicio').style.display==='none'&&/Normas/.test(w.document.querySelector('#bres').textContent),'al escribir, los resultados salen agrupados en el mismo inicio');
-  bq.value='';bq.dispatchEvent(new w.Event('input'));await espera(200);ev(w,'ST.bq=""');
+  ok(w.document.querySelectorAll('.kpi').length===5&&/Próximo: derogación/.test(texto(w))&&w.document.querySelector('#pnormas tr[data-n]'),'el panel, como el del CLM: los totales, lo que viene y la normativa vigente');
+  w.document.querySelector('.kpi[data-st=prov]').click();
+  ok(ev(w,'ST.view')==='actas'&&ev(w,'ST.af.estado')==='prov','cada total lleva a su lista, ya filtrada');
+  ev(w,'ST.af.estado="all"');
+  const gq=w.document.querySelector('#gq');gq.value='teletrabajo';gq.dispatchEvent(new w.Event('input'));
+  ok(w.document.querySelector('#gres').style.display!=='none'&&/Teletrabajo/.test(w.document.querySelector('#gres').textContent),'el buscador de arriba está en todas las pantallas y responde al escribir');
+  gq.value='';gq.dispatchEvent(new w.Event('input'));
+  ev(w,'go("normativa")');
+  const fila=w.document.querySelector('#filas tr[data-n]');fila.click();
+  ok(ev(w,'ST.view')==='norma'&&ev(w,'ST.id')===fila.dataset.n,'un clic en la fila abre la ficha, como un contrato en el CLM');
   ev(w,'go("revision")');
   ok(/renglón 58/.test(texto(w)),'«Revisión de la matriz» trae el aviso del robot con su renglón');
 
   seccion('4b. Fondos: todo junto, o cada uno por separado');
   ev(w,'go("panel")');
-  ok(w.document.querySelectorAll('.fondobar [data-fd]').length===5,'arriba, en todas las pantallas, «Todos» y un botón por fondo (FIAS, FAP, FEIG y el programa)');
-  ok(/Programa de Pequeñas Donaciones/.test(w.document.querySelector('#inicio').textContent),'y el inicio muestra la normativa de cada fondo');
-  w.document.querySelector('.fondobar [data-fd="FAP"]').click();
-  ok(ev(w,'ST.fondo')==='FAP'&&/Áreas Protegidas/.test(w.document.querySelector('.fbname').textContent),'al elegir el FAP, el panel dice cuál es');
-  ok(w.document.querySelector('.statline [data-st=actas] b').textContent==='8','y cuenta solo sus actas: las 8 de la Junta Administrativa');
+  const fsel=()=>w.document.querySelector('#fondoSel');
+  const elige=v=>{fsel().value=v;fsel().dispatchEvent(new w.Event('change'));};
+  ok(fsel()&&fsel().options.length===5,'arriba, en todas las pantallas, «Todos los fondos» y uno por fondo (FIAS, FAP, FEIG y el programa)');
+  ok([...fsel().options].some(o=>/Programa de Pequeñas Donaciones/.test(o.textContent)),'cada fondo con su nombre completo');
+  elige('FAP');
+  ok(ev(w,'ST.fondo')==='FAP'&&fsel().value==='FAP'&&/Áreas Protegidas/.test(fsel().selectedOptions[0].textContent),'al elegir el FAP, se queda elegido y dice cuál es');
+  ok(w.document.querySelector('.kpi[data-st=actas] .kpi-n').textContent==='8','y cuenta solo sus actas: las 8 de la Junta Administrativa');
   ev(w,'go("actas")');
   ok(/8 de 8 actas/.test(texto(w))&&ev(w,'actasFiltradas().every(x=>x.a.cuerpo==="JA-FAP")'),'el listado de actas se queda en el FAP',texto(w).match(/\d+ de \d+ actas?/));
-  ok([...w.document.querySelectorAll('select[data-f=cuerpo] option')].map(o=>o.value).join()==='all,JA-FAP','y el filtro de cuerpo solo ofrece los suyos');
+  ok(ev(w,'cuerposDelFondo().map(c=>c.sigla).join()')==='JA-FAP'&&!w.document.querySelector('select[data-f=cuerpo]'),'con un solo cuerpo no hay nada que elegir: no aparece el filtro');
   ev(w,'go("resoluciones")');ok(/16 de 16 resoluciones/.test(texto(w)),'sus 16 resoluciones');
   ev(w,'go("normativa")');ok(/2 de 2 normas/.test(texto(w)),'y sus 2 normas');
-  w.document.querySelector('.fondobar [data-fd="PPD"]').click();
+  elige('PPD');
   ok(/2 de 2 normas/.test(texto(w))===false&&ev(w,'normasFiltradas().length')===0,'un programa sin normas no muestra ninguna');
   ev(w,'go("actas")');ok(/2 de 2 actas/.test(texto(w)),'pero sí las actas de su comité');
-  w.document.querySelector('.fondobar [data-fd="all"]').click();
+  elige('all');
   ok(/28 de 28 actas/.test(texto(w)),'«Todos» vuelve a juntarlo todo',texto(w).match(/\d+ de \d+ actas?/));
   ok(ev(w,'buscarTodo("pequenas donaciones comite").some(h=>h.t==="acta")'),'el buscador encuentra por el nombre del fondo');
 
@@ -206,7 +214,7 @@ const texto=w=>[...w.document.body.children].filter(e=>e.tagName!=='SCRIPT').map
 
   seccion('9. La demostración');
   w.document.querySelector('#ldemo').click();
-  ok(await hasta(()=>w.document.querySelector('.top')),'entra sin frase');
+  ok(await hasta(()=>w.document.querySelector('.shell')),'entra sin frase');
   ok(ev(w,'DEMO')&&/datos ficticios/.test(w.document.querySelector('.srcpill').textContent),'y dice siempre que los datos son ficticios');
   ev(w,'go("texto","reglamento-de-adquisiciones-del-fias")');
   ok(await hasta(()=>w.document.querySelectorAll('#ltx .lart').length===13),'la demostración trae un texto de ejemplo para leer');

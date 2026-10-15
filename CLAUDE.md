@@ -7,12 +7,19 @@ Sin build, sin framework: `index.html` se abre tal cual. Sigue el estilo de cód
 (funciones sueltas, HTML como cadenas) y reutiliza sus piezas (`coincide()`, `edadBase()`,
 `mientras()`, el router por id).
 
-**El diseño es de la familia del CLM, no una copia.** Comparte su azul, su letra (Titillium Web) y su
-fondo; la estructura es propia, porque Quórum es una biblioteca y no un tablero: pestañas arriba
-(no menú lateral), el fondo elegido siempre a la vista, el inicio es un buscador con resultados
-agrupados, los listados son renglones de documento con filtros al costado que dicen cuántos dejan,
-y cada norma tiene su página (migas de pan, título con serifa, pestañas «Texto vigente» y «Ficha»).
-Nada de gráficos ni tarjetas de indicadores: a quien busca una norma no le sirven.
+**La interfaz es la del CLM.** Se probó una «propia» (pestañas arriba, títulos con serifa, filtros al
+costado, renglones de biblioteca) y quien la usa la rechazó: se notaba hecha por una IA y era más
+difícil que el CLM. Así que se usan las piezas del CLM, con su CSS: menú a la izquierda (en el
+celular, una fila que se desliza), barra arriba con el título, el fondo y el buscador; panel con
+totales que llevan a su lista ya filtrada, «Requiere atención» y lo último que pasó; listados como
+el repositorio de contratos (buscador y listas arriba, chips de estado con cuántos dejan, tabla, clic
+en la fila abre la ficha, la última columna abre el documento —«📖 Leer» o «📄 Abrir»— y queda fija a la
+derecha); fichas como el detalle del contrato (enlace al documento arriba, datos en dos columnas,
+línea de tiempo, y a la derecha las acciones y las notas). Una sola letra, Titillium Web, también en
+el lector. Antes de inventar una pieza, búscala en `clm/index.html` de `fap-contratos`.
+
+Las tablas caben en 1280 px con la barra de desplazamiento puesta, y bajo 900 px cada fila es una
+tarjeta (solo CSS, rótulos con `data-l`). Se mide en Chromium, igual que en el CLM.
 
 **Un anexo es una norma completa.** Va en su propio renglón del catálogo, con su nombre propio
 (`tituloNorma()` quita el «Anexo 8 al Manual Operativo:» del Excel) y una línea que dice de qué
@@ -67,7 +74,12 @@ quien lo usa). `texto.extraer()` saca el texto (PyMuPDF; la negrita marca títul
 de texto es un OCR viejo y malo (`calidad()`: «C6digo», «lnterno») y entonces vuelve a leer con
 Tesseract en español; quita encabezados y números de página y lo parte en `h1`/`h2`/`art`/`p`.
 Si la numeración de artículos vuelve a 1 (la resolución que aprueba un reglamento trae su propio
-Art. 1), es otra parte: los ids llevan la parte (`p1-a14`).
+Art. 1), es otra parte: los ids llevan la parte (`p1-a14`). El índice del propio PDF (renglones con
+puntos guía y número de página, el título «ÍNDICE») no es texto de la norma y se descarta (`_es_indice`).
+
+**Cada PDF se lee una sola vez.** El robot lo baja en cada corrida solo para sacarle la huella; si la
+huella está en el caché, no lo vuelve a leer. La huella lleva `texto.VERSION`: **súbela** cuando cambie
+lo que sale de `extraer()`, o las normas ya leídas se quedan con el texto viejo.
 
 En el robot (`leer_textos`, `escribir_textos`): cada texto va en un archivo aparte, cifrado con una
 llave al azar que viaja dentro del archivo del grupo, y con un nombre que no dice qué norma es. El
