@@ -163,6 +163,9 @@
   .doc-r .tx{font-size:11.5px;font-weight:600;color:var(--accent)}
   .datebox{flex:0 0 52px;text-align:center;border:1px solid var(--line);border-radius:8px;padding:5px 0;background:var(--paper)}
   .datebox b{display:block;font-family:var(--serif);font-size:19px;line-height:1.1}
+  .yr{display:flex;align-items:baseline;gap:10px;margin:18px 2px 8px}.yr:first-child{margin-top:0}
+  .yr b{font-family:var(--serif);font-size:20px}.yr span{font-size:12.5px;color:var(--muted)}
+  .nres{font-size:12.5px;font-weight:600;color:var(--ink2)}.nres.cero{font-weight:400;color:var(--muted)}
   .datebox small{font-size:10.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.3px}
   .pn{flex:0 0 auto;min-width:32px;height:32px;padding:0 6px;border-radius:8px;background:var(--accentbg);color:var(--accent);font-weight:700;font-size:13px;display:flex;align-items:center;justify-content:center}
   @media(max-width:560px){.doc{padding:12px 12px;gap:10px}.doc-ic{flex-basis:30px;height:38px}.doc-r .badge{font-size:10.5px}}
@@ -726,11 +729,16 @@ function filaNorma(n,ref,q){
     <span class="doc-b"><span class="doc-t">${marcar(tituloNorma(n),q)}</span><span class="doc-m"><span>${esc(n.tipo||"Norma")}</span>${fondoNorma(n)?`<span>${esc(fondoNorma(n))}</span>`:""}<span>aprobada ${fdate(n.fecha)}</span>${u?`<span>${esc(u.tipo.toLowerCase())} ${fdate(u.fecha)}</span>`:""}${padre?`<span class="anx">${esc(trunc(etiquetaAnexo(n),70))}</span>`:""}${nax?`<span>${nax} anexo${nax===1?"":"s"}</span>`:""}</span></span>
     <span class="doc-r"><span class="badge ${e.b}">${esc(e.label)}</span>${n.texto?`<span class="tx">📖 Texto</span>`:""}</span></button>`;
 }
-function filaActa(a){
-  const e=estadoActa(a),[y,m,d]=a.fecha.split("-");
-  return `<button class="doc" data-a="${esc(a.id)}"><span class="datebox"><b>${+d}</b><small>${MESES[+m-1].slice(0,3)} ${y}</small></span>
-    <span class="doc-b"><span class="doc-t">${esc(cuerpo(a.cuerpo).nombre)}</span><span class="doc-m"><span>${a.tipo?"Sesión "+esc(a.tipo.toLowerCase()):"Sesión"}${a.numero?" n.º "+esc(a.numero):""}</span><span>${resDeActa(a.id).length} resoluciones</span>${fondoActa(a)?`<span>${esc(fondoActa(a))}</span>`:""}</span></span>
-    <span class="doc-r"><span class="badge ${e.b}">${esc(e.label)}</span>${e.key==="prov"?`<span class="doc-m" style="margin:0">hace ${e.dias} días</span>`:""}</span></button>`;
+/* El renglón dice lo que distingue a un acta: qué sesión fue y cuánto resolvió.
+   El cuerpo y el fondo solo se repiten si hay más de uno a la vista, y «Definitiva»
+   no se rotula —es lo normal—: solo lo que pide atención (provisional, sin registrar). */
+function filaActa(a,ctx){
+  ctx=ctx||{};
+  const e=estadoActa(a),[y,m,d]=a.fecha.split("-"),nr=resDeActa(a.id).length;
+  const titulo=a.numero?`Sesión ${a.tipo?esc(a.tipo.toLowerCase())+" ":""}n.º ${esc(a.numero)}`:`Sesión ${a.tipo?esc(a.tipo.toLowerCase()):""} del ${esc(fdate(a.fecha))}`;
+  return `<button class="doc" data-a="${esc(a.id)}"><span class="datebox"><b>${+d}</b><small>${MESES[+m-1].slice(0,3)}</small></span>
+    <span class="doc-b"><span class="doc-t">${titulo}</span>${ctx.multi||ctx.multiF?`<span class="doc-m">${ctx.multi?`<span>${esc(cuerpo(a.cuerpo).nombre)}</span>`:""}${ctx.multiF&&fondoActa(a)&&!(" "+cuerpo(a.cuerpo).nombre+" ").includes(" "+fondoActa(a)+" ")?`<span>${esc(fondoActa(a))}</span>`:""}</span>`:""}</span>
+    <span class="doc-r">${e.key==="def"?"":`<span class="badge ${e.b}">${esc(e.label)}</span>`}${e.key==="prov"?`<span class="doc-m" style="margin:0">hace ${e.dias} días</span>`:""}<span class="nres${nr?"":" cero"}">${nr?nr+" resolucion"+(nr===1?"":"es"):"sin resoluciones"}</span></span></button>`;
 }
 function filaRes(r,ref,q){
   const e=estadoRes(r,ref||todayISO());
@@ -1109,7 +1117,9 @@ function vActas(){
   pintaFilas=()=>{
     const l=actasFiltradas(),hay=base.length;
     $("#cnt").textContent=`${l.length} de ${hay} acta${hay===1?"":"s"}`;
-    $("#filas").innerHTML=l.length?`<div class="docs">${l.map(({a})=>filaActa(a)).join("")}</div>`:vacioHTML(hay);
+    const ctx={multi:new Set(base.map(a=>a.cuerpo)).size>1,multiF:new Set(base.map(a=>fondoActa(a))).size>1},porAnio={};
+    l.forEach(({a})=>(porAnio[anio(a.fecha)]=porAnio[anio(a.fecha)]||[]).push(a));
+    $("#filas").innerHTML=l.length?Object.keys(porAnio).sort().reverse().map(y=>`<div class="yr"><b>${esc(y)}</b><span>${porAnio[y].length} acta${porAnio[y].length===1?"":"s"} · ${porAnio[y].reduce((t,a)=>t+resDeActa(a.id).length,0)} resoluciones</span></div><div class="docs">${porAnio[y].map(a=>filaActa(a,ctx)).join("")}</div>`).join(""):vacioHTML(hay);
     bindFilas($("#filas"));
   };
   pintaFilas();bindLista(vActas,"af","aq");
