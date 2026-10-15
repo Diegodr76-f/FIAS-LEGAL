@@ -149,8 +149,8 @@ def instrucciones(wb, demo):
     ws.sheet_view.showGridLines = False
 
 
-def libro(demo=False):
-    datos = demo_datos() if demo else {
+def libro(demo=False, datos=None):
+    datos = datos or (demo_datos() if demo else None) or {
         "Fondos": [{"sigla": s, "nombre": n, "tipo": t} for s, n, t in FONDOS_INICIALES],
         "Cuerpos": [{"sigla": s, "nombre": n, "entidad": e, "grupo": g} for s, n, e, g in CUERPOS_INICIALES]}
     wb = Workbook()
@@ -312,6 +312,9 @@ def demo_datos():
         resol.append({"cuerpo": cuerpo, "fecha": fecha, "punto": punto, "texto": texto, "materia": materia})
     normas = [{"nombre": n, "tipo": t, "entidad": e, "organo": o, "fecha": f, "punto": p,
                "enlace": f"{EJ}normativa/{i + 1}-original.pdf"} for i, (n, t, e, o, f, p) in enumerate(NORMAS)]
+    for n in normas:   # un anexo, para que la demostración lo muestre
+        if n["nombre"] == "Lineamientos de Teletrabajo":
+            n["anexo"] = "Reglamento Interno de Talento Humano"
     cambios = []
     for i, (a, tipo, por, rige, arts, texto) in enumerate(CAMBIOS):
         c = {"tipo": tipo, "pcuerpo": por[0], "pfecha": por[1], "ppunto": por[2],

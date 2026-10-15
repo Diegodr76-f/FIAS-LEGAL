@@ -213,6 +213,11 @@ const texto=w=>w.document.body.textContent;
   w.document.querySelector('#ntx').value='nota de demo';w.document.querySelector('#nok').click();await espera(50);
   ok(!w.localStorage.getItem('quorum_notas_demo'),'sus notas no se guardan');
 
+  ev(w,'go("norma","reglamento-interno-de-talento-humano")');
+  ok(w.document.querySelectorAll('[data-anx]').length===1&&/Anexos/.test(texto(w)),'una norma muestra sus anexos');
+  w.document.querySelector('[data-anx]').click();
+  ok(ev(w,'ST.id')==='lineamientos-de-teletrabajo'&&/Anexo de Reglamento Interno de Talento Humano/.test(texto(w)),'y el anexo dice de cuál es, con enlace');
+
   seccion('10. Sin red, o sin publicar todavía');
   let w5=nuevoDom({sinRed:true});
   await cargado(w5);

@@ -147,12 +147,23 @@ def fh(iso):
     return f"{iso[8:10]}/{iso[5:7]}/{iso[:4]}" if iso else ""
 
 
+NUMEROS = {w: i for i, w in enumerate(
+    "cero uno dos tres cuatro cinco seis siete ocho nueve diez once doce trece catorce quince dieciseis "
+    "diecisiete dieciocho diecinueve veinte".split())}
+NUMEROS.update({w: i + 1 for i, w in enumerate(
+    "primero segundo tercero cuarto quinto sexto septimo octavo noveno decimo".split())})
+NUMEROS.update({"un": 1, "una": 1, "primer": 1, "tercer": 3, "primera": 1, "segunda": 2, "tercera": 3, "cuarta": 4, "quinta": 5})
+
+
 def punto(v):
-    """«3», 3, 3.0, «Punto 3», «3.» → «3». Lo que no es número se deja como texto."""
+    """«3», 3, 3.0, «Punto 3», «3.», «Cuatro», «cuarto» → «3»/«4». «-» o «s/n» → sin punto.
+    Lo que no es número se deja como texto."""
     s = texto(v)
-    if not s:
+    if not s or re.fullmatch(r"[-–—_./ ]+|s/?n|n/?a|no aplica", s, re.I):
         return None
     s = re.sub(r"^(punto|pto\.?)\s*", "", s, flags=re.I).strip().rstrip(".")
+    if plano(s) in NUMEROS:
+        return str(NUMEROS[plano(s)])
     try:
         f = float(s.replace(",", "."))
         if f.is_integer():
@@ -160,6 +171,19 @@ def punto(v):
     except ValueError:
         pass
     return s
+
+
+def grupos_de_texto(v):
+    """«Legal y financiero», «Legal, RR.HH.» → ['legal', 'financiero'], ['legal', 'rr-hh'].
+    Cada grupo es una frase: lo marcado con varios lo abre cualquiera de ellas.
+    «Programas y proyectos» es UN grupo, no dos."""
+    s = plano(texto(v) or "").replace("programas y proyectos", "programas_y_proyectos")
+    out = []
+    for parte in re.split(r"\s*(?:,|;|/|\+|\by\b|\be\b)\s*", s):
+        g = slug(parte)
+        if g and g not in out:
+            out.append(g)
+    return out
 
 
 def enlace(v):
@@ -177,12 +201,16 @@ class Matriz:
         self.avisos = []
 
     def aviso(self, hoja, fila, generico, detalle=None, grupo=None):
-        """`generico` va al registro público; `detalle` solo al archivo cifrado."""
+        """`generico` va al registro público; `detalle` solo al archivo cifrado.
+        `grupo`: a qué grupos llega (None: a todos)."""
+        if isinstance(grupo, str):
+            grupo = [grupo]
         self.avisos.append({"hoja": hoja, "fila": fila, "texto": detalle or generico,
-                            "generico": generico, "grupo": grupo})
+                            "generico": generico, "grupo": list(grupo) if grupo else None})
 
     def grupo_de(self, sigla):
-        return self.cuerpos[sigla]["grupo"]
+        """Los grupos de acceso de un cuerpo (una lista: puede ser más de uno)."""
+        return self.cuerpos[sigla]["grupos"]
 
     def ref_res(self, sigla, f, p):
         return f"{slug(sigla)}_{f}_p{slug(p) or 'x'}"
@@ -258,7 +286,7 @@ class Matriz:
                 continue
             self.cuerpos[s] = {"sigla": s, "nombre": texto(d.get("nombre")) or s,
                                "entidad": self._fondo("Cuerpos", i, d.get("entidad")),
-                               "grupo": slug(texto(d.get("grupo")) or "") or GRUPO_POR_OMISION}
+                               "grupos": grupos_de_texto(d.get("grupo")) or [GRUPO_POR_OMISION]}
 
     def _actas(self, wb):
         for i, d in filas(wb, "Actas"):
@@ -322,19 +350,21 @@ class Matriz:
                              "materia": texto(d.get("materia")), "enlace": u, "obs": texto(d.get("obs")), "fila": i}
 
     def _normas(self, wb):
-        self.por_nombre = {}
+        self.por_nombre, self.sin_sesion = {}, []
         for i, d in filas(wb, "Normativa"):
             n = texto(d.get("nombre"))
             if not n:
                 self.aviso("Normativa", i, "falta el nombre de la norma; el renglón no se publica")
                 continue
             s = self._sigla("Normativa", i, d.get("organo"), "órgano que la aprueba")
-            if not s:
-                if s is None:
-                    self.aviso("Normativa", i, "falta el órgano que la aprueba; el renglón no se publica",
-                               f"«{n}»: falta el órgano que la aprueba. Sin él no se sabe quién puede verla, así que no se publica.")
+            propios = grupos_de_texto(d.get("grupo"))
+            if s is False:
                 continue
-            g = slug(texto(d.get("grupo")) or "") or self.grupo_de(s)
+            if s is None and not propios:
+                self.aviso("Normativa", i, "sin órgano ni grupo de acceso no se sabe quién la puede ver; no se publica",
+                           f"«{n}»: no tiene órgano que la apruebe ni grupo de acceso. Sin uno de los dos no se sabe quién puede verla, así que no se publica.")
+                continue
+            g = propios or self.grupo_de(s)
             f = self._fecha("Normativa", i, d.get("fecha"), "la fecha de aprobación", grupo=g)
             if not f:
                 continue
@@ -343,10 +373,13 @@ class Matriz:
                 self.aviso("Normativa", i, "norma repetida; vale el primer renglón", f"«{n}» está dos veces; vale el primer renglón.", g)
                 continue
             p = punto(d.get("punto"))
-            res = self.ref_res(s, f, p) if p else None
+            res = self.ref_res(s, f, p) if p and s else None
             if res and res not in self.res:
-                self.aviso("Normativa", i, "no encuentro la resolución que la aprobó",
-                           f"«{n}»: no encuentro en Resoluciones el punto {p} de {s} del {fh(f)}, que la aprobó.", g)
+                if f"{slug(s)}_{f}" in self.actas:
+                    self.aviso("Normativa", i, "no encuentro la resolución que la aprobó",
+                               f"«{n}»: no encuentro en Resoluciones el punto {p} de {s} del {fh(f)}, que la aprobó.", g)
+                else:   # la sesión todavía no se cargó: un solo aviso para todas, al final
+                    self.sin_sesion.append(n)
                 res = None
             u, malo = enlace(d.get("enlace"))
             if malo:
@@ -354,13 +387,28 @@ class Matriz:
             pdf, malo = enlace(d.get("pdf"))
             if malo:
                 self.aviso("Normativa", i, "el «PDF para leer en Quórum» no empieza por https://; se ignora", None, g)
-            aid = f"{slug(s)}_{f}"
-            self.normas[nid] = {"pdf": pdf,"id": nid, "nombre": n, "tipo": texto(d.get("tipo")),
-                                "entidad": self._fondo("Normativa", i, d.get("entidad"), g) or self.cuerpos[s]["entidad"],
+            aid = f"{slug(s)}_{f}" if s else None
+            self.normas[nid] = {"pdf": pdf, "_anexo": texto(d.get("anexo")),"id": nid, "nombre": n, "tipo": texto(d.get("tipo")),
+                                "entidad": self._fondo("Normativa", i, d.get("entidad"), g) or (self.cuerpos[s]["entidad"] if s else None),
                                 "organo": s, "fecha": f, "punto": p, "res": res,
                                 "acta": aid if aid in self.actas else None, "enlace": u,
-                                "obs": texto(d.get("obs")), "grupo": g, "fila": i}
+                                "obs": texto(d.get("obs")), "grupos": g, "fila": i}
             self.por_nombre[plano(n)] = nid
+        if self.sin_sesion:
+            self.aviso("Normativa", None, f"{len(self.sin_sesion)} normas citan la sesión que las aprobó, pero esa sesión aún no está en Actas",
+                       f"{len(self.sin_sesion)} normas dicen en qué sesión y punto se aprobaron, pero esas sesiones todavía no están en las hojas "
+                       "Actas y Resoluciones. No es un error: cuando las cargues, cada norma queda enlazada sola a la resolución que la aprobó.")
+        # «Anexo de»: el nombre de otra norma de la hoja.
+        for nn in self.normas.values():
+            padre = nn.pop("_anexo", None)
+            if not padre:
+                continue
+            pid = self.por_nombre.get(plano(padre))
+            if not pid or pid == nn["id"]:
+                self.aviso("Normativa", nn["fila"], "«Anexo de» no nombra otra norma de la hoja",
+                           f"«{nn['nombre']}» dice ser anexo de «{padre}», que no está en la hoja Normativa (¿escrito distinto?).", nn["grupos"])
+                continue
+            nn["anexo"] = pid
 
     def _cambios(self, wb):
         tipos = {plano(t): t for t in TIPOS_CAMBIO}
@@ -382,7 +430,7 @@ class Matriz:
                     continue
                 n = self.normas[nid]
                 a = {"t": "norma", "id": nid, "nombre": n["nombre"], "fecha": n["fecha"]}
-                grupos = {n["grupo"]}
+                grupos = set(n["grupos"])
             else:
                 s = self._sigla("Cambios", i, d.get("rcuerpo"))
                 if not s:
@@ -399,8 +447,8 @@ class Matriz:
                                f"No encuentro en Resoluciones el punto {p} de {s} del {fh(f)}.", self.grupo_de(s))
                     continue
                 a = {"t": "res", "id": rid, "cuerpo": s, "fecha": f, "punto": p}
-                grupos = {self.grupo_de(s)}
-            g0 = sorted(grupos)[0]
+                grupos = set(self.grupo_de(s))
+            g0 = sorted(grupos)
 
             por = None
             if any(texto(d.get(k)) for k in ("pcuerpo", "pfecha", "ppunto")):
@@ -419,7 +467,7 @@ class Matriz:
                 if not por["id"]:
                     self.aviso("Cambios", i, "no encuentro la resolución de «Resuelto por»",
                                f"No encuentro en Resoluciones el punto {p} de {s} del {fh(f)}, que hizo el cambio. Se muestra igual, sin enlace.", g0)
-                grupos.add(self.grupo_de(s))
+                grupos.update(self.grupo_de(s))
             rige = self._fecha("Cambios", i, d.get("rige"), "«Rige desde»", False, g0)
             if rige is False:
                 continue
@@ -439,7 +487,7 @@ class Matriz:
 
     # --------------------------------------------------------- reparto
     def grupos(self):
-        gs = {c["grupo"] for c in self.cuerpos.values()} | {n["grupo"] for n in self.normas.values()}
+        gs = {g for c in self.cuerpos.values() for g in c["grupos"]} | {g for n in self.normas.values() for g in n["grupos"]}
         return sorted(gs)
 
     def payload(self, grupo, generado, textos=None, clave_textos=None, inline=False):
@@ -448,7 +496,7 @@ class Matriz:
         textos = textos or {}
 
         def de(sigla):
-            return self.grupo_de(sigla) == grupo
+            return grupo in self.grupo_de(sigla)
         # El enlace «PDF para leer en Quórum» es para el robot: no se publica.
         limpio = lambda d: {k: v for k, v in d.items() if k not in ("fila", "grupos", "pdf", "_texto") and v not in (None, "", [])}
 
@@ -461,7 +509,7 @@ class Matriz:
                 x["texto"] = textos[n["id"]]
                 x["textoInfo"] = {"articulos": t.get("articulos", 0), "paginas": t.get("paginas"), "ocr": t.get("ocr", False)}
             return x
-        normas = [norma(n) for n in self.normas.values() if n["grupo"] == grupo]
+        normas = [norma(n) for n in self.normas.values() if grupo in n["grupos"]]
         usados = {c["entidad"] for c in self.cuerpos.values()} | {n.get("entidad") for n in normas}
         return {
             "v": 1, "grupo": grupo, "generado": generado,
@@ -472,7 +520,7 @@ class Matriz:
             "normas": normas,
             "cambios": [limpio(c) for c in self.cambios if grupo in c["grupos"]],
             "avisos": [{"hoja": a["hoja"], "fila": a["fila"], "texto": a["texto"]}
-                       for a in self.avisos if a["grupo"] in (None, grupo)],
+                       for a in self.avisos if a["grupo"] is None or grupo in a["grupo"]],
             **({"claveTextos": base64.b64encode(clave_textos).decode("ascii")} if clave_textos and textos else {}),
         }
 
@@ -519,7 +567,7 @@ def leer_textos(m, cache=None, secreto=None, bajar=None, extraer=None):
         except Exception:
             m.aviso("Normativa", n["fila"], "el «PDF para leer en Quórum» no se pudo bajar (¿pide iniciar sesión?)",
                     f"«{n['nombre']}»: el enlace de «PDF para leer en Quórum» no entrega un PDF. Tiene que ser un enlace "
-                    "«cualquier persona con el vínculo», de descarga.", n["grupo"])
+                    "«cualquier persona con el vínculo», de descarga.", n["grupos"])
             continue
         h = hashlib.sha256(pdf).hexdigest()
         usados.add(h)
@@ -537,7 +585,7 @@ def leer_textos(m, cache=None, secreto=None, bajar=None, extraer=None):
                 t = extraer(pdf)
             except Exception as e:
                 m.aviso("Normativa", n["fila"], "no se pudo leer el texto del «PDF para leer en Quórum»",
-                        f"«{n['nombre']}»: no se pudo leer el texto del PDF ({type(e).__name__}).", n["grupo"])
+                        f"«{n['nombre']}»: no se pudo leer el texto del PDF ({type(e).__name__}).", n["grupos"])
                 continue
             if ruta:
                 os.makedirs(cache, exist_ok=True)
@@ -546,7 +594,7 @@ def leer_textos(m, cache=None, secreto=None, bajar=None, extraer=None):
                     f.write(iv + AESGCM(k).encrypt(iv, json.dumps(t, ensure_ascii=False).encode(), h.encode()))
         if not t.get("unidades"):
             m.aviso("Normativa", n["fila"], "el «PDF para leer en Quórum» no trae texto legible",
-                    f"«{n['nombre']}»: del PDF no salió texto. ¿Es una imagen de muy baja calidad?", n["grupo"])
+                    f"«{n['nombre']}»: del PDF no salió texto. ¿Es una imagen de muy baja calidad?", n["grupos"])
             continue
         n["_texto"] = t
         hechos += 1
@@ -563,7 +611,7 @@ def escribir_textos(m, grupo, salida):
     from cryptography.hazmat.primitives.ciphers.aead import AESGCM
     clave, archivos = os.urandom(32), {}
     for n in m.normas.values():
-        if n["grupo"] != grupo or not n.get("_texto"):
+        if grupo not in n["grupos"] or not n.get("_texto"):
             continue
         nombre = "t-" + hashlib.sha256(clave + n["id"].encode()).hexdigest()[:24] + ".json"
         iv = os.urandom(12)
@@ -613,7 +661,7 @@ def resumen(m, grupos):
               f"Grupos publicados: {', '.join(grupos)}"]
     if m.avisos:
         lineas.append(f"Avisos: {len(m.avisos)} (el detalle está en Quórum → Revisión de la matriz)")
-        lineas += [f"  · {a['hoja']}, fila {a['fila']}: {a['generico']}" for a in m.avisos[:40]]
+        lineas += [f"  · {a['hoja']}" + (f", fila {a['fila']}" if a["fila"] else "") + f": {a['generico']}" for a in m.avisos[:40]]
     return "\n".join(lineas)
 
 
@@ -668,9 +716,14 @@ def main(argv=None):
     grupos = m.grupos()
 
     faltan = [g for g in grupos if g not in claves]
-    if faltan:
-        raise Alto("No hay frase en el secreto CLAVES para: " + ", ".join(faltan) +
-                   ". No se publica nada en claro. Añade una línea «grupo = frase» por cada uno.")
+    grupos = [g for g in grupos if g in claves]
+    if not grupos:
+        raise Alto("No hay frase en el secreto CLAVES para ningún grupo (" + ", ".join(faltan) +
+                   "). No se publica nada en claro. Añade una línea «grupo = frase» por cada uno.")
+    for g in faltan:   # sin frase, ese grupo no se publica; los demás sí
+        m.aviso("Normativa", None, f"el grupo «{g}» no tiene frase en CLAVES: lo que es solo suyo no se publica",
+                f"El grupo de acceso «{g}» no tiene frase en el secreto CLAVES. Lo que solo ese grupo puede ver no se publica "
+                "hasta que tenga frase; lo que comparte con otros grupos, sí.")
     cortas = [g for g in grupos if len(claves[g]) < MIN_FRASE]
     if cortas:
         raise Alto(f"La frase de {', '.join(cortas)} es corta (menos de {MIN_FRASE} caracteres). "

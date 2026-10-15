@@ -21,7 +21,7 @@ import unicodedata
 TIPOS_SESION = ["Ordinaria", "Extraordinaria"]
 TIPOS_FONDO = ["Institución", "Fondo", "Programa", "Proyecto"]
 TIPOS_NORMA = ["Estatuto", "Reglamento", "Manual", "Política", "Procedimiento",
-               "Instructivo", "Lineamiento", "Código", "Otro"]
+               "Instructivo", "Lineamiento", "Código", "Escritura", "Plan", "Lista", "Otro"]
 MATERIAS = ["Normativa", "Presupuesto y finanzas", "Inversiones",
             "Proyectos y convocatorias", "Convenios y alianzas", "Talento humano",
             "Designaciones", "Gobierno corporativo", "Administrativo", "Otros"]
@@ -69,7 +69,7 @@ HOJAS = {
         ("sigla", "Sigla", "Corta y sin repetirse (p. ej. JA-FAP). Es como se escribe el cuerpo en las demás hojas.", 14, "texto"),
         ("nombre", "Nombre completo", "Como debe leerse en pantalla: «Junta Administrativa del FAP».", 40, "texto"),
         ("entidad", "Fondo", "De qué fondo, programa o proyecto es este cuerpo (sigla de la hoja Fondos). Sus actas y resoluciones se ven bajo ese fondo: la Junta Administrativa del FAP es del FAP.", 12, "lista:FONDOS"),
-        ("grupo", "Grupo de acceso", "Qué frase abre las actas y resoluciones de este cuerpo. Si todos los abogados ven todo, deja «legal» en todas las filas.", 18, "texto"),
+        ("grupo", "Grupo de acceso", "Qué frase abre las actas y resoluciones de este cuerpo; pueden ser varios grupos, separados por coma o «y». Si todos los abogados ven todo, deja «legal» en todas las filas.", 18, "texto"),
         ("obs", "Observaciones", "", 40, "texto"),
     ],
     "Actas": [
@@ -93,14 +93,15 @@ HOJAS = {
     ],
     "Normativa": [
         ("nombre", "Nombre de la norma", "Sin repetirse. Es como se la nombra en la hoja Cambios.", 46, "texto"),
+        ("anexo", "Anexo de", "Si esta norma es anexo de otra (p. ej. del Manual Operativo), el nombre de esa otra, igual que en esta hoja. Vacío si no es anexo.", 30, "lista:NORMAS"),
         ("tipo", "Tipo", "Reglamento, Manual, Política…", 14, "lista:TIPOS_NORMA"),
         ("entidad", "Fondo", "De qué fondo es la norma (sigla de la hoja Fondos). Vacío = el fondo del órgano que la aprueba.", 10, "lista:FONDOS"),
-        ("organo", "Órgano que la aprueba", "Sigla del cuerpo competente (p. ej. el Manual de Ciclo lo aprueba la JA-FAP).", 16, "lista:CUERPOS"),
+        ("organo", "Órgano que la aprueba", "Sigla del cuerpo competente (p. ej. el Manual de Ciclo lo aprueba la JA-FAP). Si la aprobó alguien de fuera (p. ej. el Ministerio del Trabajo), se deja vacío y se dice quién en Observaciones.", 16, "lista:CUERPOS"),
         ("fecha", "Fecha de aprobación", "Fecha de la sesión que la aprobó.", 14, "fecha"),
         ("punto", "Punto en que se aprobó", "Opcional. Con órgano + fecha + punto, la norma queda enlazada a su resolución.", 12, "texto"),
         ("enlace", "Texto original (enlace)", "PDF del texto aprobado.", 34, "enlace"),
         ("pdf", "PDF para leer en Quórum", "Opcional. Enlace de descarga («cualquier persona con el vínculo») al PDF del texto VIGENTE. El robot lo lee y lo publica cifrado, por artículos, para leerlo en Quórum con índice y buscador. Este enlace no se muestra a nadie. Cuando la norma se reforme, se cambia por el PDF nuevo.", 30, "enlace"),
-        ("grupo", "Grupo de acceso", "Opcional. Vacío = el mismo grupo del órgano que la aprueba.", 16, "texto"),
+        ("grupo", "Grupo de acceso", "Quién la puede ver: uno o varios grupos, separados por coma o «y» (p. ej. «Legal y financiero»). Cada grupo abre con su propia frase. Vacío = el grupo del órgano que la aprueba.", 22, "texto"),
         ("obs", "Observaciones", "", 40, "texto"),
     ],
     "Cambios": [

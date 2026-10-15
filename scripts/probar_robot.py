@@ -222,12 +222,18 @@ def main():
         ok("DIR-FEIG" not in log and "2022-11-10" not in log and "10/11/2022" not in log, "ni siglas ni fechas de lo que avisa")
         ok("fila 58" in log, "solo la hoja y el renglón del aviso", log)
 
-        seccion("5. Sin frase, nada se publica")
+        seccion("5. Sin frase, ese grupo no se publica (y nada sale en claro)")
         sal2 = os.path.join(t, "datos2")
         codigo, error, log = correr(["--excel", ruta, "--salida", sal2, "--permitir-sin-clave"], {"CLAVES": f"legal = {FRASE_LEGAL}"})
-        ok(error and "directorio" in error and not os.path.exists(sal2), "falta la frase de un grupo: no se escribe NADA", error)
-        codigo, error, log = correr(["--excel", ruta, "--salida", sal2, "--permitir-sin-clave"], {"CLAVES": "legal = corta\ndirectorio = corta"})
-        ok(error and "corta" in error and not os.path.exists(sal2), "una frase corta tampoco", error)
+        ind = json.load(open(os.path.join(sal2, "indice.json")))
+        ok(codigo == 0 and [g["id"] for g in ind["grupos"]] == ["legal"] and not os.path.exists(os.path.join(sal2, "g-directorio.json")),
+           "falta la frase del directorio: se publica legal, el directorio no", ind)
+        ok("«directorio» no tiene frase" in log, "y el registro lo dice", log[-300:])
+        sal2b = os.path.join(t, "datos2b")
+        codigo, error, log = correr(["--excel", ruta, "--salida", sal2b, "--permitir-sin-clave"], {"CLAVES": ""})
+        ok(error and "ningún grupo" in error and not os.path.exists(sal2b), "sin ninguna frase no se escribe NADA", error)
+        codigo, error, log = correr(["--excel", ruta, "--salida", sal2b, "--permitir-sin-clave"], {"CLAVES": "legal = corta\ndirectorio = corta"})
+        ok(error and "corta" in error and not os.path.exists(sal2b), "una frase corta tampoco", error)
         codigo, error, log = correr(["--salida", sal2, "--si-falta-config"], {"EXCEL_URL": ""})
         ind = json.load(open(os.path.join(sal2, "indice.json")))
         ok(codigo == 0 and ind["grupos"] == [] and ind["pendiente"] == "configuracion", "sin configurar aún: la herramienta sale sin datos")
@@ -400,6 +406,45 @@ def main():
                                      "--cache", os.path.join(t, "cache3")], claves)
         ok(codigo == 0 and "con texto: 1" in log and "combustible" not in log.lower() and "bueno.pdf" not in log,
            "el registro cuenta las normas con texto, sin texto ni enlaces", error or log[-300:])
+
+        seccion("11. Como se llena de verdad: varios grupos, puntos en palabras, anexos")
+        ok(publicar.grupos_de_texto("Legal y financiero") == ["legal", "financiero"]
+           and publicar.grupos_de_texto("Legal, administrativo, programas y proyectos y FAP") == ["legal", "administrativo", "programas-y-proyectos", "fap"]
+           and publicar.grupos_de_texto("Legal y RR.HH.") == ["legal", "rr-hh"], "«Legal y financiero» son dos grupos; «programas y proyectos», uno")
+        ok([publicar.punto(x) for x in ("Cuatro", "cuarto", "Dos", "-", "Punto 3", "s/n")] == ["4", "4", "2", None, "3", None],
+           "el punto escrito con palabras («Cuatro», «cuarto») se entiende; «-» es sin punto")
+        wb = crear_plantilla.libro(demo=True)
+        wn = wb["Normativa"]
+        n0 = wn.max_row + 1
+        filas_n = [{"nombre": "Reglamento de Seguridad y Salud Ocupacional", "tipo": "Reglamento", "fecha": "2025-01-10", "grupo": "Legal y RR.HH."},
+                   {"nombre": "Manual de prueba con punto en palabras", "organo": "DIR-FIAS", "fecha": "2018-08-16", "punto": "Cinco", "grupo": "Legal y financiero"},
+                   {"nombre": "Anexo 1 del Manual de prueba", "anexo": "manual de prueba con PUNTO en palabras", "organo": "DIR-FIAS", "fecha": "2018-08-16"},
+                   {"nombre": "Anexo huérfano", "anexo": "Norma que no existe", "organo": "DIR-FIAS", "fecha": "2018-08-16"},
+                   {"nombre": "Sin órgano ni grupo", "fecha": "2020-01-01"}]
+        for k, f in enumerate(filas_n):
+            for c, v in f.items():
+                wn.cell(row=n0 + k, column=col(wn, c, "Normativa")).value = v
+        m = publicar.Matriz().leer(wb)
+        sso = m.normas.get("reglamento-de-seguridad-y-salud-ocupacional")
+        ok(sso and sso["grupos"] == ["legal", "rr-hh"] and not sso["organo"], "sin órgano (la aprobó el Ministerio) se publica, si dice quién la ve")
+        ok("sin-organo-ni-grupo" not in m.normas and ("Normativa", n0 + 4) in {(a["hoja"], a["fila"]) for a in m.avisos},
+           "sin órgano ni grupo, no: no se sabe quién la puede ver")
+        ok(m.normas["manual-de-prueba-con-punto-en-palabras"]["res"] == "dir-fias_2018-08-16_p5", "el punto «Cinco» enlaza con la resolución del punto 5")
+        ok(m.normas["anexo-1-del-manual-de-prueba"].get("anexo") == "manual-de-prueba-con-punto-en-palabras", "«Anexo de» enlaza con su norma, escrita como sea")
+        ok("anexo" not in m.normas["anexo-huerfano"] and ("Normativa", n0 + 3) in {(a["hoja"], a["fila"]) for a in m.avisos}, "un anexo de una norma que no existe se avisa")
+        ok("financiero" in m.grupos() and "rr-hh" in m.grupos(), "cada grupo nombrado es un grupo de acceso")
+        pf = m.payload("financiero", "x")
+        ok([n["id"] for n in pf["normas"]] == ["manual-de-prueba-con-punto-en-palabras"] and not pf["actas"],
+           "la frase de financiero abre solo lo marcado para financiero")
+        ok(any(n["id"] == "manual-de-prueba-con-punto-en-palabras" for n in m.payload("legal", "x")["normas"]), "y lo mismo lo abre legal")
+        wb = crear_plantilla.libro()
+        wn = wb["Normativa"]
+        for k in range(3):
+            for c, v in {"nombre": f"Norma {k}", "organo": "DIR-FIAS", "fecha": "2018-03-12", "punto": "Cuatro"}.items():
+                wn.cell(row=2 + k, column=col(wn, c, "Normativa")).value = v
+        m = publicar.Matriz().leer(wb)
+        ok(len(m.avisos) == 1 and m.avisos[0]["fila"] is None and "3 normas" in m.avisos[0]["texto"],
+           "normas cuyas sesiones aún no se cargaron: un solo aviso, no uno por norma", [a["texto"][:60] for a in m.avisos])
 
     print(f"\n{pruebas - fallos} de {pruebas} comprobaciones bien" + (f" · {fallos} FALLAN" if fallos else ""))
     sys.exit(1 if fallos else 0)

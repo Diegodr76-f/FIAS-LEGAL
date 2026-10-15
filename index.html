@@ -481,7 +481,8 @@ function estadoActa(a){
 }
 
 /* ================= NOMBRES ================= */
-function cuerpo(s){return DB.cuerpos[s]||{sigla:s,nombre:s};}
+function cuerpo(s){return DB.cuerpos[s]||(s?{sigla:s,nombre:s}:{sigla:"",nombre:"Órgano externo o sin registrar"});}
+function anexosDe(id){return NORMAS().filter(x=>x.anexo===id).sort((a,b)=>a.nombre.localeCompare(b.nombre,"es",{numeric:true}));}
 function resRef(r){return `${cuerpo(r.cuerpo).nombre} · ${fdate(r.fecha)} · punto ${r.punto}`;}
 function resCorta(r){return `${r.cuerpo} · ${fdate(r.fecha)} · p. ${r.punto}`;}
 function actaRef(a){return `${cuerpo(a.cuerpo).nombre} · ${a.tipo?("sesión "+a.tipo.toLowerCase()+" del "):"sesión del "}${longDate(a.fecha)}`;}
@@ -511,7 +512,7 @@ function cuerposDelFondo(){return Object.values(DB.cuerpos).filter(c=>enFondo(c.
 /* Todo lo que identifica a cada cosa, también la fecha escrita de las formas en
    que se dice: «8 de agosto de 2026», «08/08/2026», «agosto 2026». */
 function fechasPaja(iso){return iso?[iso,dmy(iso),longDate(iso),fdate(iso),MESES[+iso.slice(5,7)-1]+" "+iso.slice(0,4)].join(" "):"";}
-function pajaNorma(n){return [n.nombre,n.tipo,fondoNorma(n),fondoNombre(fondoNorma(n)),n.organo,cuerpo(n.organo).nombre,n.obs,fechasPaja(n.fecha)].filter(Boolean).join(" ");}
+function pajaNorma(n){return [n.nombre,n.anexo&&DB.normas[n.anexo]?"anexo "+DB.normas[n.anexo].nombre:"",n.tipo,fondoNorma(n),fondoNombre(fondoNorma(n)),n.organo,cuerpo(n.organo).nombre,n.obs,fechasPaja(n.fecha)].filter(Boolean).join(" ");}
 function pajaRes(r){return [r.texto,r.materia,r.obs,r.cuerpo,fondoNombre(fondoDeCuerpo(r.cuerpo)),cuerpo(r.cuerpo).nombre,"punto "+r.punto,fechasPaja(r.fecha)].filter(Boolean).join(" ");}
 function pajaActa(a){return [a.cuerpo,cuerpo(a.cuerpo).nombre,fondoActa(a),fondoNombre(fondoActa(a)),a.tipo,a.numero?"sesion "+a.numero:"",a.obs,fechasPaja(a.fecha)].filter(Boolean).join(" ");}
 
@@ -862,7 +863,7 @@ function normasFiltradas(){
 function ultimoCambio(n,ref){const cs=cambiosA(n.id).filter(c=>c.fecha<=(ref||hoyRef()));return cs[cs.length-1]||null;}
 function vNormativa(){
   const f=ST.nf;
-  const organos=[...new Set(NORMAS().filter(n=>enFondo(fondoNorma(n))).map(n=>n.organo))].sort().map(s=>[s,cuerpo(s).nombre]);
+  const organos=[...new Set(NORMAS().filter(n=>enFondo(fondoNorma(n))).map(n=>n.organo).filter(Boolean))].sort().map(s=>[s,cuerpo(s).nombre]);
   const tipos=[...new Set(NORMAS().map(n=>n.tipo).filter(Boolean))].sort().map(t=>[t,t]);
   $("#view").innerHTML=`<div class="up">
     ${fondoBar()}${aFechaBarra()}
@@ -877,9 +878,9 @@ function vNormativa(){
     $("#cnt").textContent=`${l.length} de ${hay} norma${hay===1?"":"s"}`;
     if(!l.length){$("#filas").innerHTML=vacioHTML(hay);return;}
     $("#filas").innerHTML=ST.viewMode==="cards"
-      ?`<div class="grid">${l.map(({n,e})=>{const u=ultimoCambio(n);return `<div class="cc ${e.cc}" data-n="${esc(n.id)}"><div class="cc-nro">${esc(n.tipo||"Norma")} · ${esc(fondoNorma(n)||n.organo)}</div><div class="cc-title">${esc(n.nombre)}</div><div class="td-sub">${esc(cuerpo(n.organo).nombre)}</div><div class="cc-meta"><span class="badge ${e.b}">${esc(e.label)}</span><span>Aprobada ${fdate(n.fecha)}</span>${u?`<span>· ${esc(u.tipo.toLowerCase())} ${fdate(u.fecha)}</span>`:""}</div></div>`;}).join("")}</div>`
+      ?`<div class="grid">${l.map(({n,e})=>{const u=ultimoCambio(n);return `<div class="cc ${e.cc}" data-n="${esc(n.id)}"><div class="cc-nro">${esc(n.tipo||"Norma")} · ${esc(fondoNorma(n)||n.organo)}</div><div class="cc-title">${esc(n.nombre)}</div><div class="td-sub">${n.anexo&&DB.normas[n.anexo]?"Anexo de "+esc(DB.normas[n.anexo].nombre):esc(cuerpo(n.organo).nombre)}</div><div class="cc-meta"><span class="badge ${e.b}">${esc(e.label)}</span><span>Aprobada ${fdate(n.fecha)}</span>${u?`<span>· ${esc(u.tipo.toLowerCase())} ${fdate(u.fecha)}</span>`:""}</div></div>`;}).join("")}</div>`
       :`<div class="tablewrap"><table class="list"><thead><tr><th>Norma</th><th class="td-org">Órgano</th><th>Aprobada</th><th>Último cambio</th><th>Estado</th><th class="td-sig"></th></tr></thead><tbody>${l.map(({n,e})=>{const u=ultimoCambio(n);
-        return `<tr data-n="${esc(n.id)}"><td class="td-obj">${esc(n.nombre)}<div class="oc"><span class="catchip">${esc(n.tipo||"Norma")}</span></div><div class="oa">${esc(cuerpo(n.organo).nombre)}</div></td><td class="td-org">${esc(cuerpo(n.organo).nombre)}</td><td style="white-space:nowrap">${fdate(n.fecha)}</td><td>${u?`${esc(u.tipo)}<div class="td-sub">${fdate(u.fecha)}</div>`:'<span style="color:var(--muted2)">—</span>'}</td><td><span class="badge ${e.b}">${esc(e.label)}</span></td><td class="td-sig"><button class="btn sm line">Abrir</button></td></tr>`;}).join("")}</tbody></table></div>`;
+        return `<tr data-n="${esc(n.id)}"><td class="td-obj">${esc(n.nombre)}<div class="oc"><span class="catchip">${esc(n.tipo||"Norma")}</span>${n.anexo&&DB.normas[n.anexo]?` <span class="catchip" style="background:var(--tint);color:var(--navy)">Anexo de ${esc(trunc(DB.normas[n.anexo].nombre,40))}</span>`:""}${anexosDe(n.id).length?` <span class="catchip">${anexosDe(n.id).length} anexos</span>`:""}</div><div class="oa">${esc(cuerpo(n.organo).nombre)}</div></td><td class="td-org">${esc(cuerpo(n.organo).nombre)}</td><td style="white-space:nowrap">${fdate(n.fecha)}</td><td>${u?`${esc(u.tipo)}<div class="td-sub">${fdate(u.fecha)}</div>`:'<span style="color:var(--muted2)">—</span>'}</td><td><span class="badge ${e.b}">${esc(e.label)}</span></td><td class="td-sig"><button class="btn sm line">Abrir</button></td></tr>`;}).join("")}</tbody></table></div>`;
     $("#filas").querySelectorAll("[data-n]").forEach(r=>r.onclick=()=>go("norma",r.dataset.n));
   };
   pintaFilas();bindLista(vNormativa,"nf","nq");bindFondoBar(vNormativa);
@@ -887,7 +888,7 @@ function vNormativa(){
 function lineaNorma(n){
   const hoy=todayISO(),ev=[];
   const r=n.res&&DB.res[n.res];
-  ev.push({d:n.fecha,cls:"ok",t:"✅ Aprobada",s:`${cuerpo(n.organo).nombre} · sesión del ${longDate(n.fecha)}${n.punto?" · punto "+n.punto:""}`,go:r?["resolucion",r.id]:(n.acta?["acta",n.acta]:null)});
+  ev.push({d:n.fecha,cls:"ok",t:"✅ Aprobada",s:n.organo?`${cuerpo(n.organo).nombre} · sesión del ${longDate(n.fecha)}${n.punto?" · punto "+n.punto:""}`:`${longDate(n.fecha)}${n.obs?" · "+trunc(n.obs,120):""}`,go:r?["resolucion",r.id]:(n.acta?["acta",n.acta]:null)});
   cambiosA(n.id).forEach(c=>ev.push(eventoCambio(c,hoy)));
   return ev;
 }
@@ -924,6 +925,7 @@ function vNorma(){
         </div>
         ${e.cambio&&e.key==="baja"?`<div class="note" style="margin-top:12px">⛔ ${esc(e.cambio.tipo)} el ${esc(longDate(e.cambio.fecha))}${e.cambio.por?` por ${esc(cuerpo(e.cambio.por.cuerpo).nombre)}, sesión del ${esc(longDate(e.cambio.por.fecha))}, punto ${esc(e.cambio.por.punto)}`:""}.</div>`:""}
         ${e.key==="vence"?`<div class="note" style="margin-top:12px;background:var(--amberbg);border-color:#F0DCA6;color:#8A5E06">📅 Deja de regir el ${esc(longDate(e.cambio.fecha))}: ${esc(e.cambio.tipo.toLowerCase())} aprobada por ${esc(e.cambio.por?cuerpo(e.cambio.por.cuerpo).nombre+", sesión del "+longDate(e.cambio.por.fecha):"la matriz")}.</div>`:""}
+        ${n.anexo&&DB.normas[n.anexo]?`<div class="note" style="margin-top:12px">📎 Anexo de <button class="linkbtn" id="a-padre" style="font-size:inherit">${esc(DB.normas[n.anexo].nombre)}</button></div>`:""}
         <div class="dl">
           <div><div class="k">Tipo</div><div class="v">${esc(n.tipo||"—")}</div></div>
           <div><div class="k">Fondo</div><div class="v">${esc(fondoNorma(n)?fondoNombre(fondoNorma(n)):"—")}</div></div>
@@ -933,6 +935,7 @@ function vNorma(){
         </div>
       </div>
       <div class="panel"><p class="ptitle">Línea de tiempo</p><p class="psub">Aprobación y cada cambio, con la sesión que lo resolvió</p>${timelineHTML(ev)}</div>
+      ${anexosDe(n.id).length?`<div class="panel"><p class="ptitle">Anexos</p><p class="psub">${anexosDe(n.id).length} normas que forman parte de esta</p><div class="rowlist">${anexosDe(n.id).map(x=>{const ex=estadoNorma(x,todayISO());return `<button class="rowitem" data-anx="${esc(x.id)}"><span style="min-width:0;flex:1"><span class="rt">${esc(x.nombre)}</span><span class="rs"><span class="badge ${ex.b}">${esc(ex.label)}</span><span class="catchip">${esc(x.tipo||"Norma")}</span>${x.texto?'<span class="catchip" style="background:var(--tint);color:var(--navy)">📖 texto</span>':""}</span></span></button>`;}).join("")}</div></div>`:""}
     </div><div>
       <div class="panel"><p class="ptitle">¿Qué regía en una fecha?</p><p class="psub">Para saber qué texto aplicaba, por ejemplo, el día que se firmó algo.</p>
         <div class="quedia"><input type="date" id="qd" value="${esc(ST.aFecha||todayISO())}"><button class="btn sm" id="qdb">Consultar</button></div><div id="qdr"></div></div>
@@ -943,6 +946,8 @@ function vNorma(){
   bindVolver("normativa");bindTimeline(ev);bindNotas("norma",n.id,n._g,vNorma);
   if($("#a-acta"))$("#a-acta").onclick=()=>go("acta",n.acta);
   if($("#a-leer"))$("#a-leer").onclick=()=>go("texto",n.id);
+  if($("#a-padre"))$("#a-padre").onclick=()=>go("norma",n.anexo);
+  $("#view").querySelectorAll("[data-anx]").forEach(b=>b.onclick=()=>go("norma",b.dataset.anx));
   if($("#a-res"))$("#a-res").onclick=()=>go("resolucion",r.id);
   const consulta=()=>{const d=$("#qd").value;if(!d)return;const out=$("#qdr");
     if(d<n.fecha){out.innerHTML=`<div class="resq">El ${esc(longDate(d))} esta norma <b>todavía no existía</b>: se aprobó el ${esc(longDate(n.fecha))}.</div>`;return;}
