@@ -7,19 +7,31 @@ Sin build, sin framework: `index.html` se abre tal cual. Sigue el estilo de cód
 (funciones sueltas, HTML como cadenas) y reutiliza sus piezas (`coincide()`, `edadBase()`,
 `mientras()`, el router por id).
 
-**La interfaz es la del CLM.** Se probó una «propia» (pestañas arriba, títulos con serifa, filtros al
-costado, renglones de biblioteca) y quien la usa la rechazó: se notaba hecha por una IA y era más
-difícil que el CLM. Así que se usan las piezas del CLM, con su CSS: menú a la izquierda (en el
-celular, una fila que se desliza), barra arriba con el título, el fondo y el buscador; panel con
-totales que llevan a su lista ya filtrada, «Requiere atención» y lo último que pasó; listados como
-el repositorio de contratos (buscador y listas arriba, chips de estado con cuántos dejan, tabla, clic
-en la fila abre la ficha, la última columna abre el documento —«📖 Leer» o «📄 Abrir»— y queda fija a la
-derecha); fichas como el detalle del contrato (enlace al documento arriba, datos en dos columnas,
-línea de tiempo, y a la derecha las acciones y las notas). Una sola letra, Titillium Web, también en
-el lector. Antes de inventar una pieza, búscala en `clm/index.html` de `fap-contratos`.
+**La interfaz es «Mesa» y tiene su porqué escrito en `docs/diseno.md`.** Antes de tocar cómo se ve
+algo, lee ese brief: sale de una investigación de las mejores interfaces de legislación, portales de
+directorio y gestores de políticas, y es la tercera versión. Las dos anteriores se rechazaron: la
+«biblioteca editorial» (pestañas, títulos con serifa, filtros al costado, fichas «Ma»/«Rg», pastillas
+pastel) **se notaba hecha por una IA**, y la copia del CLM (menú azul, tarjetas de indicadores, tablas
+con chips, «📖 Leer») **era el CLM**. Quien usa Quórum eligió «Mesa» entre dos prototipos completos.
 
-Las tablas caben en 1280 px con la barra de desplazamiento puesta, y bajo 900 px cada fila es una
-tarjeta (solo CSS, rótulos con `data-l`). Se mide en Chromium, igual que en el CLM.
+Lo que la define, y no se negocia sin volver a preguntar:
+
+- **Tres paneles**, como un buen cliente de correo: a la izquierda las **fuentes** (vistas con su
+  conteo, el fondo como espacio de trabajo, «Al día» y Buscar), al centro la **lista**, a la derecha
+  la **ficha**, que se abre al instante sin cambiar de página. Al pie de la ficha, la **barra de
+  acción**: la acción principal con su tecla (↵ abrir el PDF, Ctrl ↵ copiar la cita). En el celular es
+  una pila (fuentes → lista → ficha) con la acción principal fija abajo.
+- **El estado se dice con una frase con fechas** (`fraseNorma()`, `fraseRes()`, `fraseActa()`), no con
+  una insignia de color. El color se gana: solo ámbar para lo que pide atención; derogada va en gris.
+- **Signos SVG, nunca emojis** (`ico()`, `sg()`). Dos letras: IBM Plex Sans para la interfaz y IBM Plex
+  Serif **solo** para lo oficial (el texto de la norma y lo resuelto). Nada de serifa en títulos.
+- **Buscar es un gesto**: Ctrl/⌘ K o «/» abren la paleta desde cualquier pantalla (`paletaHTML()`).
+- **«Copiar cita» entrega la cita completa** (`citaDe()`), no «art. 14».
+- La marca sale del membrete oficial: tinta `#213772`, la franja amarilla, azul y roja y el punto lima.
+
+Se mide en Chromium a 1366 y 390 px (y 1280, 1024, 900) con las barras de desplazamiento reales, sin
+desbordes. Lo que la interfaz recuerda (recientes, panel plegado, tamaño de letra) vive en memoria, nunca
+en el navegador.
 
 **Un anexo es una norma completa.** Va en su propio renglón del catálogo, con su nombre propio
 (`tituloNorma()` quita el «Anexo 8 al Manual Operativo:» del Excel) y una línea que dice de qué

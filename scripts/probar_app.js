@@ -107,11 +107,11 @@ const texto=w=>[...w.document.body.children].filter(e=>e.tagName!=='SCRIPT').map
   seccion('4. Pantallas y enlaces');
   ev(w,'go("norma","reglamento-de-adquisiciones-del-fias")');
   ok(w.location.hash==='#/norma/reglamento-de-adquisiciones-del-fias','el enlace lleva el id de la norma, no su posición');
-  ok(/Vigente con reformas/.test(texto(w))&&/Codificación/.test(texto(w))&&w.document.querySelectorAll('.tl li').length===3,'la ficha trae estado, versiones y línea de tiempo');
+  ok(/Vigente con reformas/.test(texto(w))&&/Codificación/.test(texto(w))&&w.document.querySelectorAll('.hist li').length===3,'la ficha trae estado, versiones y línea de tiempo');
   const qd=w.document.querySelector('#qd');qd.value='2020-06-01';w.document.querySelector('#qdb').click();
   ok(/Reforma parcial/.test(w.document.querySelector('#qdr').textContent),'«¿Qué regía en una fecha?» responde con la versión de ese día');
   ev(w,'go("acta","ja-fap_2026-08-08")');
-  ok(w.document.querySelectorAll('.rowitem').length===3&&/Reforma: Manual Operativo/.test(texto(w)),'el acta muestra sus puntos y lo que cambió');
+  ok(w.document.querySelectorAll('.punto').length===3&&/Reforma: Manual Operativo/.test(texto(w)),'el acta muestra sus puntos y lo que cambió');
   ev(w,'go("resoluciones")');
   ok(/59 de 59 resoluciones/.test(texto(w)),'el listado de resoluciones');
   const q=w.document.querySelector('#rq');q.value='convocatoria donaciones';q.dispatchEvent(new w.Event('input'));
@@ -121,16 +121,16 @@ const texto=w=>[...w.document.body.children].filter(e=>e.tagName!=='SCRIPT').map
   ok(ev(w,'buscarTodo("08/08/2026").some(h=>h.t==="acta"&&h.id==="ja-fap_2026-08-08")'),'y sesiones por la fecha como se escribe');
   ok(ev(w,'buscarTodo("junta agosto 2026").length>0')&&ev(w,'buscarTodo("codificacion").length>0'),'sin tildes y en cualquier orden');
   ev(w,'go("panel")');
-  ok(w.document.querySelectorAll('.kpi').length===5&&/Próximo: derogación/.test(texto(w))&&w.document.querySelector('#pnormas tr[data-n]'),'el panel, como el del CLM: los totales, lo que viene y la normativa vigente');
-  w.document.querySelector('.kpi[data-st=prov]').click();
+  ok(w.document.querySelectorAll('.tot').length===5&&/Próximo: derogación/.test(texto(w))&&w.document.querySelector('#pnormas [data-n]'),'el inicio: los totales en una frase, lo que viene y la normativa vigente');
+  w.document.querySelector('.tot[data-st=prov]').click();
   ok(ev(w,'ST.view')==='actas'&&ev(w,'ST.af.estado')==='prov','cada total lleva a su lista, ya filtrada');
   ev(w,'ST.af.estado="all"');
   const gq=w.document.querySelector('#gq');gq.value='teletrabajo';gq.dispatchEvent(new w.Event('input'));
   ok(w.document.querySelector('#gres').style.display!=='none'&&/Teletrabajo/.test(w.document.querySelector('#gres').textContent),'el buscador de arriba está en todas las pantallas y responde al escribir');
   gq.value='';gq.dispatchEvent(new w.Event('input'));
   ev(w,'go("normativa")');
-  const fila=w.document.querySelector('#filas tr[data-n]');fila.click();
-  ok(ev(w,'ST.view')==='norma'&&ev(w,'ST.id')===fila.dataset.n,'un clic en la fila abre la ficha, como un contrato en el CLM');
+  const fila=w.document.querySelector('#filas [data-n]');fila.click();
+  ok(ev(w,'ST.view')==='norma'&&ev(w,'ST.id')===fila.dataset.n,'un clic en la fila abre la ficha');
   ev(w,'go("revision")');
   ok(/renglón 58/.test(texto(w)),'«Revisión de la matriz» trae el aviso del robot con su renglón');
 
@@ -142,7 +142,7 @@ const texto=w=>[...w.document.body.children].filter(e=>e.tagName!=='SCRIPT').map
   ok([...fsel().options].some(o=>/Programa de Pequeñas Donaciones/.test(o.textContent)),'cada fondo con su nombre completo');
   elige('FAP');
   ok(ev(w,'ST.fondo')==='FAP'&&fsel().value==='FAP'&&/Áreas Protegidas/.test(fsel().selectedOptions[0].textContent),'al elegir el FAP, se queda elegido y dice cuál es');
-  ok(w.document.querySelector('.kpi[data-st=actas] .kpi-n').textContent==='8','y cuenta solo sus actas: las 8 de la Junta Administrativa');
+  ok(w.document.querySelector('.tot[data-st=actas] .tot-n').textContent==='8','y cuenta solo sus actas: las 8 de la Junta Administrativa');
   ev(w,'go("actas")');
   ok(/8 de 8 actas/.test(texto(w))&&ev(w,'actasFiltradas().every(x=>x.a.cuerpo==="JA-FAP")'),'el listado de actas se queda en el FAP',texto(w).match(/\d+ de \d+ actas?/));
   ok(ev(w,'cuerposDelFondo().map(c=>c.sigla).join()')==='JA-FAP'&&!w.document.querySelector('select[data-f=cuerpo]'),'con un solo cuerpo no hay nada que elegir: no aparece el filtro');
@@ -210,6 +210,27 @@ const texto=w=>[...w.document.body.children].filter(e=>e.tagName!=='SCRIPT').map
     resoluciones:[{id:"ja-fap_2030-01-01_p1",acta:"ja-fap_2030-01-01",cuerpo:"JA-FAP",fecha:"2030-01-01",punto:"1",texto:"<img src=x onerror=window.PWNED=1>",enlace:"javascript:window.PWNED=2"}],normas:[],cambios:[],avisos:[]});render();go("resolucion","ja-fap_2030-01-01_p1")`);
   ok(!w.document.querySelector('#view img')&&!w.PWNED,'el texto con etiquetas se muestra como texto');
   ok(![...w.document.querySelectorAll('a')].some(a=>/^javascript:/i.test(a.getAttribute('href')||'')),'y un «javascript:» no llega a un enlace');
+  // Lo mismo, pero en TODOS los campos que vienen del Excel y en todas las pantallas:
+  // una sola inserción sin esc() basta para que una celda ejecute código.
+  {
+    const P='<i data-xss=1></i><img src=x onerror=window.PWNED=3>',J=JSON.stringify(P);
+    ev(w,`fusionar({grupo:"x",fondos:[{sigla:"XF",nombre:${J}}],cuerpos:[{sigla:"XC",nombre:${J},entidad:"XF"}],
+      actas:[{id:"xc_2031-01-01",cuerpo:"XC",fecha:"2031-01-01",tipo:${J},numero:${J},obs:${J},provisional:"javascript:window.PWNED=4"}],
+      resoluciones:[{id:"xc_2031-01-01_p1",acta:"xc_2031-01-01",cuerpo:"XC",fecha:"2031-01-01",punto:${J},texto:${J},materia:${J},obs:${J}}],
+      normas:[{id:"xn",nombre:${J},tipo:${J},organo:"XC",fecha:"2031-01-01",punto:${J},obs:${J},entidad:"XF",res:"xc_2031-01-01_p1",enlace:"javascript:window.PWNED=5",
+        texto:{unidades:[{t:"h1",txt:${J}},{t:"art",id:"p0-a1",n:"1",rub:${J},p:[${J}]}],paginas:1,ocr:false,articulos:1}},
+        {id:"xa",nombre:${J},tipo:${J},organo:"XC",fecha:"2031-01-02",anexo:"xn"}],
+      cambios:[{id:"xcb",tipo:"Reforma",fecha:"2031-01-01",a:{t:"norma",id:"xn",nombre:${J}},por:{id:"xc_2031-01-01_p1",cuerpo:"XC",fecha:"2031-01-01",punto:${J}},articulos:${J}+" art. 1",detalle:${J}}],
+      avisos:[{hoja:${J},fila:${J},texto:${J}}]});ST.aFecha="2031-06-01";`);
+    const malo=()=>w.document.querySelector('[data-xss]')||w.PWNED||[...w.document.querySelectorAll('a')].some(a=>/^javascript:/i.test(a.getAttribute('href')||''));
+    const rutas=[['panel'],['normativa'],['norma','xn'],['norma','xa'],['texto','xn'],['actas'],['acta','xc_2031-01-01'],['resoluciones'],['resolucion','xc_2031-01-01_p1'],['revision'],['notas']];
+    const fallan=[];
+    for(const r of rutas){ ev(w,`go(${r.map(x=>JSON.stringify(x)).join(',')})`); await espera(30); if(malo())fallan.push(r.join('/')); }
+    const gq=w.document.querySelector('#gq');
+    if(gq){ gq.value='data xss'; gq.dispatchEvent(new w.Event('input')); await espera(30); if(malo())fallan.push('buscador'); gq.value=''; gq.dispatchEvent(new w.Event('input')); }
+    ev(w,'ST.aFecha=null');
+    ok(!fallan.length,'ningún campo del Excel se vuelve código, en ninguna pantalla ni en el buscador',fallan);
+  }
   ev(w,'cerrarSesion()');
 
   seccion('9. La demostración');
