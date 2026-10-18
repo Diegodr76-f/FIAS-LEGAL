@@ -239,6 +239,22 @@ const texto=w=>[...w.document.body.children].filter(e=>e.tagName!=='SCRIPT').map
   ok(ev(w,'DEMO')&&/datos ficticios/.test(w.document.querySelector('.srcpill').textContent),'y dice siempre que los datos son ficticios');
   ev(w,'go("texto","reglamento-de-adquisiciones-del-fias")');
   ok(await hasta(()=>w.document.querySelectorAll('#ltx .lart').length===13),'la demostración trae un texto de ejemplo para leer');
+  {
+    const L=w.document.querySelector('#ltx');
+    const tb=L.querySelector('.ltabla table');
+    ok(tb&&tb.querySelectorAll('tr').length===4&&tb.querySelector('th').textContent==='Procedimiento'&&/USD 60\.000/.test(tb.textContent),'una tabla del PDF se ve como tabla, con su encabezado');
+    const fg=L.querySelector('.lfig');
+    ok(fg&&/Diagrama: PROCESO: Contratación directa/.test(fg.textContent)&&/pág\. 3 del PDF/.test(fg.textContent)&&/#page=3$/.test(fg.querySelector('a').getAttribute('href')),
+      'un flujograma se ve como «diagrama de la pág. N», con su enlace a esa página del PDF');
+    ok(L.querySelector('.lh1 .lpg')&&/pág\. 1/.test(L.querySelector('.lh1 .lpg').textContent),'cada título dice de qué página del PDF viene, para cotejar');
+    ok([...w.document.querySelectorAll('#lidx .lix.fig')].length===1&&![...w.document.querySelectorAll('#lidx .lix')].some(b=>/undefined/.test(b.textContent)),'el índice lista el diagrama, y nada sale «undefined»');
+    ok(/Del PDF al texto/.test(texto(w))&&/pasó el 99,8 % del texto del PDF/i.test(texto(w)),'al margen, cuánto del PDF pasó al texto');
+    ok(!w.document.querySelector('#lavisos .aviso'),'si pasó bien, no hay aviso encima del texto');
+    ev(w,`TEXTOS["reglamento-de-adquisiciones-del-fias"]=Object.assign({},textoCargado(DB.normas["reglamento-de-adquisiciones-del-fias"]),{control:{cobertura:.9,ocr:[2],seguridad:{2:61},dudosas:[2],figuras:[],sin_texto:[5],flojas:[4],tablas:0}})`);
+    ok(ev(w,'avisosTexto(TEXTOS["reglamento-de-adquisiciones-del-fias"]).map(x=>x[1]).join(" | ")')==="Puede faltar texto: las págs. 4 y 5 no pasaron completas. Revísalas en el PDF. | La pág. 2 se leyó de un escaneo de baja calidad: puede haber palabras mal leídas. Confírmalas en el PDF.",
+      'si algo no pasó, el aviso dice qué páginas revisar en el PDF',ev(w,'avisosTexto(TEXTOS["reglamento-de-adquisiciones-del-fias"]).map(x=>x[1])'));
+    ok(ev(w,'rangoPags([19,20,21,22,23])')==='19 a 23'&&ev(w,'rangoPags([3,7])')==='3 y 7'&&ev(w,'rangoPags([1,2,5])')==='1, 2 y 5','las páginas se dicen como se leen',ev(w,'[rangoPags([19,20,21,22,23]),rangoPags([3,7]),rangoPags([1,2,5])]'));
+  }
   ok(w.document.querySelectorAll('#ltx .lref').length===2&&/arts?\. ?12|Art\. 12/.test(w.document.querySelector('#a-p0-a12').textContent)&&w.document.querySelector('#a-p0-a12 .lref'),'los artículos 12 y 15, reformados en la hoja Cambios, lo dicen al pie');
   ok(w.document.querySelectorAll('#lidx .ref').length===2,'y el índice los marca');
   ev(w,'go("norma","codigo-de-etica-y-conducta-del-fias")');

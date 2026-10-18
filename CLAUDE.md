@@ -95,6 +95,18 @@ Si la numeración de artículos vuelve a 1 (la resolución que aprueba un reglam
 Art. 1), es otra parte: los ids llevan la parte (`p1-a14`). El índice del propio PDF (renglones con
 puntos guía y número de página, el título «ÍNDICE») no es texto de la norma y se descarta (`_es_indice`).
 
+**Cada página se trata por lo que es** (`extraer()`): una página escaneada dentro de un PDF digital
+(un anexo firmado) se lee con OCR —antes se perdía sin aviso—; las tablas salen como tablas (`tabla`,
+celda por celda; la del encabezado que se repite y el índice armado como tabla, fuera); un flujograma
+queda como `fig`, «diagrama de la pág. N» con su título y su enlace a esa página, en vez de frases
+sueltas. Cada unidad lleva `pg`, su página en el PDF, para cotejar.
+
+**Lo que pasó se mide** (`control`): qué fracción de las palabras del PDF llegó al texto (descontado lo
+que se quita a propósito), qué páginas se leyeron con OCR y con qué seguridad, cuáles no pasaron. Si
+algo no pasó, `revisar_paso()` lo pone en «Revisión de la matriz» con el detalle cifrado, y el lector lo
+dice encima del texto con las páginas que hay que revisar. Una regla nueva del extractor se prueba con
+`pdf_mixto()` de `probar_robot.py`, que junta lo difícil en cuatro páginas.
+
 **Cada PDF se lee una sola vez.** El robot lo baja en cada corrida solo para sacarle la huella; si la
 huella está en el caché, no lo vuelve a leer. La huella lleva `texto.VERSION`: **súbela** cuando cambie
 lo que sale de `extraer()`, o las normas ya leídas se quedan con el texto viejo.

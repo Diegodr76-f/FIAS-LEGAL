@@ -92,6 +92,53 @@ def correr(args, env):
     return codigo, error, salida.getvalue()
 
 
+def pdf_mixto(escaneada=True):
+    """Lo difícil de los PDF reales, en cuatro páginas: una tabla dentro de un
+    artículo, una página escaneada en medio de un PDF digital (un anexo firmado),
+    un flujograma apaisado y una página digital más."""
+    import pymupdf
+    doc = pymupdf.open()
+    # 1: digital, con una tabla de verdad
+    p = doc.new_page(width=595, height=842)
+    y = 80
+    for t in ["CAPÍTULO I", "DE LOS VIÁTICOS", "Art. 1.- OBJETO. Este reglamento fija los viáticos del personal del fondo en comisión de servicios."]:
+        p.insert_text((60, y), t, fontsize=11, fontname="hebo" if t.isupper() else "helv"); y += 22
+    filas = [["Destino", "Monto diario", "Movilización"], ["Quito", "USD 40", "Taxi"], ["Galápagos", "USD 90", "Avioneta"], ["Amazonía", "USD 60", "Lancha"]]
+    x0, y0, w, h = 60, y + 10, 160, 22
+    for i in range(len(filas) + 1):
+        p.draw_line((x0, y0 + i * h), (x0 + 3 * w, y0 + i * h))
+    for j in range(4):
+        p.draw_line((x0 + j * w, y0), (x0 + j * w, y0 + len(filas) * h))
+    for i, f in enumerate(filas):
+        for j, c in enumerate(f):
+            p.insert_text((x0 + j * w + 6, y0 + i * h + 15), c, fontsize=10, fontname="helv")
+    y = y0 + len(filas) * h + 30
+    p.insert_text((60, y), "Art. 2.- PAGO. El pago se hace antes de la comisión, contra el informe de la jefatura.", fontsize=11, fontname="helv")
+    # 2: escaneada (una imagen con texto, sin capa de texto)
+    if escaneada:
+        tmp = pymupdf.open(); q = tmp.new_page(width=595, height=842)
+        yy = 90
+        for t in ["Art. 3.- VACACIONES. El personal goza de quince días de vacaciones", "anuales pagadas, que se programan con la jefatura inmediata", "en el mes de enero de cada año."]:
+            q.insert_text((60, yy), t, fontsize=13, fontname="helv"); yy += 26
+        pix = q.get_pixmap(dpi=200)
+        p2 = doc.new_page(width=595, height=842); p2.insert_image(p2.rect, pixmap=pix)
+    # 3: un flujograma apaisado
+    p3 = doc.new_page(width=842, height=595)
+    p3.insert_text((40, 40), "PROCESO: Pago de viáticos", fontsize=12, fontname="hebo")
+    etiquetas = ["Inicio", "Solicitar", "Revisar", "Aprobar", "Pagar", "Archivar", "Fin", "Informe", "Factura", "Validar", "Registrar", "Notificar"]
+    k = 0
+    for fila in range(4):
+        for col in range(5):
+            r = pymupdf.Rect(40 + col * 155, 70 + fila * 120, 150 + col * 155, 120 + fila * 120)
+            p3.draw_rect(r); p3.draw_line((r.x1, r.y0 + 25), (r.x1 + 5, r.y0 + 25))
+            for d in range(3):
+                p3.draw_line((r.x0 + 5 + d * 3, r.y1 + 3), (r.x0 + 8 + d * 3, r.y1 + 8))
+            p3.insert_text((r.x0 + 8, r.y0 + 28), etiquetas[k % len(etiquetas)], fontsize=9, fontname="helv"); k += 1
+    # 4: digital
+    p4 = doc.new_page(width=595, height=842)
+    p4.insert_text((60, 80), "Art. 4.- VIGENCIA. Este reglamento rige desde su aprobación por el Directorio.", fontsize=11, fontname="helv")
+    return doc.tobytes()
+
 def pdf_prueba(escaneado=False):
     """Un reglamento inventado de tres páginas, con encabezado repetido, número
     de página, capítulos y artículos con rubro en negrita. Con `escaneado`, cada
@@ -352,6 +399,38 @@ def main():
             ok(r2["ocr"] and r2["articulos"] == 6, "un PDF escaneado se lee con OCR: los mismos 6 artículos", (r2["ocr"], r2["articulos"]))
         else:
             print("  · (sin Tesseract aquí: la prueba del escaneado corre en GitHub)")
+        rm = texto.extraer(pdf_mixto())
+        tb = next((u for u in rm["unidades"] if u["t"] == "tabla"), None)
+        ok(tb and tb["filas"][0] == ["Destino", "Monto diario", "Movilización"] and tb["filas"][2] == ["Galápagos", "USD 90", "Avioneta"],
+           "una tabla del PDF sale como tabla, celda por celda", tb)
+        ok(tb and tb.get("de") == "p0-a1", "y queda unida al artículo donde estaba", tb and tb.get("de"))
+        fg = next((u for u in rm["unidades"] if u["t"] == "fig"), None)
+        ok(fg and fg.get("pg") == 3 and fg.get("tit") == "PROCESO: Pago de viáticos" and rm["control"]["figuras"] == [3],
+           "un flujograma no se vuelve frases sueltas: queda como diagrama de su página, con su título", fg and {k: fg.get(k) for k in ("pg", "tit")})
+        ok(all(u.get("pg") for u in rm["unidades"]), "cada parte del texto dice de qué página del PDF viene")
+        if shutil.which("tesseract"):
+            ok(rm["control"]["ocr"] == [2] and "3" in [u.get("n") for u in rm["unidades"] if u["t"] == "art"],
+               "una página escaneada en medio de un PDF digital se lee con OCR (antes se perdía sin aviso)", rm["control"])
+            ok(rm["control"]["cobertura"] >= 0.97 and not rm["control"]["flojas"] and not rm["control"]["sin_texto"],
+               "y se mide lo que pasó: todo el texto del PDF llegó", rm["control"])
+        orig = texto._ocr_pagina
+        texto._ocr_pagina = lambda page: (_ for _ in ()).throw(RuntimeError("sin tesseract"))
+        try:
+            rs = texto.extraer(pdf_mixto())
+        finally:
+            texto._ocr_pagina = orig
+        ok(rs["control"]["sin_texto"] == [2], "si una página no se puede leer, el control lo dice con su número", rs["control"])
+        ms = publicar.Matriz()
+        ms.avisos = []
+        publicar.revisar_paso(ms, {"nombre": "Reglamento de Viáticos", "fila": 7, "grupos": ["legal"]}, rs)
+        publicar.revisar_paso(ms, {"nombre": "Manual Escaneado", "fila": 8, "grupos": ["legal"]},
+                              {"control": {"cobertura": 1.0, "dudosas": [5, 6, 7]}})
+        publicar.revisar_paso(ms, {"nombre": "Código de Ética", "fila": 9, "grupos": ["legal"]},
+                              {"control": {"cobertura": 1.0, "figuras": [3], "ocr": [2]}})
+        ok([(a["fila"], "la pág. 2" in a["texto"]) for a in ms.avisos][:1] == [(7, True)] and "Viáticos" not in ms.avisos[0]["generico"],
+           "el robot lo avisa en «Revisión de la matriz»: el detalle cifrado, y en el registro solo que hay algo que revisar", ms.avisos[:1])
+        ok(len(ms.avisos) == 2 and "las págs. 5 a 7" in ms.avisos[1]["texto"],
+           "también las páginas leídas de un escaneo de baja calidad; un diagrama o un OCR limpio no es un aviso", [a["texto"] for a in ms.avisos])
         ok(texto.calidad("El C6digo del Trabajo y el reglamento lnterno de la organizaci~n " * 10) > 0.01
            and texto.calidad("El Código del Trabajo y el reglamento interno de la organización " * 10) == 0,
            "una capa de OCR mala se reconoce («C6digo», «lnterno»)")

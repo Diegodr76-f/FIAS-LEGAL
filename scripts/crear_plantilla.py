@@ -276,6 +276,12 @@ DEMO_TEXTOS = {"reglamento-de-adquisiciones-del-fias": {"demo": True, "paginas":
     _art(10, "PLANIFICACIÓN", "Toda adquisición debe constar en el plan anual aprobado, con su presupuesto referencial."),
     _art(11, "TIPOS DE PROCEDIMIENTO", "Según el presupuesto referencial, los procedimientos son: contratación directa, comparación de precios y concurso."),
     _art(12, "CONTRATACIÓN DIRECTA", "Procede la contratación directa cuando el presupuesto referencial no supere los montos que fije la Dirección Ejecutiva para cada ejercicio, con al menos una proforma."),
+    {"t": "tabla", "de": "p0-a12", "filas": [["Procedimiento", "Presupuesto referencial", "Proformas"],
+                                              ["Contratación directa", "Hasta USD 10.000", "Una"],
+                                              ["Comparación de precios", "De USD 10.000 a USD 60.000", "Tres"],
+                                              ["Concurso", "Más de USD 60.000", "Bases aprobadas"]]},
+    {"t": "p", "de": "p0-a12", "txt": "Los montos de la tabla se actualizan cada año con el presupuesto institucional."},
+    {"t": "fig", "tit": "PROCESO: Contratación directa", "txt": "Solicitud Proforma Revisión Orden de compra Recepción Pago"},
     _art(13, "COMPARACIÓN DE PRECIOS", "Procede cuando el presupuesto referencial supere el monto de contratación directa, con al menos tres proformas comparables."),
     _art(14, "CONCURSO", "Para montos superiores a los de comparación de precios se convocará a concurso, con bases aprobadas por la Dirección Ejecutiva."),
     _art(15, "COMISIÓN TÉCNICA", "En los concursos, la calificación de las ofertas la realizará una comisión técnica de tres miembros designados por la Dirección Ejecutiva.",
@@ -287,6 +293,13 @@ DEMO_TEXTOS = {"reglamento-de-adquisiciones-del-fias": {"demo": True, "paginas":
     {"t": "h1", "txt": "DISPOSICIONES GENERALES"},
     {"t": "p", "txt": "PRIMERA.- Los casos no previstos en este reglamento serán resueltos por la Dirección Ejecutiva."},
 ]}}
+# Cada parte dice de qué página del PDF viene, y el control dice cuánto pasó (como lo
+# escribe scripts/texto.py): la demostración muestra la tabla, el diagrama y la página.
+for _k, _u in enumerate(DEMO_TEXTOS["reglamento-de-adquisiciones-del-fias"]["unidades"]):
+    _u["pg"] = 1 + _k // 5
+DEMO_TEXTOS["reglamento-de-adquisiciones-del-fias"]["control"] = {
+    "cobertura": 0.998, "ocr": [], "seguridad": {}, "dudosas": [], "sin_texto": [], "flojas": [], "tablas": 1,
+    "figuras": [u["pg"] for u in DEMO_TEXTOS["reglamento-de-adquisiciones-del-fias"]["unidades"] if u["t"] == "fig"]}
 
 
 def demo_datos():

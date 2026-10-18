@@ -601,11 +601,43 @@ def leer_textos(m, cache=None, secreto=None, bajar=None, extraer=None):
             continue
         n["_texto"] = t
         hechos += 1
+        revisar_paso(m, n, t)
     if k and os.path.isdir(cache):   # lo que ya no se usa, fuera
         for f in os.listdir(cache):
             if f.endswith(".bin") and f[:-4] not in usados:
                 os.remove(os.path.join(cache, f))
     return hechos
+
+
+def _pags(l):
+    l = sorted(set(int(x) for x in l))
+    tramos = []
+    for x in l:
+        if tramos and x == tramos[-1][1] + 1:
+            tramos[-1][1] = x
+        else:
+            tramos.append([x, x])
+    t = [y for i, f in tramos for y in ([str(i)] if i == f else [str(i), str(f)] if f == i + 1 else [f"{i} a {f}"])]
+    return ("las págs. " if len(l) > 1 else "la pág. ") + (", ".join(t[:-1]) + " y " + t[-1] if len(t) > 1 else t[0])
+
+
+def revisar_paso(m, n, t):
+    """¿Pasó bien el PDF al texto? Lo dice `control` (scripts/texto.py). Lo que no
+    pasó va a «Revisión de la matriz», con su detalle cifrado; el registro, que es
+    público, solo dice que hay algo que revisar en esa fila."""
+    c = t.get("control") or {}
+    problemas = []
+    falta = sorted(set(c.get("sin_texto") or []) | set(c.get("flojas") or []))
+    if falta:
+        problemas.append(f"{_pags(falta)} no " + ("pasaron completas" if len(falta) > 1 else "pasó completa") + " al texto")
+    elif c.get("cobertura", 1) < 0.97:
+        problemas.append(f"llegó el {c['cobertura'] * 100:.1f} % del texto".replace(".", ","))
+    if c.get("dudosas"):
+        problemas.append(f"{_pags(c['dudosas'])} " + ("se leyeron" if len(c["dudosas"]) > 1 else "se leyó") + " de un escaneo de baja calidad")
+    if problemas:
+        m.aviso("Normativa", n["fila"], "parte del «PDF para leer en Quórum» no pasó bien al texto",
+                f"«{n['nombre']}»: " + "; ".join(problemas) + ". Revisa esas páginas en el PDF; si el PDF es un escaneo, "
+                "una copia más nítida se lee mejor.", n["grupos"])
 
 
 def escribir_textos(m, grupo, salida):

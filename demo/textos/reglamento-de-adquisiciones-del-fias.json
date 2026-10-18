@@ -5,15 +5,18 @@
  "unidades": [
   {
    "t": "h1",
-   "txt": "REGLAMENTO DE ADQUISICIONES DEL FIAS (TEXTO DE EJEMPLO)"
+   "txt": "REGLAMENTO DE ADQUISICIONES DEL FIAS (TEXTO DE EJEMPLO)",
+   "pg": 1
   },
   {
    "t": "p",
-   "txt": "Texto ficticio, escrito solo para mostrar cómo se lee una norma en Quórum."
+   "txt": "Texto ficticio, escrito solo para mostrar cómo se lee una norma en Quórum.",
+   "pg": 1
   },
   {
    "t": "h1",
-   "txt": "CAPÍTULO I · DISPOSICIONES GENERALES"
+   "txt": "CAPÍTULO I · DISPOSICIONES GENERALES",
+   "pg": 1
   },
   {
    "t": "art",
@@ -22,7 +25,8 @@
    "rub": "OBJETO",
    "p": [
     "El presente reglamento regula la adquisición de bienes, obras y servicios, incluidos los de consultoría, que realice el FIAS con recursos propios o administrados."
-   ]
+   ],
+   "pg": 1
   },
   {
    "t": "art",
@@ -31,7 +35,8 @@
    "rub": "ÁMBITO",
    "p": [
     "Se aplica a todas las direcciones, programas y proyectos administrados por el FIAS, salvo que el convenio de financiamiento establezca reglas propias."
-   ]
+   ],
+   "pg": 1
   },
   {
    "t": "art",
@@ -44,7 +49,8 @@
     "b) Economía y eficiencia;",
     "c) Igualdad de trato a los oferentes;",
     "d) Publicidad, cuando corresponda."
-   ]
+   ],
+   "pg": 2
   },
   {
    "t": "art",
@@ -53,11 +59,13 @@
    "rub": "CONFLICTO DE INTERESES",
    "p": [
     "Ninguna persona que intervenga en un proceso podrá tener relación de parentesco, hasta el cuarto grado de consanguinidad o segundo de afinidad, con los oferentes."
-   ]
+   ],
+   "pg": 2
   },
   {
    "t": "h1",
-   "txt": "CAPÍTULO II · DE LOS PROCEDIMIENTOS"
+   "txt": "CAPÍTULO II · DE LOS PROCEDIMIENTOS",
+   "pg": 2
   },
   {
    "t": "art",
@@ -66,7 +74,8 @@
    "rub": "PLANIFICACIÓN",
    "p": [
     "Toda adquisición debe constar en el plan anual aprobado, con su presupuesto referencial."
-   ]
+   ],
+   "pg": 2
   },
   {
    "t": "art",
@@ -75,7 +84,8 @@
    "rub": "TIPOS DE PROCEDIMIENTO",
    "p": [
     "Según el presupuesto referencial, los procedimientos son: contratación directa, comparación de precios y concurso."
-   ]
+   ],
+   "pg": 2
   },
   {
    "t": "art",
@@ -84,7 +94,47 @@
    "rub": "CONTRATACIÓN DIRECTA",
    "p": [
     "Procede la contratación directa cuando el presupuesto referencial no supere los montos que fije la Dirección Ejecutiva para cada ejercicio, con al menos una proforma."
-   ]
+   ],
+   "pg": 3
+  },
+  {
+   "t": "tabla",
+   "de": "p0-a12",
+   "filas": [
+    [
+     "Procedimiento",
+     "Presupuesto referencial",
+     "Proformas"
+    ],
+    [
+     "Contratación directa",
+     "Hasta USD 10.000",
+     "Una"
+    ],
+    [
+     "Comparación de precios",
+     "De USD 10.000 a USD 60.000",
+     "Tres"
+    ],
+    [
+     "Concurso",
+     "Más de USD 60.000",
+     "Bases aprobadas"
+    ]
+   ],
+   "pg": 3
+  },
+  {
+   "t": "p",
+   "de": "p0-a12",
+   "txt": "Los montos de la tabla se actualizan cada año con el presupuesto institucional.",
+   "pg": 3
+  },
+  {
+   "t": "fig",
+   "tit": "PROCESO: Contratación directa",
+   "txt": "Solicitud Proforma Revisión Orden de compra Recepción Pago",
+   "pg": 3
   },
   {
    "t": "art",
@@ -93,7 +143,8 @@
    "rub": "COMPARACIÓN DE PRECIOS",
    "p": [
     "Procede cuando el presupuesto referencial supere el monto de contratación directa, con al menos tres proformas comparables."
-   ]
+   ],
+   "pg": 3
   },
   {
    "t": "art",
@@ -102,7 +153,8 @@
    "rub": "CONCURSO",
    "p": [
     "Para montos superiores a los de comparación de precios se convocará a concurso, con bases aprobadas por la Dirección Ejecutiva."
-   ]
+   ],
+   "pg": 4
   },
   {
    "t": "art",
@@ -112,11 +164,13 @@
    "p": [
     "En los concursos, la calificación de las ofertas la realizará una comisión técnica de tres miembros designados por la Dirección Ejecutiva.",
     "La comisión dejará constancia de su trabajo en un acta de calificación."
-   ]
+   ],
+   "pg": 4
   },
   {
    "t": "h1",
-   "txt": "CAPÍTULO III · DE LOS CONTRATOS"
+   "txt": "CAPÍTULO III · DE LOS CONTRATOS",
+   "pg": 4
   },
   {
    "t": "art",
@@ -125,7 +179,8 @@
    "rub": "INSTRUMENTO",
    "p": [
     "Las adquisiciones se formalizan mediante orden de compra o de servicio, o mediante contrato cuando el plazo de ejecución supere treinta días."
-   ]
+   ],
+   "pg": 4
   },
   {
    "t": "art",
@@ -134,7 +189,8 @@
    "rub": "GARANTÍAS",
    "p": [
     "Los contratos de obra o de bienes con anticipo llevarán garantía de buen uso del anticipo y de fiel cumplimiento."
-   ]
+   ],
+   "pg": 4
   },
   {
    "t": "art",
@@ -143,15 +199,30 @@
    "rub": "ADMINISTRACIÓN DEL CONTRATO",
    "p": [
     "Cada contrato tendrá un administrador designado, responsable de velar por su cumplimiento y de suscribir el acta de entrega-recepción."
-   ]
+   ],
+   "pg": 5
   },
   {
    "t": "h1",
-   "txt": "DISPOSICIONES GENERALES"
+   "txt": "DISPOSICIONES GENERALES",
+   "pg": 5
   },
   {
    "t": "p",
-   "txt": "PRIMERA.- Los casos no previstos en este reglamento serán resueltos por la Dirección Ejecutiva."
+   "txt": "PRIMERA.- Los casos no previstos en este reglamento serán resueltos por la Dirección Ejecutiva.",
+   "pg": 5
   }
- ]
+ ],
+ "control": {
+  "cobertura": 0.998,
+  "ocr": [],
+  "seguridad": {},
+  "dudosas": [],
+  "sin_texto": [],
+  "flojas": [],
+  "tablas": 1,
+  "figuras": [
+   3
+  ]
+ }
 }
