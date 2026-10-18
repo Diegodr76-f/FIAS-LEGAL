@@ -23,11 +23,17 @@ Lo que la define, y no se negocia sin volver a preguntar:
   una pila (fuentes → lista → ficha) con la acción principal fija abajo.
 - **El estado se dice con una frase con fechas** (`fraseNorma()`, `fraseRes()`, `fraseActa()`), no con
   una insignia de color. El color se gana: solo ámbar para lo que pide atención; derogada va en gris.
-- **Signos SVG, nunca emojis** (`ico()`, `sg()`). Dos letras: IBM Plex Sans para la interfaz y IBM Plex
-  Serif **solo** para lo oficial (el texto de la norma y lo resuelto). Nada de serifa en títulos.
+- **Signos SVG, nunca emojis** (`ico()`, `sg()`). La letra es la del FIAS: **Arial Narrow** en la interfaz
+  (con Archivo Narrow de respaldo donde no está instalada) y **Arial** para lo oficial —el texto de la norma
+  y lo resuelto— (con Arimo de respaldo). Nada de serifas.
 - **Buscar es un gesto**: Ctrl/⌘ K o «/» abren la paleta desde cualquier pantalla (`paletaHTML()`).
 - **«Copiar cita» entrega la cita completa** (`citaDe()`), no «art. 14».
-- La marca sale del membrete oficial: tinta `#213772`, la franja amarilla, azul y roja y el punto lima.
+- **La marca es la del FIAS**, tomada de su hoja membretada y del template de diapositivas: el celeste
+  `#00A4DC` y el lima `#BCD430` de las dos líneas del logo. El celeste puro da 2,9:1 sobre blanco, así que
+  enlaces y botones van en el mismo celeste más profundo, `#006F94` (5,7:1); el puro y el lima quedan
+  para la marca, la franja y lo grande (los números de punto, como los «Punto N» de las presentaciones al
+  Directorio). Los logos van embebidos en `LOGO` (la CSP solo admite imágenes propias o `data:`). La
+  franja tricolor amarilla, azul y roja no es del FIAS: no se usa.
 
 Se mide en Chromium a 1366 y 390 px (y 1280, 1024, 900) con las barras de desplazamiento reales, sin
 desbordes. Lo que la interfaz recuerda (recientes, panel plegado, tamaño de letra) vive en memoria, nunca
