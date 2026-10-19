@@ -458,6 +458,7 @@
   .lfig figcaption span{display:block;color:var(--g11);font-size:13px}
   .lfig .btn{flex:0 0 auto}
   @media(max-width:600px){.lfig{flex-wrap:wrap}.lfig .btn{margin-left:32px}}
+  .lix.p,.lix.tabla{display:block;padding:5px 16px 5px 28px;font-size:13px;line-height:18px;color:var(--g11)}
   .lix.fig{display:block;padding:5px 16px 5px 70px;font-style:italic;color:var(--g11)}
   .lart{position:relative;margin:0 0 1.1em;scroll-margin-top:24px;border-radius:2px;transition:background-color 1.6s var(--ease)}
   .lart .lnum{position:absolute;left:-84px;width:70px;top:0;text-align:right;font-family:var(--sans);font-size:13px;line-height:28px;font-weight:600;color:var(--g11);text-decoration:none;white-space:nowrap}
@@ -531,6 +532,10 @@
   .pi.hijo .a,.pi.hijo .b{grid-column:1/span 2}
   .pi-padre{padding:6px 16px 2px 20px;font-size:13px;line-height:18px;font-weight:600;color:var(--g12);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
   .pi.cmd{min-height:40px}
+  .pal-aviso,.pal-leyendo{display:flex;gap:8px;align-items:flex-start;padding:8px 16px;font-size:13px;line-height:18px;color:var(--g11)}
+  .pal-aviso .ic,.pal-leyendo .ic{flex:none;width:16px;height:16px;margin-top:1px}
+  .pal-leyendo{border-top:1px solid var(--g4);margin-top:6px}
+  .pi.mas .a{color:var(--acento);font-weight:600}
   .pal-nada{padding:28px 20px;color:var(--g11)}
   .pal-nada b{color:var(--g12)}
   .pal-nada .sug{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
@@ -730,14 +735,27 @@ if (window.top !== window.self) {
 const $=(s,el=document)=>el.querySelector(s);
 const esc=s=>(s==null?"":String(s)).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 function plano(s){return String(s==null?"":s).normalize("NFD").replace(/[̀-ͯ]/g,"").toLowerCase();}
-/* Búsqueda que perdona: sin tildes, cada palabra en cualquier parte. La usan el
-   buscador de arriba y el de cada listado: una sola regla. */
-function coincide(texto,q){
-  const t=plano(texto),frases=[];
+/* Búsqueda que perdona: sin tildes, cada palabra en cualquier parte, y singular o
+   plural («combustible» halla «combustibles»). La usan el buscador de arriba, el de
+   cada listado y el del lector: una sola regla. */
+// Plural: -es solo tras n, l, r, d, z, j («comisiones»), si no -s («informes» es «informe», no «inform»,
+// que sería también «información»). La vocal final se suelta solo en palabras largas (presupuesto → presupuestario).
+function raiz(p){let r=p;if(r.length>=6){if(/[nlrdzj]es$/.test(r))r=r.slice(0,-2);else if(/s$/.test(r))r=r.slice(0,-1);}
+  if(r.length>=9)r=r.replace(/[aeiou]$/,"");return r;}
+function consulta(q){
+  const frases=[];
   // Entre comillas, la frase exacta; el resto, cada palabra en cualquier parte.
   const resto=String(q==null?"":q).replace(/["“”«»]([^"“”«»]+)["“”«»]/g,(m,f)=>{frases.push(plano(f).trim());return " ";});
-  return frases.every(f=>!f||t.includes(f))&&plano(resto).replace(/["“”«»]/g," ").split(/\s+/).filter(Boolean).every(p=>t.includes(p));
+  const pal=plano(resto).replace(/["“”«»]/g," ").split(/\s+/).filter(Boolean);
+  return {frases:frases.filter(Boolean),pal,rz:pal.map(w=>w.length>=5?raiz(w):w)};
 }
+// tp: texto ya pasado por plano(). Con `alguna`, basta una palabra (se usa solo si ninguna junta todas).
+function casa(tp,c,alguna){
+  if(!c.frases.every(f=>tp.includes(f)))return false;
+  if(!c.pal.length)return true;
+  return alguna?c.rz.some(w=>tp.includes(w)):c.rz.every(w=>tp.includes(w));
+}
+function coincide(texto,q){return casa(plano(texto),consulta(q));}
 const MESES=["enero","febrero","marzo","abril","mayo","junio","julio","agosto","septiembre","octubre","noviembre","diciembre"];
 function fdate(iso){if(!iso)return "—";const [y,m,d]=String(iso).split("-");return `${+d} ${MESES[+m-1].slice(0,3)} ${y}`;}
 function longDate(iso){if(!iso)return "—";const [y,m,d]=String(iso).split("-");return `${+d} de ${MESES[+m-1]} de ${y}`;}
@@ -954,7 +972,7 @@ function tocar(){if(!ABIERTOS.length)return;clearTimeout(relojBloqueo);relojBloq
 /* Cerrar es olvidar: los datos descifrados, las llaves de las notas y la vista. */
 function cerrarSesion(msg){
   clearTimeout(relojBloqueo);
-  DB=vacia();ABIERTOS=[];NOTAS={};LLAVES={};TEXTOS={};CLAVES_TEXTO={};DEMO=false;ST.art=null;
+  DB=vacia();ABIERTOS=[];NOTAS={};LLAVES={};TEXTOS={};IDX={};PRE={activo:false,hechos:0,total:0};CLAVES_TEXTO={};DEMO=false;ST.art=null;
   ST.view="panel";ST.id=null;ST.aFecha=null;ST.fondo="all";ST.artVisible=null;
   // Lo que se buscó y lo que se abrió también se olvida.
   ST.nf.q="";ST.af.q="";ST.rf.q="";ST.recientes=[];ST.sel={notas:0,revision:0};
@@ -1524,6 +1542,7 @@ function citaDe(t,id,art){
   if(t==="norma"||t==="texto"){const n=DB.normas[id];if(!n)return "";const ref=hoyRef(),u=ultimaReforma(n,ref),padre=n.anexo&&DB.normas[n.anexo];
     const vig=`texto vigente al ${longDate(ref)}; `+(u?`última reforma: ${u.por?`${cuerpo(u.por.cuerpo).nombre}, ${longDate(u.por.fecha)}, punto ${u.por.punto}`:longDate(u.fecha)}`:"sin reformas");
     const nom=tituloNorma(n)+(padre?`, anexo${numAnexo(n)<999?" "+numAnexo(n):""} de ${padre.nombre}`:"");
+    if(art&&/^u\d+$/.test(art)){const t=textoCargado(n),u=t&&t.unidades[+art.slice(1)];return `${nom}${u&&u.pg?`, pág. ${u.pg} del PDF`:""} (${vig}).`;}
     if(art){const num=numArt(n,art)||art;return `${nom}, art. ${num} (${vig}).`;}
     return `${nom} (${n.organo?`${cuerpo(n.organo).nombre}, sesión del ${longDate(n.fecha)}${n.punto?", punto "+n.punto:""}; `:""}${vig}).`;}
   return "";
@@ -1604,12 +1623,34 @@ function marcaPal(ver){
   const i=$("#gq");if(i)i.setAttribute("aria-activedescendant","pi"+PAL.sel);
 }
 function normalizaQ(q){return String(q||"").replace(/\bp(?:to|unto)?\.?\s*(\d+)\b/gi,"punto $1").replace(/\bart(?:[ií]culos?|s)?\.?\s*(\d+)/gi,"art $1");}
-function fragmentoDe(u,q){
-  const s=[u.rub||"",...u.p].join(" "),p=plano(s),ws=plano(normalizaQ(q)).replace(/["“”«»]/g," ").split(/\s+/).filter(w=>w.length>1&&w!=="art"&&!/^\d+$/.test(w));
+function una(s){return String(s==null?"":s).replace(/\s+/g," ").trim();}
+function fragmentoTx(s,q){
+  s=una(s);
+  const p=plano(s),ws=plano(normalizaQ(q)).replace(/["“”«»]/g," ").split(/\s+/).filter(w=>w.length>1&&w!=="art"&&!/^\d+$/.test(w)).map(w=>w.length>=5?raiz(w):w);
   let i=-1;for(const w of ws){i=p.indexOf(w);if(i>=0)break;}
-  if(i<0)return trunc(u.p.join(" "),110);
+  if(i<0)return trunc(s,110);
   const a=Math.max(0,i-40);return (a?"…":"")+trunc(s.slice(a),110);
 }
+function fragmentoDe(u,q){return fragmentoTx(textoU(u),q);}
+/* Índice del texto de cada norma, armado una vez cuando el texto llega: cada
+   unidad (artículo, párrafo, título, tabla, diagrama) con su sección y su texto
+   sin tildes. Buscar en un manual sin artículos depende de que se mire TODO. */
+let IDX={};
+function textoU(u){return u.t==="art"?["art",u.n,u.rub||"",...u.p].join(" "):u.t==="tabla"?(u.filas||[]).map(f=>f.join(" ")).join(" "):u.t==="fig"?["diagrama",u.tit||"",u.txt||""].join(" "):(u.txt||"");}
+function idxDe(n){
+  const t=textoCargado(n);if(!t)return null;
+  const x=IDX[n.id];if(x&&x.t===t)return x;
+  let sec="";
+  const us=t.unidades.map((u,i)=>{const tit=u.t==="art"?u.rub:u.t==="fig"?u.tit:(u.t==="h1"||u.t==="h2")?u.txt:"";
+    if(u.t==="h1"||u.t==="h2")sec=u.txt;
+    const tx=textoU(u),mia=(u.t==="h1"||u.t==="h2")?"":sec;
+    return {u,i,k:u.t==="art"?u.id:"u"+i,sec:mia,sp:plano(mia),tx,tp:plano(tx),tit:plano(tit||"")};});
+  return IDX[n.id]={t,us,todo:us.map(e=>e.tp).join(" ")};
+}
+function textoPlano(n){const x=idxDe(n);return x?x.todo:"";}
+/* Una norma «contiene» lo buscado si su ficha o su texto lo traen: así el filtro
+   de Normativa también encuentra por lo que dice la norma, no solo por su nombre. */
+function coincideNorma(n,q){return casa(plano(pajaNorma(n))+" "+textoPlano(n),consulta(q));}
 function rutaNorma(n){const p=n.anexo&&DB.normas[n.anexo];return p?`${tituloNorma(p)} › ${numAnexo(n)<999?"Anexo "+numAnexo(n):"Anexo"}: ${tituloNorma(n)}`:tituloNorma(n);}
 /* El buscador de arriba: lo mismo que el de cada listado (coincide/pajaR),
    acotado al fondo elegido, y entiende citas cortas («ja 8 ago p. 3»). */
@@ -1617,20 +1658,52 @@ function buscarTodo(q,max){
   q=normalizaQ(q);const out=[],ref=hoyRef();
   NORMAS().filter(n=>enFondo(fondoNorma(n))&&coincide(pajaNorma(n),q)).sort((a,b)=>tituloNorma(a).localeCompare(tituloNorma(b),"es",{numeric:true})).forEach(n=>{const e=estadoNorma(n,ref);
     out.push({t:"norma",id:n.id,g:"Normas",a:tituloNorma(n),b:[estadoPalabras(e),n.tipo||"Norma",cuerpo(n.organo).nombre].join(" · "),sg:signoNorma(e),acc:n.texto?"Abrir · tiene texto":"Abrir"});});
-  NORMAS().filter(n=>enFondo(fondoNorma(n))).forEach(n=>{const t=textoCargado(n);if(!t)return;let k=0;
-    t.unidades.forEach(u=>{if(u.t!=="art"||k>=3)return;const txt=[u.rub||"",...u.p].join(" ");if(coincide("art "+u.n+" "+txt,q)){k++;
-      out.push({t:"texto",id:n.id,art:u.id,g:"Artículos",a:`Art. ${u.n}${u.rub?" · "+may(String(u.rub).toLowerCase()):""}`,b:fragmentoDe(u,q),padre:rutaNorma(n),acc:"Leer"});}});});
+  // El texto de cada norma: todo lo que el PDF trae (artículos, párrafos, títulos,
+  // tablas y diagramas), lo más relevante primero. Si nada junta todas las palabras,
+  // se ofrece lo que contiene alguna, y se dice.
+  const c=consulta(q);
+  const hallar=alguna=>{const res=[];
+    NORMAS().filter(n=>enFondo(fondoNorma(n))).forEach(n=>{const x=idxDe(n);if(!x)return;const hs=[];
+      x.us.forEach(e=>{if(!casa(e.tp,c,alguna))return;
+        let sc=alguna?c.rz.filter(w=>e.tp.includes(w)).length:1;
+        const esT=e.u.t==="h1"||e.u.t==="h2";
+        if(c.rz.length&&c.rz.every(w=>e.tit.includes(w)))sc+=esT?5:3;
+        else if(c.rz.length&&e.sp&&c.rz.every(w=>e.sp.includes(w)))sc+=1;
+        hs.push({e,sc});});
+      if(!hs.length)return;
+      hs.sort((a,b)=>b.sc-a.sc||a.e.i-b.e.i);res.push({n,hs});});
+    res.sort((a,b)=>b.hs[0].sc-a.hs[0].sc||b.hs.length-a.hs.length||tituloNorma(a.n).localeCompare(tituloNorma(b.n),"es",{numeric:true}));
+    return res;};
+  const aTexto=(res,alg)=>{res.forEach(({n,hs})=>hs.slice(0,4).forEach((h,k,v)=>{const u=h.e.u,pg=u.pg?" · pág. "+u.pg:"";
+    const a=u.t==="art"?`Art. ${u.n}${u.rub?" · "+may(String(u.rub).toLowerCase()):""}`
+      :u.t==="h1"||u.t==="h2"?trunc(una(u.txt),70)
+      :u.t==="tabla"?"Tabla"+(h.e.sec?" · "+trunc(una(h.e.sec),50):"")
+      :u.t==="fig"?"Diagrama"+(u.tit?": "+trunc(una(u.tit),60):"")
+      :trunc(una(h.e.sec||u.txt),70);
+    out.push({t:"texto",id:n.id,art:h.e.k,g:"En el texto",a,b:u.t==="fig"?"Un flujograma: se ve en el PDF"+pg:u.t==="h1"||u.t==="h2"?"Título"+pg:u.t==="art"?fragmentoTx(h.e.tx,q):trunc(fragmentoTx(h.e.tx,q),104)+pg,
+      padre:rutaNorma(n),mas:k===v.length-1?hs.length-v.length:0,acc:u.t==="fig"?"Ver":"Leer",
+      q:alg?c.pal.filter((w,j)=>h.e.tp.includes(c.rz[j])).join(" "):null});}));};
+  const enTexto=hallar(false);aTexto(enTexto);
   ACTAS().filter(a=>enFondo(fondoActa(a))&&coincide(pajaActa(a),q)).sort((x,y)=>y.fecha.localeCompare(x.fecha)).forEach(a=>{const e=estadoActa(a),d=seguro(a.definitiva),p=seguro(a.provisional),nr=resDeActa(a.id).length;
     out.push({t:"acta",id:a.id,g:"Actas",a:actaRef(a),b:`${e.key==="def"?"Acta definitiva":e.key==="prov"?"Acta provisional":"En elaboración"} · ${nr} resolución${nr===1?"":"es"}`,sg:signoActa(e),pdf:d||p,pdfTxt:d?"Acta definitiva":"Acta provisional",acc:"Ver la sesión"});});
   RESOL().filter(r=>enFondo(fondoDeCuerpo(r.cuerpo))&&coincide(pajaRes(r),q)).sort((x,y)=>y.fecha.localeCompare(x.fecha)||String(x.punto).localeCompare(String(y.punto),undefined,{numeric:true})).forEach(r=>{const e=estadoRes(r,ref);
     out.push({t:"resolucion",id:r.id,g:"Resoluciones",a:trunc(r.texto,120),b:`${estadoPalabras(e)} · ${r.cuerpo} · ${fdate(r.fecha)} · punto ${r.punto}`,sg:signoRes(e),acc:"Abrir"});});
-  return out.slice(0,max||12);
+  let parcial=false;
+  if(!out.length&&c.pal.length>1){const alg=hallar(true);if(alg.length){parcial=true;aTexto(alg,true);}}
+  const r=out.slice(0,max||12);r.parcial=parcial;return r;
 }
-function itemHit(h,q){
-  q=normalizaQ(q).replace(/\b(punto|art)\b/gi," ");
+/* Lo que se buscó viaja al lector: llega con la palabra marcada y el buscador de la norma lleno. */
+function qLectorDe(q){return normalizaQ(q).replace(/\b(punto|art)\b/gi," ").replace(/\s+/g," ").trim();}
+function abrirHit(h,q){if(h.t==="texto")ST.qLector=h.q||qLectorDe(q);go(h.t,h.id,h.art);}
+function itemMas(h,q){
+  return {cita:null,run:()=>{ST.qLector=h.q||qLectorDe(q);go("texto",h.id);},clic:()=>{ST.qLector=h.q||qLectorDe(q);go("texto",h.id);},
+    html:k=>`<div class="pi hijo ult mas" role="option" id="pi${k}" data-k="${k}" aria-selected="false"><span class="pis"></span><span class="a">${h.mas} coincidencia${h.mas===1?"":"s"} más en esta norma</span><span class="b">Ver todas en su texto</span><span class="acc">Abrir${kbdHTML("↵")}</span></div>`};
+}
+function itemHit(h,q0){
+  const q=normalizaQ(q0).replace(/\b(punto|art)\b/gi," ");
   return {cita:()=>copiarCita(h.t,h.id,h.art),
-    run:()=>{if(h.t==="acta"&&h.pdf)window.open(h.pdf,"_blank","noopener,noreferrer");else go(h.t,h.id,h.art);},
-    clic:()=>go(h.t,h.id,h.art),
+    run:()=>{if(h.t==="acta"&&h.pdf)window.open(h.pdf,"_blank","noopener,noreferrer");else abrirHit(h,q0);},
+    clic:()=>abrirHit(h,q0),
     html:k=>`<div class="pi${h.t==="texto"?" hijo"+(h.ult?" ult":""):""}" role="option" id="pi${k}" data-k="${k}" aria-selected="false"><span class="pis">${h.sg||""}</span>
       <span class="a">${marcar(h.a,q,"hit")}</span><span class="b">${h.t==="texto"?marcar(h.b,q,"hit"):esc(h.b)}</span>
       <span class="acc">${h.t==="acta"&&h.pdf?`<a class="doclink" href="${esc(h.pdf)}" target="_blank" rel="noopener noreferrer" data-pdf>${ico("doc")}${esc(h.pdfTxt)}</a>`:esc(h.acc||"Abrir")}${kbdHTML("↵")}</span></div>`};
@@ -1671,19 +1744,23 @@ function pintaPaleta(q){
     grupo("Abiertos en esta sesión",rec.map(x=>itemCmd({a:tituloDe(x.t,x.id,x.art),ico:x.t==="acta"?"sesion":x.t==="texto"?"libro":"doc",run:()=>go(x.t,x.id,x.art)})));
     grupo("Ir a…",comandos().map(itemCmd));
   }else{
-    const hits=buscarTodo(qq,90),por=gg=>hits.filter(h=>h.g===gg);
-    if((ST.view==="norma"||ST.view==="texto")&&ST.id){const aqui=hits.filter(h=>h.t==="texto"&&h.id===ST.id).slice(0,6);aqui.forEach((h,i)=>h.ult=i===aqui.length-1);
-      if(aqui.length){html+=`<div class="pg" role="presentation">En esta norma</div>`;aqui.forEach(h=>{const it=itemHit(h,qq);const k=PAL.items.length;PAL.items.push(it);html+=it.html(k);});}}
+    const hits=buscarTodo(qq,400),por=gg=>hits.filter(h=>h.g===gg);
+    const filaHits=hs=>{hs.forEach((h,i)=>{h.ult=i===hs.length-1&&!(h.mas>0);const it=itemHit(h,qq);const k=PAL.items.length;PAL.items.push(it);html+=it.html(k);});
+      const u=hs[hs.length-1];if(u&&u.mas>0){const it=itemMas(u,qq);const k=PAL.items.length;PAL.items.push(it);html+=it.html(k);}};
+    const enNorma=(ST.view==="norma"||ST.view==="texto")&&ST.id;
+    if(hits.parcial)html+=`<div class="pal-aviso">${ico("aviso")}<span>Nada junta todas las palabras. Esto contiene alguna de ellas.</span></div>`;
+    if(enNorma){const aqui=hits.filter(h=>h.t==="texto"&&h.id===ST.id);
+      if(aqui.length){html+=`<div class="pg" role="presentation">En esta norma</div>`;filaHits(aqui);}}
     grupo("Normas",por("Normas").slice(0,5).map(h=>itemHit(h,qq)));
-    const arts=por("Artículos").filter(h=>!((ST.view==="norma"||ST.view==="texto")&&h.id===ST.id)).slice(0,9);
-    if(arts.length){html+=`<div class="pg" role="presentation">Artículos</div>`;
-      const normas=[...new Set(arts.map(h=>h.id))];
-      normas.forEach(nid=>{const hs=arts.filter(h=>h.id===nid);hs.forEach((h,i)=>h.ult=i===hs.length-1);
-        html+=`<div class="pi-padre">${esc(hs[0].padre)}</div>`;hs.forEach(h=>{const it=itemHit(h,qq);const k=PAL.items.length;PAL.items.push(it);html+=it.html(k);});});}
+    const enTx=por("En el texto").filter(h=>!(enNorma&&h.id===ST.id));
+    if(enTx.length){html+=`<div class="pg" role="presentation">En el texto de las normas</div>`;
+      [...new Set(enTx.map(h=>h.id))].slice(0,5).forEach(nid=>{const hs=enTx.filter(h=>h.id===nid);
+        html+=`<div class="pi-padre">${esc(hs[0].padre)}</div>`;filaHits(hs);});}
     grupo("Actas",por("Actas").slice(0,6).map(h=>itemHit(h,qq)));
     grupo("Resoluciones",por("Resoluciones").slice(0,8).map(h=>itemHit(h,qq)));
     grupo("Ir a…",comandos().filter(c=>coincide(c.a,qq)).map(itemCmd));
     if(!PAL.items.length)html=nadaPaleta(qq);
+    if(PRE.activo)html+=`<div class="pal-leyendo">${ico("historia")}<span>Todavía se leen los textos de las normas (${PRE.hechos} de ${PRE.total}). Lo que busques saldrá completo en un momento.</span></div>`;
   }
   g.innerHTML=html;g.style.display="";
   g.querySelectorAll(".pi").forEach(el=>{
@@ -1787,7 +1864,7 @@ function vPanel(){
 function normasFiltradas(){
   const f=ST.nf,ref=hoyRef();
   const l=NORMAS().filter(n=>n.fecha<=ref&&enFondo(fondoNorma(n))).map(n=>({n,e:estadoNorma(n,ref)}))
-    .filter(({n,e})=>(f.estado==="all"||(f.estado==="vig"?vigenteGrupo(e):e.key===f.estado))&&(f.organo==="all"||n.organo===f.organo)&&(f.tipo==="all"||n.tipo===f.tipo)&&(!f.texto||n.texto)&&(!f.q||coincide(pajaNorma(n),f.q)));
+    .filter(({n,e})=>(f.estado==="all"||(f.estado==="vig"?vigenteGrupo(e):e.key===f.estado))&&(f.organo==="all"||n.organo===f.organo)&&(f.tipo==="all"||n.tipo===f.tipo)&&(!f.texto||n.texto)&&(!f.q||coincideNorma(n,f.q)));
   const az=(a,b)=>tituloNorma(a.n).localeCompare(tituloNorma(b.n),"es",{numeric:true});
   if(f.orden==="rec")return l.sort((a,b)=>((ultimoCambio(b.n,ref)||b.n).fecha).localeCompare((ultimoCambio(a.n,ref)||a.n).fecha)||az(a,b));
   if(f.orden==="fondo")return l.sort((a,b)=>String(fondoNorma(a.n)).localeCompare(String(fondoNorma(b.n)))||az(a,b));
@@ -1960,8 +2037,14 @@ async function textoDe(n){
 }
 /* Al entrar, los textos se bajan de a uno en segundo plano: así el buscador de
    arriba encuentra también dentro de los artículos. */
+let PRE={activo:false,hechos:0,total:0};
 async function precargarTextos(){
-  for(const n of NORMAS()){if(!ABIERTOS.length)return;if(n.texto&&!textoCargado(n)){try{await textoDe(n);}catch(e){}}}
+  const pend=NORMAS().filter(n=>n.texto&&!textoCargado(n));
+  PRE={activo:pend.length>0,hechos:0,total:pend.length};
+  const repinta=()=>{const p=$("#pal"),i=$("#gq");if(p&&!p.hidden&&i&&i.value.trim().length>=2){const sel=PAL.sel;pintaPaleta(i.value);if(sel<PAL.items.length){PAL.sel=sel;marcaPal(false);}}};
+  const obrero=async()=>{while(pend.length){if(!ABIERTOS.length)return;const n=pend.shift();try{await textoDe(n);}catch(e){}PRE.hechos++;if(PRE.hechos%3===0||!pend.length)repinta();}};
+  await Promise.all([obrero(),obrero(),obrero()]);
+  PRE.activo=false;repinta();
 }
 /* «arts. 12 y 15», «art. 8», «arts. 22 a 25», «artículos 3, 4 y 7» → {"12","15"}… */
 function artsDe(txt){
@@ -1979,10 +2062,11 @@ function reformasPorArticulo(n){
 /* Resalta lo buscado. En el texto de la norma, en lima claro («aquí»); en las
    listas y en la paleta, en negrita subrayada con la tinta. */
 function marcar(texto,q,modo){
-  const s=String(texto||"");const ws=plano(q||"").replace(/["“”«»]/g," ").split(/\s+/).filter(w=>w.length>1);
+  const s=String(texto||"");const ws=plano(q||"").replace(/["“”«»]/g," ").split(/\s+/).filter(w=>w.length>1).map(w=>w.length>=5?raiz(w):w);
   if(!ws.length)return esc(s);
   const p=plano(s),r=[];
-  ws.forEach(w=>{let i=p.indexOf(w);while(i>=0){r.push([i,i+w.length]);i=p.indexOf(w,i+w.length);}});
+  // Se marca la palabra entera donde cae la raíz: «combustibl» pinta «combustibles».
+  ws.forEach(w=>{let i=p.indexOf(w);while(i>=0){let j=i+w.length;while(j<p.length&&/[a-z0-9]/.test(p[j]))j++;r.push([i,j]);i=p.indexOf(w,j);}});
   if(!r.length)return esc(s);
   r.sort((a,b)=>a[0]-b[0]);const u=[];r.forEach(x=>{const l=u[u.length-1];if(l&&x[0]<=l[1])l[1]=Math.max(l[1],x[1]);else u.push(x.slice());});
   const [ab,ce]=modo==="hit"?['<b class="hit">',"</b>"]:["<mark>","</mark>"];
@@ -2093,7 +2177,7 @@ function pintaTexto(n,t){
   bindNotas("norma",n.id,n._g,render);
   const notaHTML=x=>`<div class="lref" id="nr-${x.k}"><span class="llam">${x.k}</span><span><span class="verbo">${esc(x.c.tipo)}</span>: ${x.c.por?`${esc(cuerpo(x.c.por.cuerpo).nombre)}, sesión del ${esc(longDate(x.c.por.fecha))}, punto ${esc(x.c.por.punto)}`:`del ${esc(longDate(x.c.fecha))}`}${x.c.rige&&x.c.por&&x.c.rige!==x.c.por.fecha?`; rige desde el ${esc(longDate(x.c.rige))}`:""}.${x.c.por&&x.c.por.id&&DB.res[x.c.por.id]?` <button data-res="${esc(x.c.por.id)}">Ver la resolución</button>`:""}</span></div>`;
   const notasArt=ns=>!ns||!ns.length?"":ns.length===1?notaHTML(ns[0]):notaHTML(ns[ns.length-1])+`<details class="lant"><summary>+${ns.length-1} anterior${ns.length>2?"es":""}</summary>${ns.slice(0,-1).reverse().map(notaHTML).join("")}</details>`;
-  const parr=(x,q,cls)=>`<p${ES_LISTA.test(x)||cls?` class="${[ES_LISTA.test(x)?"lli":"",cls||""].join(" ").trim()}"`:""}>${marcar(x,q)}</p>`;
+  const parr=(x,q,cls,id)=>`<p${id?` id="${id}"`:""}${ES_LISTA.test(x)||cls?` class="${[ES_LISTA.test(x)?"lli":"",cls||""].join(" ").trim()}"`:""}>${marcar(x,q)}</p>`;
   const pg=u=>u.pg?`<span class="lpg">pág. ${esc(u.pg)}</span>`:"";
   const celda=(x,q)=>marcar(x,q).replace(/\n/g,"<br>");
   const tablaHTML=(u,i,q)=>`<div class="ltabla" id="u${i}">${pg(u)}<table>${u.filas.map((f,k)=>`<tr>${f.map(c=>k===0?`<th scope="col">${celda(c,q)}</th>`:`<td>${celda(c,q)}</td>`).join("")}</tr>`).join("")}</table></div>`;
@@ -2108,7 +2192,7 @@ function pintaTexto(n,t){
     $("#ltx").innerHTML=t.unidades.map((u,i)=>u.t==="h1"?`<h3 class="lh1" id="u${i}">${marcar(u.txt,q)}${pg(u)}</h3>`
       :u.t==="h2"?`<h4 class="lh2" id="u${i}">${marcar(u.txt,q)}${pg(u)}</h4>`
       :u.t==="art"?artHTML(u,q):u.t==="tabla"?tablaHTML(u,i,q):u.t==="fig"?figHTML(u,i,q)
-      :parr(u.txt,q,u.de?"lcont":"")).join("")||`<p class="vacio">El texto de esta norma está vacío.</p>`;
+      :parr(u.txt,q,u.de?"lcont":"",`u${i}`)).join("")||`<p class="vacio">El texto de esta norma está vacío.</p>`;
     const L=$("#ltx");
     L.querySelectorAll("[data-res]").forEach(b=>b.onclick=()=>go("resolucion",b.dataset.res));
     L.querySelectorAll("[data-cpl]").forEach(b=>b.onclick=()=>copiarEnlace("texto",n.id,b.dataset.cpl));
@@ -2122,12 +2206,14 @@ function pintaTexto(n,t){
   const cuantas=(txt,q)=>{const p=plano(txt);let c=0;plano(q).split(/\s+/).filter(w=>w.length>1).forEach(w=>{let i=p.indexOf(w);while(i>=0){c++;i=p.indexOf(w,i+w.length);}});return c;};
   const pintaIndice=q=>{
     const hay=q&&q.trim().length>1;
-    const items=t.unidades.map((u,i)=>({u,i})).filter(({u})=>u.t!=="p"&&u.t!=="tabla");
-    const txtDe=u=>u.t==="art"?["art",u.n,u.rub||"",...u.p].join(" "):u.t==="fig"?["diagrama",u.tit||"",u.txt||""].join(" "):u.txt;
-    const vis=hay?items.filter(({u})=>coincide(txtDe(u),q)):items;
+    // Sin buscar, el índice son los títulos; buscando, también los párrafos y las tablas donde está.
+    const todos=t.unidades.map((u,i)=>({u,i})),items=hay?todos:todos.filter(({u})=>u.t!=="p"&&u.t!=="tabla");
+    const cq=hay?consulta(q):null;
+    const vis=hay?items.filter(({u})=>casa(plano(textoU(u)),cq)):items;
     $("#lcnt").textContent=hay?(vis.length?`${vis.length} coincidencia${vis.length===1?"":"s"}`:"Nada coincide. Prueba con menos palabras."):"";
     $("#lidx").innerHTML=vis.map(({u,i})=>u.t==="art"?`<button class="lix art" data-go="a-${esc(u.id)}" data-art="${esc(u.id)}"><span class="ixn">Art. ${esc(u.n)}</span><span class="ixr">${u.rub?esc(may(String(u.rub).toLowerCase())):"&nbsp;"}</span>${refs[u.n]&&u.id.split("-")[0]===cuerpoP?`<span class="ref" title="Reformado">${sg("cuadro","c-sec")}</span>`:hay?`<span class="nm">${cuantas([u.rub||"",...u.p].join(" "),q)||""}</span>`:""}${hay?`<span class="frag">${marcar(fragmentoDe(u,q),q,"hit")}</span>`:""}</button>`
       :u.t==="fig"?`<button class="lix fig" data-go="u${i}">${esc(trunc("Diagrama"+(u.tit?": "+u.tit:"")+(u.pg?" · pág. "+u.pg:""),90))}</button>`
+      :u.t==="p"||u.t==="tabla"?`<button class="lix ${u.t}" data-go="u${i}">${u.t==="tabla"?"Tabla · ":""}${marcar(fragmentoTx(textoU(u),q),q,"hit")}${u.pg?` <span class="lpg">pág. ${esc(u.pg)}</span>`:""}</button>`
       :`<button class="lix ${u.t}" data-go="u${i}">${esc(trunc(u.txt,90))}</button>`).join("");
     $("#lidx").querySelectorAll("[data-go]").forEach(b=>b.onclick=()=>{const el=document.getElementById(b.dataset.go);document.body.classList.remove("indice-abierto");
       if(el&&el.scrollIntoView)try{el.scrollIntoView({behavior:reducido()?"auto":"smooth",block:"start"});}catch(e){}
@@ -2139,6 +2225,8 @@ function pintaTexto(n,t){
   lq.onkeydown=e=>{if(e.key==="Enter"){e.preventDefault();e.stopPropagation();saltaMarca(e.shiftKey?-1:1);}else if(e.key==="Escape"){e.stopPropagation();if(lq.value){lq.value="";pintaCuerpo("");pintaIndice("");}}};
   $("#lant").onclick=()=>saltaMarca(-1);$("#lsig").onclick=()=>saltaMarca(1);
   pintaCuerpo("");pintaIndice("");
+  if(ST.qLector){const q=ST.qLector;ST.qLector=null;lq.value=q;pintaCuerpo(q);pintaIndice(q);
+    if(!ST.art&&LECT.marks.length)setTimeout(()=>pintaPos(true),30);}
   $("#lbPos").textContent=arts.length?`${arts.length} artículos`:"";
   espiar(arts);
   if(ST.art)setTimeout(()=>irArticulo(ST.art),30);else{const a0=arts[0];if(a0)marcarActual(a0.id);}
@@ -2175,7 +2263,7 @@ function marcarActual(art){
   ACC_ACTUAL=accionesDe("texto",ST.id,art);
 }
 function irArticulo(art){
-  const el=document.getElementById("a-"+art);if(!el)return;
+  const el=document.getElementById(/^u\d+$/.test(art)?art:"a-"+art);if(!el)return;
   if(el.scrollIntoView)try{el.scrollIntoView({block:"start"});}catch(e){}
   marcarActual(art);
   if(!reducido()){el.classList.add("flash");setTimeout(()=>el.classList.remove("flash"),2000);}

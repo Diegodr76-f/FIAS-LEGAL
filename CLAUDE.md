@@ -27,6 +27,15 @@ Lo que la define, y no se negocia sin volver a preguntar:
   (con Archivo Narrow de respaldo donde no está instalada) y **Arial** para lo oficial —el texto de la norma
   y lo resuelto— (con Arimo de respaldo). Nada de serifas.
 - **Buscar es un gesto**: Ctrl/⌘ K o «/» abren la paleta desde cualquier pantalla (`paletaHTML()`).
+- **Buscar tiene que hallar.** Una sola regla (`consulta()` / `casa()` / `coincide()`): sin tildes, cada
+  palabra en cualquier parte, singular o plural (`raiz()`: «combustible» halla «combustibles»; «informes» no
+  se pasa a «información»). El buscador de arriba mira **todo el texto de cada norma** (`idxDe()`: artículos,
+  párrafos, títulos, tablas y diagramas), no solo los artículos: un manual no los tiene, y así el Manual
+  Financiero no se podía buscar. Lo más relevante va primero (palabras en el título o en la sección), hasta
+  cuatro por norma y «N coincidencias más» que abre el lector con lo buscado ya marcado (`ST.qLector`). Si nada
+  junta todas las palabras, ofrece lo que tiene alguna y lo dice. Los textos se bajan en segundo plano y la
+  paleta dice cuántos faltan (`PRE`). El filtro de Normativa también mira el texto (`coincideNorma()`).
+  Lo prueba la sección 4 de `probar_app.js` y la demostración, que trae párrafos, tabla y diagrama.
 - **«Copiar cita» entrega la cita completa** (`citaDe()`), no «art. 14».
 - **La marca es la del FIAS**, tomada de su hoja membretada y del template de diapositivas: el celeste
   `#00A4DC` y el lima `#BCD430` de las dos líneas del logo. El celeste puro da 2,9:1 sobre blanco, así que

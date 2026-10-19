@@ -168,6 +168,11 @@ const texto=w=>[...w.document.body.children].filter(e=>e.tagName!=='SCRIPT').map
   const lq=w.document.querySelector('#lq');lq.value='combustible';lq.dispatchEvent(new w.Event('input'));
   ok(await hasta(()=>w.document.querySelectorAll('#ltx mark').length>=2)&&/1 coincidencia/.test(w.document.querySelector('#lcnt').textContent),'buscar en la norma resalta y deja en el índice solo lo que coincide');
   ok(ev(w,'buscarTodo("estaciones autorizadas").some(h=>h.t==="texto"&&h.art==="p0-a5")'),'el buscador de arriba encuentra dentro del texto, y lleva al artículo');
+  // Buscar es hallar: singular y plural, sin tildes, y por lo que la norma dice.
+  ok(ev(w,'coincide("Combustibles para vehículos","combustible")&&coincide("el combustible","Combustibles")&&!coincide("el combustible","gasolina")'),'combustible y combustibles son lo mismo para el buscador');
+  ok(ev(w,'coincide("los informes finales","informe")&&coincide("las comisiones","comision")&&!coincide("la información disponible","informes")'),'el plural no se pasa de largo: «informes» no es «información»');
+  ok(ev(w,'buscarTodo("estacion autorizada").some(h=>h.t==="texto"&&h.art==="p0-a5")&&buscarTodo("vehiculo conductor").some(h=>h.t==="texto"&&h.art==="p0-a3")'),'el singular halla el plural del texto, y al revés');
+  ok(ev(w,'buscarTodo("combustibles").some(h=>h.t==="texto"&&h.art==="p0-a5")'),'«combustibles» halla el artículo del combustible');
   ev(w,`go("texto","${MO}","p0-a4")`);
   ok(w.location.hash===`#/texto/${MO}~p0-a4`,'el enlace lleva la norma y el artículo');
   ev(w,'go("norma","reglamento-de-adquisiciones-del-fias")');
@@ -257,6 +262,24 @@ const texto=w=>[...w.document.body.children].filter(e=>e.tagName!=='SCRIPT').map
   }
   ok(w.document.querySelectorAll('#ltx .lref').length===2&&/arts?\. ?12|Art\. 12/.test(w.document.querySelector('#a-p0-a12').textContent)&&w.document.querySelector('#a-p0-a12 .lref'),'los artículos 12 y 15, reformados en la hoja Cambios, lo dicen al pie');
   ok(w.document.querySelectorAll('#lidx .ref').length===2,'y el índice los marca');
+  {
+    // La demostración tiene lo que un manual real: párrafos sueltos, una tabla, un diagrama.
+    ok(ev(w,'buscarTodo("casos previstos").some(h=>h.t==="texto"&&/^u\\d+$/.test(h.art))'),'halla lo que no es artículo: un párrafo suelto, con su ancla');
+    ok(ev(w,'buscarTodo("comparacion precios tres").some(h=>h.t==="texto"&&/^Tabla/.test(h.a))'),'halla dentro de una tabla');
+    ok(ev(w,'buscarTodo("contratacion directa").some(h=>h.t==="texto"&&/^Diagrama/.test(h.a))'),'y un diagrama por su título');
+    ok(ev(w,'(()=>{const h=buscarTodo("garantias zzzqx");return h.parcial===true&&h.some(x=>x.art==="p0-a21");})()'),'si nada junta todas las palabras, ofrece lo que tiene alguna y lo dice');
+    ok(ev(w,'buscarTodo("garantias").parcial===false'),'y si algo las junta, no lo dice');
+    ok(ev(w,'(()=>{const h=buscarTodo("presupuesto").filter(x=>x.t==="texto");return h.length>=4&&h.length<=4+0&&h.some(x=>x.mas>0);})()'),'no más de cuatro por norma, y dice cuántas hay de sobra');
+    ok(ev(w,'/concurso/i.test(buscarTodo("concurso").filter(x=>x.t==="texto")[0].a)'),'lo que está en el título del artículo va primero');
+    ev(w,'abrirPaleta("proformas")');
+    ok(/En el texto de las normas|En esta norma/.test(w.document.querySelector('#gres').textContent)&&w.document.querySelectorAll('#gres .pi.hijo').length>=2,'la paleta muestra lo hallado en el texto');
+    w.document.querySelector('#gres .pi.hijo').click();
+    ok(await hasta(()=>w.document.querySelector('#lq')&&w.document.querySelector('#lq').value==='proformas')&&w.document.querySelectorAll('#ltx mark').length>=1,'al abrir un resultado, el lector llega con la palabra buscada ya marcada');
+    ok(/proforma/i.test(w.document.querySelector('#lidx').textContent)&&w.document.querySelector('#lidx .lix.tabla'),'y su índice muestra también la tabla donde está');
+    ev(w,'cerrarPaleta(true)');
+    ev(w,'go("texto","reglamento-de-adquisiciones-del-fias","u9")');
+    ok(ev(w,'citaDe("texto","reglamento-de-adquisiciones-del-fias","u9")').indexOf("art. u")<0,'la cita de algo que no es artículo no inventa un «art. u9»');
+  }
   ev(w,'go("norma","codigo-de-etica-y-conducta-del-fias")');
   w.document.querySelector('#ntx').value='nota de demo';w.document.querySelector('#nok').click();await espera(50);
   ok(!w.localStorage.getItem('quorum_notas_demo'),'sus notas no se guardan');
