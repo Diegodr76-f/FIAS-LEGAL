@@ -23,9 +23,8 @@ Lo que la define, y no se negocia sin volver a preguntar:
   una pila (fuentes → lista → ficha) con la acción principal fija abajo.
 - **El estado se dice con una frase con fechas** (`fraseNorma()`, `fraseRes()`, `fraseActa()`), no con
   una insignia de color. El color se gana: solo ámbar para lo que pide atención; derogada va en gris.
-- **Signos SVG, nunca emojis** (`ico()`, `sg()`). La letra es la del FIAS: **Arial Narrow** en la interfaz
-  (con Archivo Narrow de respaldo donde no está instalada) y **Arial** para lo oficial —el texto de la norma
-  y lo resuelto— (con Arimo de respaldo). Nada de serifas.
+- **Signos SVG, nunca emojis** (`ico()`, `sg()`). La letra es **Titillium Web**, la de la marca del FAP, la
+  misma del CLM: en la interfaz y en lo oficial (la norma, lo resuelto). Nada de serifas.
 - **Buscar es un gesto**: Ctrl/⌘ K o «/» abren la paleta desde cualquier pantalla (`paletaHTML()`).
 - **Buscar tiene que hallar.** Una sola regla (`consulta()` / `casa()` / `coincide()`): sin tildes, cada
   palabra en cualquier parte, singular o plural (`raiz()`: «combustible» halla «combustibles»; «informes» no
