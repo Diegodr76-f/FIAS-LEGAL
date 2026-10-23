@@ -41,7 +41,8 @@ jobs:
       - name: Instalar dependencias
         run: |
           sudo apt-get install -y -q tesseract-ocr tesseract-ocr-spa
-          pip install openpyxl requests cryptography msoffcrypto-tool pymupdf
+          # PyMuPDF 2.0 pega las palabras de cada celda de una tabla («Montodiario»): la 1.x hasta revisarlo.
+          pip install openpyxl requests cryptography msoffcrypto-tool "pymupdf<2"
 
       # El texto ya leído de cada PDF (el OCR de un escaneo toma un minuto). Va
       # cifrado con una llave que sale de los secretos: un pull request ajeno

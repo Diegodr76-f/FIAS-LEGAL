@@ -15,7 +15,9 @@ Dos clases de PDF, y se tratan distinto:
   - Escaneado: o no trae texto, o trae una capa de OCR vieja y mala («C6digo»,
     «lnterno»). Se mide eso, y si es malo se vuelve a leer con Tesseract en
     español, que en una página limpia acierta casi todo. Lo que sale de un OCR
-    se marca como tal, para que la página avise que puede tener errores.
+    se marca como tal, para que la página avise que puede tener errores. Una
+    capa invisible (la de un escáner, Acrobat u «OCR de normativa») se vuelve a
+    leer igual, por buena que sea: la página sigue siendo un escaneo.
 
 Cada página se trata por lo que es, no el documento entero: un manual digital
 con dos páginas escaneadas (un anexo firmado) lee esas dos con OCR; las tablas
@@ -39,7 +41,7 @@ from collections import Counter
 
 # Súbela cada vez que cambie lo que sale de `extraer()`: el robot guarda lo ya
 # leído por la huella del PDF Y esta versión, así que con otra versión lo relee.
-VERSION = "3"
+VERSION = "4"
 
 ART = re.compile(r"^Art(?:[íi]culo|\.)?\s*(\d+)\s*(?:[.ºo°]\s*)?(?:[.\-–—:]+\s*)?", re.I)
 # Una división lleva su número («CAPÍTULO IV»), o es una de las disposiciones con
@@ -141,6 +143,24 @@ def calidad(texto):
         return 1.0
     raras = sum(1 for w in palabras if re.search(r"[A-Za-zÁÉÍÓÚáéíóúñ][0-9~][A-Za-záéíóúñ]|~|^ln[a-z]{3,}", w))
     return raras / len(palabras)
+
+
+def _capa_invisible(page):
+    """¿El texto de la página es una capa invisible (modo 3) puesta sobre su imagen? Es el
+    OCR de otro —un escáner, Acrobat, la herramienta «OCR de normativa»—: la página es un
+    escaneo aunque traiga texto, y así hay que contarla."""
+    try:
+        trazo = page.get_texttrace()
+    except Exception:
+        return False
+    visibles = invisibles = 0
+    for s in trazo:
+        n = sum(1 for c in s.get("chars", ()) if chr(c[0]).strip())
+        if s.get("type") == 3 or s.get("opacity", 1) == 0:
+            invisibles += n
+        else:
+            visibles += n
+    return invisibles >= 60 and invisibles >= 4 * visibles
 
 
 def _ocr_pagina(page):
@@ -463,6 +483,10 @@ def extraer(contenido):
     for pn, page in enumerate(doc):
         txt = " ".join(l["t"] for l in pags[pn])
         if ocr_todo:
+            m = "ocr"
+        elif _capa_invisible(page):
+            # Se vuelve a leer con el OCR propio: sale lo mismo que del escaneo sin capa,
+            # y Quórum sigue diciendo que viene de un escaneo y con qué seguridad.
             m = "ocr"
         elif len(txt) < 60:
             m = "ocr" if page.get_images() else "vacia"

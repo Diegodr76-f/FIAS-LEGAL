@@ -21,7 +21,8 @@ jobs:
       - name: Dependencias
         run: |
           sudo apt-get install -y -q tesseract-ocr tesseract-ocr-spa
-          pip install openpyxl cryptography msoffcrypto-tool requests pymupdf
+          # PyMuPDF 2.0 pega las palabras de cada celda de una tabla («Montodiario»): la 1.x hasta revisarlo.
+          pip install openpyxl cryptography msoffcrypto-tool requests "pymupdf<2"
           npm install --no-save jsdom
       - name: Ningún dato real en el repositorio
         run: python scripts/vigilar_repo.py

@@ -99,6 +99,9 @@ Solo el texto **vigente**: el PDF que se da es el que rige hoy, y no se guarda h
 quien lo usa). `texto.extraer()` saca el texto (PyMuPDF; la negrita marca títulos), mide si la capa
 de texto es un OCR viejo y malo (`calidad()`: «C6digo», «lnterno») y entonces vuelve a leer con
 Tesseract en español; quita encabezados y números de página y lo parte en `h1`/`h2`/`art`/`p`.
+Una página con una **capa de texto invisible** sobre su imagen (la que deja un escáner, Acrobat o la
+herramienta «OCR de normativa») también va al OCR propio, por buena que sea la capa (`_capa_invisible()`):
+sigue siendo un escaneo, y así sale lo mismo que del PDF sin capa y Quórum sigue avisando que viene de uno.
 Si la numeración de artículos vuelve a 1 (la resolución que aprueba un reglamento trae su propio
 Art. 1), es otra parte: los ids llevan la parte (`p1-a14`). El índice del propio PDF (renglones con
 puntos guía y número de página, el título «ÍNDICE») no es texto de la norma y se descarta (`_es_indice`).
@@ -114,6 +117,8 @@ que se quita a propósito), qué páginas se leyeron con OCR y con qué segurida
 algo no pasó, `revisar_paso()` lo pone en «Revisión de la matriz» con el detalle cifrado, y el lector lo
 dice encima del texto con las páginas que hay que revisar. Una regla nueva del extractor se prueba con
 `pdf_mixto()` de `probar_robot.py`, que junta lo difícil en cuatro páginas.
+
+PyMuPDF va fijo en `<2` en los dos workflows: la 2.0 pega las palabras de cada celda de una tabla.
 
 **Cada PDF se lee una sola vez.** El robot lo baja en cada corrida solo para sacarle la huella; si la
 huella está en el caché, no lo vuelve a leer. La huella lleva `texto.VERSION`: **súbela** cuando cambie

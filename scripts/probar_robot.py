@@ -139,10 +139,11 @@ def pdf_mixto(escaneada=True):
     p4.insert_text((60, 80), "Art. 4.- VIGENCIA. Este reglamento rige desde su aprobación por el Directorio.", fontsize=11, fontname="helv")
     return doc.tobytes()
 
-def pdf_prueba(escaneado=False):
+def pdf_prueba(escaneado=False, capa=False):
     """Un reglamento inventado de tres páginas, con encabezado repetido, número
     de página, capítulos y artículos con rubro en negrita. Con `escaneado`, cada
-    página va como imagen, sin texto: lo tiene que leer el OCR."""
+    página va como imagen, sin texto: lo tiene que leer el OCR. Con `capa`, la
+    imagen lleva debajo su texto invisible, como la deja un escáner con OCR."""
     import pymupdf
     doc = pymupdf.open()
     arts = [(1, "OBJETO", "Este reglamento de prueba regula el uso de los vehículos de la institución."),
@@ -171,6 +172,8 @@ def pdf_prueba(escaneado=False):
         pix = pg.get_pixmap(dpi=200)
         p2 = img.new_page(width=pg.rect.width, height=pg.rect.height)
         p2.insert_image(p2.rect, pixmap=pix)
+        if capa:
+            p2.insert_textbox(p2.rect + (60, 60, -60, -60), pg.get_text(), fontname="helv", fontsize=10, render_mode=3)
     return img.tobytes()
 
 
@@ -399,6 +402,17 @@ def main():
             ok(r2["ocr"] and r2["articulos"] == 6, "un PDF escaneado se lee con OCR: los mismos 6 artículos", (r2["ocr"], r2["articulos"]))
         else:
             print("  · (sin Tesseract aquí: la prueba del escaneado corre en GitHub)")
+        orig = texto._ocr_pagina
+        texto._ocr_pagina = lambda page: ("Art. 1.- OBJETO: lo que leyó el OCR propio.", 90.0)
+        try:
+            rc = texto.extraer(pdf_prueba(escaneado=True, capa=True))
+        finally:
+            texto._ocr_pagina = orig
+        ok(rc["ocr"] and rc["control"]["ocr"] == [1, 2, 3],
+           "un escaneo con su capa de OCR invisible (escáner, Acrobat, «OCR de normativa») sigue siendo un escaneo: se vuelve a leer", rc["control"])
+        if shutil.which("tesseract"):
+            r3 = texto.extraer(pdf_prueba(escaneado=True, capa=True))
+            ok(r3["unidades"] == r2["unidades"], "y sale lo mismo que del escaneo sin capa")
         rm = texto.extraer(pdf_mixto())
         tb = next((u for u in rm["unidades"] if u["t"] == "tabla"), None)
         ok(tb and tb["filas"][0] == ["Destino", "Monto diario", "Movilización"] and tb["filas"][2] == ["Galápagos", "USD 90", "Avioneta"],
